@@ -1,8 +1,6 @@
 'use strict';
 
-// =============================================================================
 // GLOBAL VARIABLES AND CONSTANTS
-// =============================================================================
 
 // Canvas and context for generating procedural textures
 let generativeCanvas, generativeContext;
@@ -199,7 +197,7 @@ function generateTetures()
         
         setupContext(1,2);
         drawMarketingSign(); // Colorful marketing sign
-        
+         
         setupContext(2,2);
         drawGenericSign('SKILLS COMPETITION',.3,BLACK,WHITE);
         

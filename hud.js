@@ -1,264 +1,516 @@
 'use strict';
-/**
- * Key Components:
-
-A Heads-Up Display (HUD) is a user interface that presents information directly in the user's line of sight without requiring them to look away from their primary focus area. 
-
-HUD Initialization (initHUD): Sets up radio control buttons with a main "RADIO" label and 4 selectable options (tracks 1-3 and OFF)
-Main HUD Rendering (drawHUD): Handles different game states:
-
-Attract Mode: Animated title screen with pulsing text effects
-Countdown: 3-2-1-GO countdown with color-coded numbers
-Game Over: Pulsing "GAME OVER" text
-Active Game: Timer display, speed indicator, and music info
-
-
-HUD Button Class: Interactive UI elements with click detection and visual feedback
-Utility Functions:
-
-HUDstickToSides: Adjusts UI positioning for different screen aspect ratios
-drawHUDRect: Draws rectangular UI elements
-drawHUDText: Advanced text rendering with shadows, styling, and positioning
- * 
- */
 
 // Global variables for HUD management
-let HUDButtons = [];        // Array to store all HUD button objects
-let radioMusic = -1;        // Currently selected radio track (-1 = off, 0-3 = track number)
+let HUDButtons = [];
+let radioMusic = -1;
+let radioBoxAnimation = 0;
 
-// HUD = Heads Up Display - initialize all HUD elements
+// Initialize HUD elements with modern design
 function initHUD()
 {
-    // Create main RADIO label button (non-interactive display)
-    // Parameters: text, position(x,y), size(width,height), onClick, color, backgroundColor
-    HUDButtons.push(new HUDButton('RADIO', vec3(.63,.95), vec3(.15,.08), 0, YELLOW, 0));
+    // Create sleek radio panel header
+    HUDButtons.push(new HUDButton('♫ RADIO', vec3(.15,.06), vec3(.18,.05), 0, hsl(.55, .8, .9), hsl(.55, .6, .2, .9)));
     
-    // Create 4 radio station buttons (tracks 1,2,3 and OFF)
-    for(let i = 4; i--;) { // Loop from 3 to 0 (reverse order)
-        let c = hsl(.1, 1, .5);  // Orange/brown color for button
+    // Create radio station buttons in horizontal layout
+    for(let i = 4; i--;) {
+        let buttonText = i == 3 ? 'OFF' : `FM ${i + 1}`;
         
-        // Create button text: "1", "2", "3", or "OFF" for the last one
-        let buttonText = i == 3 ? 'OFF' : i + 1;
+        // Horizontal layout with better spacing
+        let buttonPos = vec3(.06 + i * .045, .13);
         
-        // Position buttons horizontally: .73, .80, .87, .94 (spaced .07 apart)
-        let buttonPos = vec3(.73 + i * .07, .95);
-        
-        // Create the button object
-        let b = new HUDButton(buttonText, buttonPos, vec3(.06), undefined, c);
-        
-        // Set music track: -1 for OFF, or track number 0-2
+        let b = new HUDButton(buttonText, buttonPos, vec3(.04, .035), undefined, WHITE, hsl(.15, .8, .4));
         b.musicTrack = i == 3 ? -1 : i;
         
-        // Define click behavior for each button
         b.onClick = o => {
-            sound_click.play();              // Play click sound effect
-            playMusicTrack(i);              // Start playing the selected track
-            radioMusic = b.musicTrack;       // Update global radio state
+            sound_click.play();
+            playMusicTrack(i);
+            radioMusic = b.musicTrack;
+            radioBoxAnimation = time; // Trigger animation
         }
         
-        HUDButtons.push(b);  // Add button to global array
+        HUDButtons.push(b);
     }
 }
 
-// Main HUD rendering function - called every frame
+// Main HUD rendering function
 function drawHUD() {
-    // Handle attract mode (title screen before game starts)
+    // Attract mode title screen
     if (attractMode) {
-        // Animated "Click to Play" text
         let t = 'Click to Play';
-        let s = 'KIGALI-2025';  // Year display
-        
-        // Create pulsing alpha effect using sine wave
+        let s = 'KIGALI-2025';
         let a = 1 - Math.abs(Math.sin(time * 2));
-        a = .5 + a * .5;  // Scale alpha between 0.5 and 1.0
+        a = .5 + a * .5;
+        // Enhanced year display with subtle effect (reduced shadow/glow)
+        let yearGlow = .7 + Math.sin(time * 3) * .1;
+        drawHUDText(
+            s,
+            vec3(.50, .60),
+            .08,
+            hsl(.3, .9, yearGlow),
+            .002, // Reduced shadow offset for minimal glow
+            hsl(.3, .6, .2, .5), // Lower alpha for softer shadow
+            undefined,
+            'center',
+            700,
+            'italic',
+            undefined,
+            0
+        );
+// Enhanced "Click to Play" with multiple effects
+let clickPulse = Math.sin(time * 2.5) * .02;
+let clickColor = hsl(.1, 1, a + clickPulse);
+drawHUDText(t, vec3(.5, .95), .07 + clickPulse, clickColor, .008, BLACK, undefined, 'center', 800, 'italic', undefined, 0);
+// Animated background elements for attract mode
+for(let i = 8; i--;) {
+    let starX = .1 + (i * .1) + Math.sin(time + i * 2) * .05;
+    let starY = .8 + Math.sin(time * .5 + i) * .1;
+    let starSize = .008 + Math.sin(time * 4 + i) * .004;
+    let starAlpha = Math.sin(time * 3 + i * 1.5) * .3 + .5;
+    let starColor = hsl(.15, .8, .7, starAlpha);
+    drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), starColor, 0);
+}       
+// Animated title logo
+      // Professional animated title logo
+for(let j = 2; j--;) {
+    let text = j ? 'RTB&RP SKILLS COMPETITION' : 'FUTURE SKILLS';
+    let pos = vec3(.5, .3 - j * .12);
+    let size = .07;
+    let weight = 700;
+    
+    // Subtle background glow for readability
+    let glowColor = hsl(.15, .4, .2, .3);
+    drawHUDRect(pos, vec3(.9, .08), glowColor, 0);
+    
+    pos = pos.multiply(mainCanvasSize);
+    size = size * mainCanvasSize.y;
+    let style = '';
+    let font = 'arial';
+    
+    const context = mainContext;
+    context.strokeStyle = BLACK;
+    context.lineWidth = size * .08;
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+    context.lineJoin = 'round';
+    
+    let totalWidth = 0;
+    
+    // Calculate total width first
+    context.font = style + ' ' + weight + ' ' + size + 'px ' + font;
+    totalWidth = context.measureText(text).width;
+    
+    // Draw text with professional styling
+    let startX = pos.x - totalWidth / 2;
+    
+    for(let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const w = context.measureText(c).width;
         
-        // Draw year text (static green)
-        drawHUDText(s, vec3(.50, .60), .06, rgb(0, 1, 0), .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
+        // Professional color scheme - gold/orange gradient
+        let charColor = hsl(.12, .8, .7);
         
-        // Draw "Click to Play" with pulsing orange color
-        drawHUDText(t, vec3(.5, .95), .06, hsl(.1, 1, a), .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
+        // Draw character shadow
+        context.fillStyle = hsl(.12, .6, .2, .8);
+        context.fillText(c, startX + w/2 + size * .02, pos.y + size * .02);
         
-        // Draw animated title logo
-        for(let j = 2; j--;) {  // Draw two lines of title text
-            // Title text content
-            let text = j ? 'RTB&RP SKILLS C0MP3T1T10N' : 'FUTURE SK11LL5';
-            
-            let pos = vec3(.47, .25 - j * .15);  // Position for each line
-            let size = .09;      // Base font size
-            let weight = 900;    // Font weight (bold)
-            
-            // Convert to canvas coordinates
-            pos = pos.multiply(mainCanvasSize);
-            size = size * mainCanvasSize.y;
-            let style = 'italic';
-            let font = 'arial';
-            
-            // Set up canvas context for text rendering
-            const context = mainContext;
-            context.strokeStyle = BLACK;
-            context.lineWidth = size * .1;
-            context.textBaseline = 'middle';
-            context.textAlign = 'center';
-            context.lineJoin = 'round';
-            
-            let totalWidth = 0;  // Track total text width for centering
-            
-            // Two-pass rendering: first pass calculates width, second pass draws
-            for(let k = 2; k--;) {
-                for(let i = 0; i < text.length; i++) {
-                
-                    /*
-                    const p = 22;
-                    const size2 = 33;  // Vary character size
-                    */
-                  
-                    // Create wave effect - each character oscillates based on time and position
-                    const p = Math.sin(i - time * 1 - j * 1);
-                    const size2 = size + p * 0.003 * mainCanvasSize.y;  // Vary character size by 3 % change
+        // Draw main character
+        context.fillStyle = charColor;
+        context.fillText(c, startX + w/2, pos.y);
+        
+        startX += w;
+    }
+    
+    // Professional side accents - minimal and clean
+    let accentColor = hsl(.12, .6, .5, .6);
+    let accentY = .3 - j * .12;
+    drawHUDRect(vec3(.15, accentY), vec3(.02, .003), accentColor, 0);
+    drawHUDRect(vec3(.85, accentY), vec3(.02, .003), accentColor, 0);
+}
 
-                    /*
-                    const p = 1;
-                    const size2 = 36
-                    */
-                     
-                    
-                    context.font = style + ' ' + weight + ' ' + size2 + 'px ' + font;
-                    const c = text[i];  // Current character
-                    const w = context.measureText(c).width;  // Character width
-                    
-                    // First pass: accumulate total width
-                    if (k) {
-                        totalWidth += w;
-                        continue;
-                    }
-                    
-                    // Second pass: render characters
-                    const x = pos.x + w/2 - totalWidth/2;  // Center the text
-                    
-                    // Draw character with shadow effect (2 layers)
-                    for(let f = 2; f--;) {
-                        const o = f * .01 * mainCanvasSize.y;  // Shadow offset
-                        // Color: bright orange for main text, black for shadow
-                        context.fillStyle = hsl(.15 + p/9, 1, !f ? .75 + p * .25 : 0);
-                        context.fillText(c, x + o, pos.y + o);
-                    }
-                    pos.x += w;  // Move to next character position
-                }
-            }
-        }
-        return;  // Exit early - don't draw game HUD in attract mode
+// Professional subtitle with clean animation
+let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
+let subtitleColor = hsl(.12, .6, .8, subtitleAlpha);
+drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(.5, .45), .035, subtitleColor, .002, BLACK, undefined, 'center', 400, undefined, undefined, 0);
+
+// Clean corner decorations
+for(let i = 4; i--;) {
+    let cornerX = .12 + (i % 2) * .76;
+    let cornerY = .15 + Math.floor(i/2) * .35;
+    let cornerColor = hsl(.12, .5, .4, .4);
+    
+    // Simple corner lines
+    drawHUDRect(vec3(cornerX, cornerY), vec3(.03, .002), cornerColor, 0);
+    drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .03), cornerColor, 0);
+}
+
+        return;
     }
     
-    // Handle game start countdown display
-    if (startCountdownTimer.active() || startCountdown > 0) {
-        if (startCountdown < 4) {
-            // Countdown animation effect
-            let a = 1 - time % 1;  // Fade out over 1 second
-            let t = startCountdown | 0;  // Convert to integer (3, 2, 1)
+// Game countdown display with enhanced modern design
+if (startCountdownTimer.active() || startCountdown > 0) {
+    if (startCountdown < 4) {
+        let a = 1 - time % 1;
+        let t = startCountdown | 0;
+        
+        if (startCountdown == 0 && startCountdownTimer.active())
+            t = 'GO!';
+        
+        // Enhanced countdown styling with unique colors
+        let colors = [hsl(.3, .9, .7), hsl(.15, .9, .7), hsl(.6, .9, .7), hsl(.0, .9, .7)]; // Green, Orange, Blue, Red
+        let c = colors[startCountdown].copy();
+        c.a = a;
+        
+        // Animated background circle that pulses
+        let circleSize = .3 + (1 - a) * .2 + Math.sin(time * 6) * .02;
+        let circleColor = colors[startCountdown].copy();
+        circleColor.a = .2 * a;
+        drawHUDRect(vec3(.5, .5), vec3(circleSize, circleSize), circleColor, .01, c);
+        
+        // Secondary ring for depth
+        let ring2Size = circleSize * 1.3;
+        let ring2Color = colors[startCountdown].copy();
+        ring2Color.a = .1 * a;
+        drawHUDRect(vec3(.5, .5), vec3(ring2Size, ring2Size), 0, .006, ring2Color);
+        
+        // Main countdown text with dramatic scaling
+        let textSize = .35 + (1 - a) * .15 + Math.sin(time * 8) * .01;
+        drawHUDText(t, vec3(.5, .5), textSize, c, .012, BLACK, undefined, 'center', 900, undefined, undefined, 0);
+        
+        // Animated corner energy bursts
+        for(let i = 4; i--;) {
+            let cornerX = .15 + (i % 2) * .7;
+            let cornerY = .25 + Math.floor(i/2) * .5;
+            let burstPulse = Math.sin(time * 10 + i * 1.5) * .5 + .5;
+            let burstSize = .04 + burstPulse * .03;
+            let burstColor = colors[startCountdown].copy();
+            burstColor.a = burstPulse * .8 * a;
+            drawHUDRect(vec3(cornerX, cornerY), vec3(burstSize, burstSize), burstColor, 0);
             
-            // Special case for go signal
-            if (startCountdown == 0 && startCountdownTimer.active())
-                t = 'GOOO!';
+            // Secondary burst effect
+            let burst2Size = burstSize * .6;
+            let burst2Color = WHITE.copy();
+            burst2Color.a = burstPulse * .4 * a;
+            drawHUDRect(vec3(cornerX, cornerY), vec3(burst2Size, burst2Size), burst2Color, 0);
+        }
+        
+        // Rotating orbital elements
+        let orbitRadius = .25;
+        for(let j = 6; j--;) {
+            let angle = (j / 6) * Math.PI * 2 + time * 4;
+            let orbitX = .5 + Math.cos(angle) * orbitRadius;
+            let orbitY = .5 + Math.sin(angle) * orbitRadius;
+            let orbitPulse = Math.sin(time * 6 + j) * .3 + .7;
+            let orbitColor = colors[startCountdown].copy();
+            orbitColor.a = orbitPulse * .6 * a;
+            let orbitSize = .02 + orbitPulse * .015;
+            drawHUDRect(vec3(orbitX, orbitY), vec3(orbitSize, orbitSize), orbitColor, 0);
+        }
+        
+        // Screen edge flash effect
+        if (a > .7) {
+            let flashIntensity = (a - .7) * 3.33; // 0 to 1 range
+            let flashColor = colors[startCountdown].copy();
+            flashColor.a = flashIntensity * .15;
             
-            // Different colors for each countdown number
-            let colors = [GREEN, YELLOW, BLUE, RED];
-            let c = colors[startCountdown].copy();
-            c.a = a;  // Apply fade effect
+            // Top and bottom bars
+            drawHUDRect(vec3(.5, .05), vec3(1, .1), flashColor, 0);
+            drawHUDRect(vec3(.5, .95), vec3(1, .1), flashColor, 0);
             
-            // Draw countdown text with growing size effect
-            drawHUDText(t, vec3(.5, .2), .3 - a * .1, c, .005, undefined, undefined, undefined, 500, undefined, undefined, 0);
+            // Left and right bars
+            drawHUDRect(vec3(.05, .5), vec3(.1, 1), flashColor, 0);
+            drawHUDRect(vec3(.95, .5), vec3(.1, 1), flashColor, 0);
         }
     }
-    else {
-        // Game is running - show timer or game over screen
-        if (gameOverTimer.isSet()) {
-            // Game over screen with pulsing text
-            const c = WHITE;
-            const s1 = .04 * (1 - Math.abs(Math.sin(time * 2)));         // Pulse effect for "GAME"
-            const s2 = .04 * (1 - Math.abs(Math.sin(time * 2 + PI/2)));  // Offset pulse for "OVER!"
-            
-            drawHUDText('GAME', vec3(.5, .1), .1 + s1, c, .005, undefined, undefined, undefined, 900, 'italic', .5, 0);
-            drawHUDText('OVER!', vec3(.5, .2), .1 + s2, c, .005, undefined, undefined, undefined, 900, 'italic', .5, 0);
-        }
-        else {
-            // Show checkpoint timer with color-coded urgency
-            const c = checkpointTimeLeft < 3 ? RED :           // Critical (red)
-                     checkpointTimeLeft < 10 ? YELLOW :        // Warning (yellow)  
-                     WHITE;                                    // Normal (white)
-            const t = checkpointTimeLeft | 0;  // Convert to integer seconds
-            
-            drawHUDText(t, vec3(.5, .1), .15, c, .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
+}
+else {
+    // Game timer display (existing code continues...)
+ if (gameOverTimer.isSet()) {
+    // Enhanced Game Over screen with dramatic effects
+    const baseColor = hsl(.0, .8, .8); // Red-tinted white
+    const pulseSpeed = 3;
+    const s1 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed)));
+    const s2 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed + PI/2)));
+    
+    // Screen darkening overlay with pulsing effect
+    let overlayAlpha = .4 + Math.sin(time * 2) * .1;
+    let overlayColor = BLACK.copy();
+    overlayColor.a = overlayAlpha;
+    drawHUDRect(vec3(.5, .5), vec3(1.2, 1.2), overlayColor, 0);
+    
+    // Animated background elements - falling debris effect
+    for(let i = 8; i--;) {
+        let debrisX = .2 + (i * .1) + Math.sin(time + i) * .05;
+        let debrisY = ((time * .3 + i * .5) % 1.5) - .25; // Falling effect
+        let debrisSize = .02 + Math.sin(time * 4 + i) * .01;
+        let debrisColor = hsl(.0, .6, .3 + Math.sin(time * 2 + i) * .2, .6);
+        drawHUDRect(vec3(debrisX, debrisY), vec3(debrisSize, debrisSize), debrisColor, 0);
+    }
+    
+    // Main background panel with glitch effect
+    let panelGlitch = Math.sin(time * 15) * .02;
+    let panelColor = hsl(.0, .7, .15, .8);
+    let panelBorder = hsl(.0, .9, .6);
+    drawHUDRect(vec3(.5 + panelGlitch, .15), vec3(.6, .25), panelColor, .008, panelBorder);
+    
+    // Animated corner warning indicators
+    for(let i = 4; i--;) {
+        let cornerX = .15 + (i % 2) * .7;
+        let cornerY = .05 + Math.floor(i/2) * .2;
+        let warningPulse = Math.sin(time * 8 + i * 2) * .5 + .5;
+        let warningColor = hsl(.0, .9, .7, warningPulse * .8);
+        let warningSize = .03 + warningPulse * .02;
+        drawHUDRect(vec3(cornerX, cornerY), vec3(warningSize, warningSize), warningColor, 0);
+        
+        // Warning triangle effect (simulated with smaller squares)
+        for(let j = 3; j--;) {
+            let triX = cornerX + (j - 1) * .015;
+            let triY = cornerY - .02 + j * .01;
+            let triColor = WHITE.copy();
+            triColor.a = warningPulse * .6;
+            drawHUDRect(vec3(triX, triY), vec3(.008, .008), triColor, 0);
         }
     }
     
-    // Speed display (KPH - Kilometers Per Hour)
-    const mph = playerVehicle.velocity.z | 0;  // Get speed as integer
-    const aspect = mainCanvasSize.x / mainCanvasSize.y;  // Screen aspect ratio
-    const mphPos = vec3(.01, .95);  // Position in top-left corner
+    // Enhanced "GAME" text with glitch and glow
+    let gameGlitch = Math.random() > .9 ? Math.random() * .01 - .005 : 0;
+    let gameColor = baseColor.copy();
+    gameColor.a = .9 + Math.sin(time * 4) * .1;
     
-    // Only show speed on wide screens (aspect ratio > 0.75)
-    if (aspect > .75)
-        drawHUDText(mph + ' KPH', mphPos, .08, RED, .005, WHITE, undefined, 'left', 200, 'italic');
-    
-    // Music track display with musical note and pulsing effect
-    if (radioMusic >= 0) {  // Only show if a track is playing
-        let size = .034 + .002 * Math.sin(time * 4);  // Pulsing size effect
-        // Musical note symbol + track name
-        drawHUDText('𝅘𝅥𝅮 ' + musicTrackNames[radioMusic], vec3(.83, .89), size, WHITE, .003, BLACK, undefined, undefined, undefined, 'italic');
+    // Multiple text layers for glow effect
+    for(let layer = 3; layer--;) {
+        let offset = layer * .003;
+        let layerColor = layer === 0 ? gameColor : hsl(.0, .8, .4, .3);
+        drawHUDText('GAME', vec3(.5 + gameGlitch + offset, .1 + offset), .15 + s1, layerColor, .008, BLACK, undefined, 'center', 900, 'italic', .5, 0);
     }
     
-    // Draw all HUD buttons (radio controls)
+    // "OVER!" text with shake effect
+    let overShake = Math.sin(time * 12) * .005;
+    let overColor = hsl(.0, .9, .9);
+    overColor.a = .9 + Math.sin(time * 6) * .1;
+    
+    // Multiple text layers for dramatic effect
+    for(let layer = 3; layer--;) {
+        let offset = layer * .004;
+        let layerColor = layer === 0 ? overColor : hsl(.0, .7, .3, .4);
+        drawHUDText('OVER!', vec3(.5 + overShake + offset, .2 + offset), .18 + s2, layerColor, .01, BLACK, undefined, 'center', 900, 'italic', .5, 0);
+    }
+    
+        // Animated scan lines effect
+    for(let i = 5; i--;) {
+        let scanY = .05 + i * .05 + (time * .2) % .3;
+        let scanAlpha = Math.sin(scanY * 20 + time * 10) * .3 + .3;
+        let scanColor = hsl(.0, .5, .8, scanAlpha * .2);
+        drawHUDRect(vec3(.5, scanY), vec3(.8, .005), scanColor, 0);
+    }
+    
+    // Pulsing restart hint
+    let hintAlpha = Math.sin(time * 2) * .3 + .7;
+    let hintColor = WHITE.copy();
+    hintColor.a = hintAlpha;
+    drawHUDText('Press R to Restart', vec3(.5, .35), .04, hintColor, .003, BLACK, undefined, 'center', 400, 'italic');
+}
+
+  else {
+    // Enhanced checkpoint timer with modern UI
+    const timeLeft = checkpointTimeLeft | 0;
+    const isUrgent = checkpointTimeLeft < 3;
+    const isWarning = checkpointTimeLeft < 10;
+    
+    // Dynamic colors based on urgency
+    const bgColor = isUrgent ? hsl(.0, .8, .2, .9) : 
+                   isWarning ? hsl(.15, .8, .2, .9) : 
+                   hsl(.6, .6, .2, .8);
+    const textColor = isUrgent ? hsl(.0, .9, .9) : 
+                     isWarning ? hsl(.15, .9, .8) : 
+                     hsl(.6, .8, .9);
+    const borderColor = isUrgent ? hsl(.0, .9, .6) : 
+                       isWarning ? hsl(.15, .9, .6) : 
+                       hsl(.6, .8, .6);
+    
+    // Pulsing effect for urgency
+    let pulseIntensity = isUrgent ? Math.sin(time * 8) * .3 + .7 : 
+                        isWarning ? Math.sin(time * 4) * .2 + .8 : 1;
+    
+    // Main timer panel with dynamic sizing
+    let panelSize = vec3(.25, .12);
+    if (isUrgent) panelSize = panelSize.scale(1 + Math.sin(time * 6) * .1);
+    
+    drawHUDRect(vec3(.5, .12), panelSize, bgColor, .006, borderColor);
+    
+    // Progress bar showing time remaining (visual indicator)
+    let maxTime = startCheckpointTime; // Use initial checkpoint time as max
+    let progress = Math.max(0, checkpointTimeLeft / maxTime);
+    let progressWidth = .20 * progress;
+    let progressColor = isUrgent ? hsl(.0, .8, .5) : 
+                       isWarning ? hsl(.15, .8, .5) : 
+                       hsl(.3, .8, .5);
+    
+    drawHUDRect(vec3(.5, .16), vec3(progressWidth, .02), progressColor, 0);
+    drawHUDRect(vec3(.5, .16), vec3(.20, .02), 0, .002, hsl(.0, .0, .8, .5));
+    
+    // Timer label
+    drawHUDText('CHECKPOINT', vec3(.5, .08), .03, textColor, .002, BLACK, undefined, 'center', 600);
+    
+    // Main time display with enhanced styling
+    let timeSize = .08 + (isUrgent ? Math.sin(time * 10) * .01 : 0);
+    drawHUDText(timeLeft + 's', vec3(.5, .12), timeSize, textColor, .004, BLACK, undefined, 'center', 900, undefined, undefined, 0);
+    
+    // Animated warning indicators for urgent state
+    if (isUrgent) {
+        for(let i = 6; i--;) {
+            let angle = (i / 6) * Math.PI * 2 + time * 5;
+            let warningX = .5 + Math.cos(angle) * .15;
+            let warningY = .12 + Math.sin(angle) * .08;
+            let warningPulse = Math.sin(time * 8 + i) * .5 + .5;
+            let warningColor = hsl(.0, .9, .7, warningPulse * .8);
+            drawHUDRect(vec3(warningX, warningY), vec3(.015, .015), warningColor, 0);
+        }
+        
+        // Screen edge warning flash
+        let flashAlpha = Math.sin(time * 12) * .2 + .1;
+        let flashColor = hsl(.0, .8, .5, flashAlpha);
+        drawHUDRect(vec3(.5, .02), vec3(1, .03), flashColor, 0);
+        drawHUDRect(vec3(.5, .98), vec3(1, .03), flashColor, 0);
+    }
+    
+    // Side warning indicators for warning state
+    if (isWarning && !isUrgent) {
+        for(let i = 2; i--;) {
+            let sideX = .35 + i * .3;
+            let sidePulse = Math.sin(time * 6 + i * 3) * .3 + .7;
+            let sideColor = hsl(.15, .8, .6, sidePulse * .6);
+            drawHUDRect(vec3(sideX, .12), vec3(.02, .06), sideColor, 0);
+        }
+    }
+    
+    // Subtle corner accents for normal state
+    if (!isWarning) {
+        for(let i = 4; i--;) {
+            let cornerX = .38 + (i % 2) * .24;
+            let cornerY = .06 + Math.floor(i/2) * .12;
+            let accentColor = hsl(.6, .6, .5, .4);
+            drawHUDRect(vec3(cornerX, cornerY), vec3(.008, .008), accentColor, 0);
+        }
+    }
+}
+
+}
+
+    // speed display in top-right
+    const mph = playerVehicle.velocity.z | 0;
+const aspect = mainCanvasSize.x / mainCanvasSize.y;
+
+if (aspect > .75) {
+    // Speed background panel - UPDATED SIZE
+    drawHUDRect(vec3(.85, .08), vec3(.20, .10), hsl(.0, .8, .2, .8), .003, hsl(.0, .8, .6));
+    
+    // Speed text with glow effect
+    drawHUDText('SPEED', vec3(.85, .055), .025, hsl(.0, .8, .8), .002, BLACK, undefined, 'center', 300);
+    drawHUDText(mph + ' KPH', vec3(.85, .095), .045, hsl(.0, .9, .9), .003, hsl(.0, .8, .3), undefined, 'center', 700, 'italic');
+}
+    
+    // Draw modern radio control panel
+    if (!attractMode && !gameOverTimer.isSet()) {
+        drawRadioPanel();
+    }
+    
+    // Draw all HUD buttons
     for(const b of HUDButtons)
         b.draw();
 }
 
-// HUD Button class - creates interactive UI elements
+// Draw modern radio control panel with animations
+function drawRadioPanel() {
+    // Animated glow effect
+    let glowIntensity = .3 + .2 * Math.sin(time * 3);
+    let animPulse = radioBoxAnimation > 0 ? Math.max(0, 1 - (time - radioBoxAnimation) * 2) : 0;
+    
+    // Main panel background with gradient effect
+    drawHUDRect(vec3(.15, .095), vec3(.22, .12), hsl(.55, .6, .15, .9), .004, hsl(.55, .8, .4 + glowIntensity * .3));
+    
+    // Inner panel for buttons
+    drawHUDRect(vec3(.15, .13), vec3(.20, .05), hsl(.55, .4, .1, .8), .002, hsl(.55, .6, .3));
+    
+    // Animated corner accents
+    for(let i = 4; i--;) {
+        let corner = vec3(.05 + (i % 2) * .20, .04 + Math.floor(i/2) * .11);
+        let accentColor = hsl(.55 + i * .1, .8, .6 + animPulse * .4, .6);
+        drawHUDRect(corner, vec3(.01, .01), accentColor, 0);
+    }
+    
+    // Status indicator
+    if (radioMusic >= 0) {
+        let statusColor = hsl(.3, .8, .7 + .3 * Math.sin(time * 4));
+        drawHUDRect(vec3(.25, .06), vec3(.008, .008), statusColor, 0);
+        
+        // Now playing text with scroll effect
+        let trackName = musicTrackNames[radioMusic];
+        let scrollOffset = (time * .05) % 1;
+        drawHUDText(`♪ ${trackName}`, vec3(.15, .175), .025, hsl(.55, .8, .9), .002, BLACK, undefined, 'center', 300, 'italic');
+    }
+    
+    // Signal strength bars animation
+    for(let i = 5; i--;) {
+        let barHeight = (.02 + i * .008) * (1 + .3 * Math.sin(time * 2 + i));
+        let barColor = hsl(.3, .8, .4 + i * .1);
+        let barPos = vec3(.26 + i * .008, .12);
+        drawHUDRect(barPos, vec3(.005, barHeight), barColor, 0);
+    }
+}
+
+// Enhanced HUD Button class with modern styling
 class HUDButton
 {
     constructor(text, pos, size, onClick, color = WHITE, backgroundColor = hsl(.6, 1, .2))
     {
-        this.text = text;                    // Button label text
-        this.pos = pos;                      // Position (normalized 0-1 coordinates)
-        this.size = size;                    // Size (normalized coordinates)
-        this.onClick = onClick;              // Click handler function
-        this.color = color;                  // Text color
-        this.backgroundColor = backgroundColor; // Button background color
+        this.text = text;
+        this.pos = pos;
+        this.size = size;
+        this.onClick = onClick;
+        this.color = color;
+        this.backgroundColor = backgroundColor;
+        this.hoverTime = 0;
     }
     
     draw()
     {
-        // Prepare rendering variables
         let pos = this.pos.copy();
         let backgroundColor = this.backgroundColor;
         let color = this.color;
         let outlineColor = WHITE;
         
-        // Highlight active radio button
+        // Enhanced active button styling
         if (this.musicTrack == radioMusic) {
-            // Active button gets special styling
-            backgroundColor = hsl(radioMusic < 0 ? 0 : .1, 1, .5);  // Orange for tracks, red for OFF
-            color = WHITE;           // White text on colored background
-            outlineColor = BLACK;    // Black outline for contrast
+            backgroundColor = hsl(.3, .9, .5 + .2 * Math.sin(time * 4));
+            color = WHITE;
+            outlineColor = hsl(.3, .8, .8);
+            
+            // Active button glow effect
+            drawHUDRect(pos, this.size.scale(1.2), hsl(.3, .6, .3, .3), 0);
         }
         
-        // Draw button background rectangle (if backgroundColor is set)
-        backgroundColor && drawHUDRect(pos, this.size, backgroundColor, .005, outlineColor);
+        // Button with rounded corners effect (simulated)
+        backgroundColor && drawHUDRect(pos, this.size, backgroundColor, .003, outlineColor);
         
-        // Adjust text position slightly down for better centering
-        pos.y += this.size.y * .05;
+        // Button text with better positioning
+        pos.y += this.size.y * .02;
+        drawHUDText(this.text, pos, this.size.y * .7, color, .002, BLACK, undefined, 'center', 600, undefined, this.size.x * .9);
         
-        // Draw button text with size constraints
-        drawHUDText(this.text, pos, this.size.y * .8, color, .005, undefined, undefined, undefined, 900, undefined, this.size.x * .75);
-        
-        // Handle mouse interaction
+        // Handle mouse interaction with hover effects
         {
-            pos = HUDstickToSides(pos);  // Adjust position for screen aspect ratio
+            pos = HUDstickToSides(pos);
             
-            const size = this.size.scale(mainCanvasSize.y);    // Convert to pixel coordinates
-            const p1 = pos.multiply(mainCanvasSize);           // Button position in pixels
-            const p2 = mousePos.multiply(mainCanvasSize);      // Mouse position in pixels
+            const size = this.size.scale(mainCanvasSize.y);
+            const p1 = pos.multiply(mainCanvasSize);
+            const p2 = mousePos.multiply(mainCanvasSize);
             
-            // Check for click collision and execute onClick handler
+            // Check for hover
+            if (isOverlapping(p1, size, p2)) {
+                this.hoverTime = time;
+                // Hover glow effect
+                drawHUDRect(this.pos, this.size.scale(1.1), hsl(.15, .4, .4, .2), 0);
+            }
+            
             if (this.onClick && mouseWasPressed(0))
                 if (isOverlapping(p1, size, p2))
                     this.onClick();
@@ -266,79 +518,62 @@ class HUDButton
     }
 }
 
-// Utility function to handle different screen aspect ratios
-// Keeps UI elements properly positioned on wide/narrow screens
+// Adjust UI positioning for different screen aspect ratios
 function HUDstickToSides(pos)
 {
     pos = pos.copy();
     
-    // Adjust horizontal positioning based on screen aspect ratio
     if (pos.x < .5) {
-        // Left side elements: scale based on aspect ratio
         pos.x = pos.x * mainCanvasSize.y / mainCanvasSize.x;
     } else {
-        // Right side elements: mirror the left side scaling
         pos.x = 1 - (1 - pos.x) * mainCanvasSize.y / mainCanvasSize.x;
     }
     return pos;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// HUD Drawing Utility Functions
-///////////////////////////////////////////////////////////////////////////////
-
-// Draw a rectangular UI element (buttons, panels, etc.)
+// Draw rectangular UI element with enhanced styling
 function drawHUDRect(pos, size, color = WHITE, lineWidth = 0, lineColor = BLACK)
 {
-    pos = HUDstickToSides(pos);  // Adjust for screen aspect ratio
+    pos = HUDstickToSides(pos);
     
-    // Convert normalized coordinates to pixel coordinates
     lineWidth *= mainCanvasSize.y;
     size = size.scale(mainCanvasSize.y);
-    pos = pos.multiply(mainCanvasSize).subtract(size.scale(.5));  // Center the rectangle
+    pos = pos.multiply(mainCanvasSize).subtract(size.scale(.5));
     
-    // Set up canvas drawing context
     const context = mainContext;
     context.fillStyle = color;
     context.strokeStyle = lineColor;
     context.lineWidth = lineWidth;
     
-    // Draw filled rectangle
     context.fillRect(pos.x, pos.y, size.x, size.y);
-    
-    // Draw outline if lineWidth is specified
     lineWidth && context.strokeRect(pos.x, pos.y, size.x, size.y);
 }
 
-// Draw text on the HUD with extensive customization options
+// Draw text with extensive customization
 function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shadowColor = BLACK, font = 'arial', textAlign = 'center', weight = 400, style = '', width, stickToSides = 1)
 {
-    // Adjust position for screen aspect ratio (unless disabled)
     if (stickToSides)
         pos = HUDstickToSides(pos);
     
-    // Convert normalized coordinates to pixel coordinates
-    size *= mainCanvasSize.y;           // Font size in pixels
+    size *= mainCanvasSize.y;
     if (width)
-        width *= mainCanvasSize.y;      // Text width constraint in pixels
-    shadowOffset *= mainCanvasSize.y;   // Shadow offset in pixels
-    pos = pos.multiply(mainCanvasSize); // Position in pixels
+        width *= mainCanvasSize.y;
+    shadowOffset *= mainCanvasSize.y;
+    pos = pos.multiply(mainCanvasSize);
     
-    // Set up canvas text rendering context
     const context = mainContext;
     context.font = style + ' ' + weight + ' ' + size + 'px ' + font;
-    context.textBaseline = 'middle';  // Vertically center text
-    context.textAlign = textAlign;    // Horizontal alignment
+    context.textBaseline = 'middle';
+    context.textAlign = textAlign;
     
-    // Draw shadow text first (if shadow is enabled)
+    // Enhanced shadow effect
     if (shadowOffset) {
         let c = shadowColor.copy();
-        c.a = color.a;  // Match shadow alpha to main text alpha
+        c.a = color.a;
         context.fillStyle = c;
         context.fillText(text, pos.x + shadowOffset, pos.y + shadowOffset, width);
     }
     
-    // Draw main text on top of shadow
     context.fillStyle = color;
     context.fillText(text, pos.x, pos.y, width);
 }

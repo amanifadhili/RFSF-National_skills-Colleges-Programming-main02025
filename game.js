@@ -231,7 +231,7 @@ function gameUpdateInternal()
             checkpointTimeLeft -= timeDelta;  // Decrease time remaining
             if (checkpointTimeLeft <= 0)      // Time expired
             {
-                speak('OHH GAME OVER');       // Announce game over
+                speak('Challenge failed. press R to restart!');   // Announce game over
                 gameOverTimer.set();          // Start game over timer
                 checkpointTimeLeft = 0;       // Clamp to zero
             }
