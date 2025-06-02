@@ -377,8 +377,9 @@ class TrackSegment
             }
             else
             {
-                // Regular tree/scenery object
-                addSprite(offset, vec3(s * m, s, s), hsl(0, 0, random.float(.9, 1)), vec3(0, 1));
+                // Use maple trees with random red/yellow foliage
+                const isRed = random.bool(0.5);
+                addSprite(offset, vec3(s * m, s, s), isRed ? hsl(0.95, 0.8, 0.5) : hsl(0.1, 0.8, 0.6), vec3(0, 1));
             }
         }
     }

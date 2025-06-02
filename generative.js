@@ -426,23 +426,66 @@ function generateTetures()
     }
 
     /**
+     * Draws a maple tree with yellow or red foliage
+     * @param {number} x - Center X position (0-1 normalized)
+     * @param {number} y - Center Y position (0-1 normalized)
+     * @param {boolean} isRed - Whether to use red foliage (true) or yellow (false)
+     */
+    function drawMapleTree(x = 0.5, y = 0.5, isRed = false) {
+        // Draw trunk
+        let p = particle(x, y + 0.3, 0, 0, 0.7, 0.02, 0.1);
+        p.color = hsl(0.08, 0.6, 0.25); // Dark brown trunk
+        p.colorRandom = 0.05;
+        p.draw();
+        
+        // Draw main branches
+        for(let j = 5; j--;) {
+            let angle = j/5 * PI * 1.5 + random.float(-0.2, 0.2);
+            let length = random.float(0.2, 0.3);
+            let xPos = x + Math.cos(angle) * 0.1;
+            let yPos = y + 0.2 + Math.sin(angle) * 0.1;
+            
+            let p = particle(xPos, yPos, 
+                            Math.cos(angle) * length, 
+                            Math.sin(angle) * length, 
+                            0.2, 0.04, 0.01);
+            p.color = hsl(0.09, 0.5, 0.3); // Medium brown branches
+            p.colorRandom = 0.05;
+            p.draw();
+        }
+        
+        // Draw foliage (leaves)
+        for(let j = 100; j--;) {
+            let angle = random.float(0, PI * 2);
+            let distance = random.float(0, 0.25);
+            let xPos = x + Math.cos(angle) * distance;
+            let yPos = y + Math.sin(angle) * distance;
+            
+            let vx = Math.cos(angle) * random.float(0.05, 0.2);
+            let vy = Math.sin(angle) * random.float(0.05, 0.2);
+            
+            let leafSize = random.float(0.15, 0.25);
+            let p = particle(xPos, yPos, vx, vy, leafSize, 0.03, 0.005);
+            
+            // Use red or yellow foliage based on parameter
+            if (isRed) {
+                p.color = hsl(random.float(0.95, 1.05), 0.8, random.float(0.4, 0.6)); // Red tones
+            } else {
+                p.color = hsl(random.float(0.1, 0.15), 0.8, random.float(0.5, 0.7)); // Yellow tones
+            }
+            p.colorRandom = 0.1;
+            p.style = 12; // Leafy appearance style
+            p.draw();
+        }
+    }
+
+    /**
      * Draws simple tree with vertical trunk and random branches
      */
-    function drawTree()
-    {
-        // Draw main trunk
-        color(rgb(1,1,1)); // White trunk
-        rect(.5,1,.05,1);  // Vertical rectangle
-        
-        // Add random branch segments
-        let z = 500 // Number of branch segments
-        for(let i=z;i--;)
-        {
-            let p = 0.05; // Progression from bottom to top
-            color(rgb(1,1,1));
-            // Draw small branch segments with random horizontal offset
-            rect(.5+random.floatSign(p/4),p*.9,.05,.05);
-        }
+    function drawTree() {
+        // Randomly choose between red and yellow maple trees
+        const isRed = random.bool(0.5);
+        drawMapleTree(0.5, 0.5, isRed);
     }
 
     /**
@@ -750,71 +793,41 @@ function generateTetures()
     /**
      * Draws colorful "VISIT RWANDA" sign with per-letter coloring
      */
-    /*function drawLittleJSSign()
+    function drawLittleJSSign()
     {
-        drawSignBackground(1,.7,BLACK,WHITE,.05,WHITE,0); // Black background, white border and posts
+        drawSignBackground(1, .7, BLACK, WHITE, .05, WHITE, 0); // Black background, white border and posts
         color();
-        ljsText('VISIT',0.05,.25);    // First line
-        ljsText('RWANDA',0.1,.5,2);   // Second line with color offset
+        ljsText('VISIT', 0.05, .25);    // First line
+        ljsText('RWANDA', 0.1, .5, 0);  // Second line with Rwandan flag colors
 
         /**
-         * Helper function to draw text with cycling colors per letter
+         * Helper function to draw text with cycling Rwandan flag colors per letter
          * @param {string} t - Text to draw
          * @param {number} x,y - Starting position
          * @param {number} o - Color offset for variety
-         * 
-         * */
-/*
-        function ljsText(t,x,y,o=0)
+         */
+        function ljsText(t, x, y, o = 0)
         {
-            for(let i=0;i<t.length;i++)
+            
+            const rwandaColors = ['rgb(9, 242, 98)', 'rgb(244, 237, 11)', 'rgb(84, 191, 230)'];
+ // Blue, Yellow, Green
+
+            for (let i = 0; i < t.length; i++)
             {
-                let weight = 600, fontSize = .21, font = 'arial';
-                context.font = weight+' ' + fontSize + 'px '+font;
+                let weight = 400, fontSize = .18, font = 'arial';
+                context.font = weight + ' ' + fontSize + 'px ' + font;
                 let w = context.measureText(t[i]).width;
-                color(hsl([1,.3,.57,.14][(i+o)%4],.9,.5));
-                text(t[i],x+w/2,y,fontSize,1,.03,font,undefined,weight);
-                text(t[i],x+w/2,y,fontSize,1,0,font,undefined,weight);
+
+                // Cycle through Rwandan flag colors
+                let colorIndex = (i + o) % rwandaColors.length;
+                color(rwandaColors[colorIndex]);
+
+                text(t[i], x + w / 2, y, fontSize, 1, .03, font, undefined, weight);
+                text(t[i], x + w / 2, y, fontSize, 1, 0, font, undefined, weight);
                 x += w;
             }
         }
     }
-    */
-/// new function to draw "VISIT RWANDA" sign
-function drawLittleJSSign(){
-    drawSignBackground(1, .7, BLACK, WHITE, .05, WHITE, 0); // Black background, white border and posts
-    color();
-    ljsText('VISIT', 0.05, .25);    // First line
-    ljsText('RWANDA', 0.1, .5, 0);  // Second line with Rwandan flag colors
-
-    /**
-     * Helper function to draw text with cycling Rwandan flag colors per letter
-     * @param {string} t - Text to draw
-     * @param {number} x,y - Starting position
-     * @param {number} o - Color offset for variety
-     */
-    function ljsText(t, x, y, o = 0)
-    {
-        
-        const rwandaColors = ['rgb(9, 242, 98)', 'rgb(244, 237, 11)', 'rgb(84, 191, 230)'];
- // Blue, Yellow, Green
-
-        for (let i = 0; i < t.length; i++)
-        {
-            let weight = 400, fontSize = .18, font = 'arial';
-            context.font = weight + ' ' + fontSize + 'px ' + font;
-            let w = context.measureText(t[i]).width;
-
-            // Cycle through Rwandan flag colors
-            let colorIndex = (i + o) % rwandaColors.length;
-            color(rwandaColors[colorIndex]);
-
-            text(t[i], x + w / 2, y, fontSize, 1, .03, font, undefined, weight);
-            text(t[i], x + w / 2, y, fontSize, 1, 0, font, undefined, weight);
-            x += w;
-        }
-    }
-}
 
     function drawStartSign()
     {
