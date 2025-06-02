@@ -40,56 +40,109 @@ function drawHUD() {
         let s = 'KIGALI-2025';
         let a = 1 - Math.abs(Math.sin(time * 2));
         a = .5 + a * .5;
+        // Enhanced year display with subtle effect (reduced shadow/glow)
+        let yearGlow = .7 + Math.sin(time * 3) * .1;
+        drawHUDText(
+            s,
+            vec3(.50, .60),
+            .08,
+            hsl(.3, .9, yearGlow),
+            .002, // Reduced shadow offset for minimal glow
+            hsl(.3, .6, .2, .5), // Lower alpha for softer shadow
+            undefined,
+            'center',
+            700,
+            'italic',
+            undefined,
+            0
+        );
+// Enhanced "Click to Play" with multiple effects
+let clickPulse = Math.sin(time * 2.5) * .02;
+let clickColor = hsl(.1, 1, a + clickPulse);
+drawHUDText(t, vec3(.5, .95), .07 + clickPulse, clickColor, .008, BLACK, undefined, 'center', 800, 'italic', undefined, 0);
+// Animated background elements for attract mode
+for(let i = 8; i--;) {
+    let starX = .1 + (i * .1) + Math.sin(time + i * 2) * .05;
+    let starY = .8 + Math.sin(time * .5 + i) * .1;
+    let starSize = .008 + Math.sin(time * 4 + i) * .004;
+    let starAlpha = Math.sin(time * 3 + i * 1.5) * .3 + .5;
+    let starColor = hsl(.15, .8, .7, starAlpha);
+    drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), starColor, 0);
+}       
+// Animated title logo
+      // Professional animated title logo
+for(let j = 2; j--;) {
+    let text = j ? 'RTB&RP SKILLS COMPETITION' : 'FUTURE SKILLS';
+    let pos = vec3(.5, .3 - j * .12);
+    let size = .07;
+    let weight = 700;
+    
+    // Subtle background glow for readability
+    let glowColor = hsl(.15, .4, .2, .3);
+    drawHUDRect(pos, vec3(.9, .08), glowColor, 0);
+    
+    pos = pos.multiply(mainCanvasSize);
+    size = size * mainCanvasSize.y;
+    let style = '';
+    let font = 'arial';
+    
+    const context = mainContext;
+    context.strokeStyle = BLACK;
+    context.lineWidth = size * .08;
+    context.textBaseline = 'middle';
+    context.textAlign = 'center';
+    context.lineJoin = 'round';
+    
+    let totalWidth = 0;
+    
+    // Calculate total width first
+    context.font = style + ' ' + weight + ' ' + size + 'px ' + font;
+    totalWidth = context.measureText(text).width;
+    
+    // Draw text with professional styling
+    let startX = pos.x - totalWidth / 2;
+    
+    for(let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const w = context.measureText(c).width;
         
-        drawHUDText(s, vec3(.50, .60), .06, rgb(0, 1, 0), .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
-        drawHUDText(t, vec3(.5, .95), .06, hsl(.1, 1, a), .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
+        // Professional color scheme - gold/orange gradient
+        let charColor = hsl(.12, .8, .7);
         
-        // Animated title logo
-        for(let j = 2; j--;) {
-            let text = j ? 'RTB&RP SKILLS C0MP3T1T10N' : 'FUTURE SK11LL5';
-            let pos = vec3(.47, .25 - j * .15);
-            let size = .09;
-            let weight = 900;
-            
-            pos = pos.multiply(mainCanvasSize);
-            size = size * mainCanvasSize.y;
-            let style = 'italic';
-            let font = 'arial';
-            
-            const context = mainContext;
-            context.strokeStyle = BLACK;
-            context.lineWidth = size * .1;
-            context.textBaseline = 'middle';
-            context.textAlign = 'center';
-            context.lineJoin = 'round';
-            
-            let totalWidth = 0;
-            
-            for(let k = 2; k--;) {
-                for(let i = 0; i < text.length; i++) {
-                    const p = Math.sin(i - time * 1 - j * 1);
-                    const size2 = size + p * 0.003 * mainCanvasSize.y;
-                    
-                    context.font = style + ' ' + weight + ' ' + size2 + 'px ' + font;
-                    const c = text[i];
-                    const w = context.measureText(c).width;
-                    
-                    if (k) {
-                        totalWidth += w;
-                        continue;
-                    }
-                    
-                    const x = pos.x + w/2 - totalWidth/2;
-                    
-                    for(let f = 2; f--;) {
-                        const o = f * .01 * mainCanvasSize.y;
-                        context.fillStyle = hsl(.15 + p/9, 1, !f ? .75 + p * .25 : 0);
-                        context.fillText(c, x + o, pos.y + o);
-                    }
-                    pos.x += w;
-                }
-            }
-        }
+        // Draw character shadow
+        context.fillStyle = hsl(.12, .6, .2, .8);
+        context.fillText(c, startX + w/2 + size * .02, pos.y + size * .02);
+        
+        // Draw main character
+        context.fillStyle = charColor;
+        context.fillText(c, startX + w/2, pos.y);
+        
+        startX += w;
+    }
+    
+    // Professional side accents - minimal and clean
+    let accentColor = hsl(.12, .6, .5, .6);
+    let accentY = .3 - j * .12;
+    drawHUDRect(vec3(.15, accentY), vec3(.02, .003), accentColor, 0);
+    drawHUDRect(vec3(.85, accentY), vec3(.02, .003), accentColor, 0);
+}
+
+// Professional subtitle with clean animation
+let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
+let subtitleColor = hsl(.12, .6, .8, subtitleAlpha);
+drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(.5, .45), .035, subtitleColor, .002, BLACK, undefined, 'center', 400, undefined, undefined, 0);
+
+// Clean corner decorations
+for(let i = 4; i--;) {
+    let cornerX = .12 + (i % 2) * .76;
+    let cornerY = .15 + Math.floor(i/2) * .35;
+    let cornerColor = hsl(.12, .5, .4, .4);
+    
+    // Simple corner lines
+    drawHUDRect(vec3(cornerX, cornerY), vec3(.03, .002), cornerColor, 0);
+    drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .03), cornerColor, 0);
+}
+
         return;
     }
     
@@ -242,7 +295,7 @@ else {
         drawHUDText('OVER!', vec3(.5 + overShake + offset, .2 + offset), .18 + s2, layerColor, .01, BLACK, undefined, 'center', 900, 'italic', .5, 0);
     }
     
-    // Animated scan lines effect
+        // Animated scan lines effect
     for(let i = 5; i--;) {
         let scanY = .05 + i * .05 + (time * .2) % .3;
         let scanAlpha = Math.sin(scanY * 20 + time * 10) * .3 + .3;
@@ -257,18 +310,92 @@ else {
     drawHUDText('Press R to Restart', vec3(.5, .35), .04, hintColor, .003, BLACK, undefined, 'center', 400, 'italic');
 }
 
-    else {
-        // Checkpoint timer with color coding
-        const c = checkpointTimeLeft < 3 ? RED :
-                 checkpointTimeLeft < 10 ? YELLOW :
-                 WHITE;
-        const t = checkpointTimeLeft | 0;
+  else {
+    // Enhanced checkpoint timer with modern UI
+    const timeLeft = checkpointTimeLeft | 0;
+    const isUrgent = checkpointTimeLeft < 3;
+    const isWarning = checkpointTimeLeft < 10;
+    
+    // Dynamic colors based on urgency
+    const bgColor = isUrgent ? hsl(.0, .8, .2, .9) : 
+                   isWarning ? hsl(.15, .8, .2, .9) : 
+                   hsl(.6, .6, .2, .8);
+    const textColor = isUrgent ? hsl(.0, .9, .9) : 
+                     isWarning ? hsl(.15, .9, .8) : 
+                     hsl(.6, .8, .9);
+    const borderColor = isUrgent ? hsl(.0, .9, .6) : 
+                       isWarning ? hsl(.15, .9, .6) : 
+                       hsl(.6, .8, .6);
+    
+    // Pulsing effect for urgency
+    let pulseIntensity = isUrgent ? Math.sin(time * 8) * .3 + .7 : 
+                        isWarning ? Math.sin(time * 4) * .2 + .8 : 1;
+    
+    // Main timer panel with dynamic sizing
+    let panelSize = vec3(.25, .12);
+    if (isUrgent) panelSize = panelSize.scale(1 + Math.sin(time * 6) * .1);
+    
+    drawHUDRect(vec3(.5, .12), panelSize, bgColor, .006, borderColor);
+    
+    // Progress bar showing time remaining (visual indicator)
+    let maxTime = startCheckpointTime; // Use initial checkpoint time as max
+    let progress = Math.max(0, checkpointTimeLeft / maxTime);
+    let progressWidth = .20 * progress;
+    let progressColor = isUrgent ? hsl(.0, .8, .5) : 
+                       isWarning ? hsl(.15, .8, .5) : 
+                       hsl(.3, .8, .5);
+    
+    drawHUDRect(vec3(.5, .16), vec3(progressWidth, .02), progressColor, 0);
+    drawHUDRect(vec3(.5, .16), vec3(.20, .02), 0, .002, hsl(.0, .0, .8, .5));
+    
+    // Timer label
+    drawHUDText('CHECKPOINT', vec3(.5, .08), .03, textColor, .002, BLACK, undefined, 'center', 600);
+    
+    // Main time display with enhanced styling
+    let timeSize = .08 + (isUrgent ? Math.sin(time * 10) * .01 : 0);
+    drawHUDText(timeLeft + 's', vec3(.5, .12), timeSize, textColor, .004, BLACK, undefined, 'center', 900, undefined, undefined, 0);
+    
+    // Animated warning indicators for urgent state
+    if (isUrgent) {
+        for(let i = 6; i--;) {
+            let angle = (i / 6) * Math.PI * 2 + time * 5;
+            let warningX = .5 + Math.cos(angle) * .15;
+            let warningY = .12 + Math.sin(angle) * .08;
+            let warningPulse = Math.sin(time * 8 + i) * .5 + .5;
+            let warningColor = hsl(.0, .9, .7, warningPulse * .8);
+            drawHUDRect(vec3(warningX, warningY), vec3(.015, .015), warningColor, 0);
+        }
         
-        drawHUDText(t, vec3(.5, .1), .15, c, .005, undefined, undefined, undefined, 900, undefined, undefined, 0);
+        // Screen edge warning flash
+        let flashAlpha = Math.sin(time * 12) * .2 + .1;
+        let flashColor = hsl(.0, .8, .5, flashAlpha);
+        drawHUDRect(vec3(.5, .02), vec3(1, .03), flashColor, 0);
+        drawHUDRect(vec3(.5, .98), vec3(1, .03), flashColor, 0);
+    }
+    
+    // Side warning indicators for warning state
+    if (isWarning && !isUrgent) {
+        for(let i = 2; i--;) {
+            let sideX = .35 + i * .3;
+            let sidePulse = Math.sin(time * 6 + i * 3) * .3 + .7;
+            let sideColor = hsl(.15, .8, .6, sidePulse * .6);
+            drawHUDRect(vec3(sideX, .12), vec3(.02, .06), sideColor, 0);
+        }
+    }
+    
+    // Subtle corner accents for normal state
+    if (!isWarning) {
+        for(let i = 4; i--;) {
+            let cornerX = .38 + (i % 2) * .24;
+            let cornerY = .06 + Math.floor(i/2) * .12;
+            let accentColor = hsl(.6, .6, .5, .4);
+            drawHUDRect(vec3(cornerX, cornerY), vec3(.008, .008), accentColor, 0);
+        }
     }
 }
 
-    
+}
+
     // speed display in top-right
     const mph = playerVehicle.velocity.z | 0;
 const aspect = mainCanvasSize.x / mainCanvasSize.y;
