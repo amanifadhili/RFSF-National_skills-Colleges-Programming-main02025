@@ -137,9 +137,9 @@ function gameStart()
         worldHeading = cameraOffset = checkpointTimeLeft = 0;
     
     // Set up race start sequence
-    startCountdown = quickStart ? 0 : 4;        // Skip countdown if quick start enabled
-    checkpointTimeLeft = startCheckpointTime;   // Set initial checkpoint time
-    nextCheckpointDistance = checkpointDistance; // Set distance to first checkpoint
+    startCountdown = quickStart ? 0 : 4;       
+    checkpointTimeLeft = startCheckpointTime;   
+    nextCheckpointDistance = checkpointDistance; 
     
     // Initialize timer objects
     startCountdownTimer = new Timer;

@@ -136,10 +136,21 @@ function createCarVariations() {
     playerCarMesh.transform(0, vec3(0, -PI/2));
     
     const aiProfiles = [
-        [vec3(-1, .4), vec3(-.8, .45), vec3(.1, .45), vec3(.8, .25), vec3(1, .2), vec3(1, 0), vec3(-1, 0)],
-        [vec3(-1, .7), vec3(-.7, .7), vec3(.2, .7), vec3(.7, .4), vec3(1, .3), vec3(1, 0), vec3(-1, 0)],
-        [vec3(-1, .3), vec3(-.5, .5), vec3(.3, .4), vec3(1, .15), vec3(1, .1), vec3(1, 0), vec3(-1, 0)]
-    ];
+    // Tall SUV
+    [vec3(-1, .7), vec3(-.6, .75), vec3(.1, .75), vec3(.7, .4), vec3(1, .3), vec3(1, 0), vec3(-1, 0)],
+    // Sports Car
+    [vec3(-1, .3), vec3(-.8, .45), vec3(.2, .5), vec3(.8, .2), vec3(1, .15), vec3(1, 0), vec3(-1, 0)],
+    // Pickup Truck
+    [vec3(-1, .6), vec3(-.4, .6), vec3(-.2, .3), vec3(.3, .3), vec3(1, .25), vec3(1, 0), vec3(-1, 0)],
+    // Bubble Car
+    [vec3(-1, .4), vec3(-.5, .8), vec3(.2, .8), vec3(.6, .5), vec3(1, .2), vec3(1, 0), vec3(-1, 0)],
+    // Racing Car
+    [vec3(-1, .2), vec3(-.3, .2), vec3(-.1, .6), vec3(.4, .6), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],
+     // Add these new unique shapes
+    [vec3(-1, .6), vec3(-.4, .6), vec3(-.2, .3), vec3(.3, .3), vec3(1, .25), vec3(1, 0), vec3(-1, 0)], // Pickup truck
+    [vec3(-1, .2), vec3(-.3, .2), vec3(-.1, .6), vec3(.4, .6), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],   // Formula car
+    [vec3(-1, .5), vec3(-.6, .8), vec3(.1, .8), vec3(.6, .5), vec3(1, .2), vec3(1, 0), vec3(-1, 0)] 
+];
     
     aiCarMeshes = aiProfiles.map(profile => {
         const mesh = new Mesh().buildExtrude(profile, .5);

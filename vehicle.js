@@ -28,6 +28,7 @@ class Vehicle {
         this.velocity = vec3(0, 0, this.targetSpeed); // Initial velocity vector
         this.color = color; // Vehicle color
         this.isPlayer = 0; // Flag to identify if this is the player’s vehicle
+        this.shapeIndex = randInt(aiCarMeshes.length || 1);
 
         // Vehicle physics
         this.breaking = 0; // Is the vehicle braking
@@ -82,8 +83,9 @@ class Vehicle {
         const m1 = m2.multiply(buildMatrix(0, vec3(0, heading, 0), 0)); // Heading rotation
 
         // Render car mesh
-        carMesh.render(m1.multiply(buildMatrix(0, 0, vec3(450))), this.color);
-        cubeMesh.render(m1.multiply(buildMatrix(0, 0, this.collisionSize)), BLACK); // Draw collision box (invisible normally)
+       const carShape = aiCarMeshes[this.shapeIndex] || carMesh;
+        carShape.render(m1.multiply(buildMatrix(0, 0, vec3(450))), this.color);
+        cubeMesh.render(m1.multiply(buildMatrix(0, 0, this.collisionSize)), BLUE); // Draw collision box (invisible normally)
 
         glPolygonOffset(50); // Offset depth for later renders
 
