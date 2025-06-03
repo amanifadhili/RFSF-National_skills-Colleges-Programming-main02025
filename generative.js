@@ -193,10 +193,10 @@ function generateTetures()
 
         // ROW 2: Various signage
         setupContext(0,2);
-        drawRTBSign(); // RFSF Skills 2025 sign
+        // drawRTBSign(); // RFSF Skills 2025 sign
         
         setupContext(1,2);
-        drawMarketingSign(); // Programming Competition sign
+        // drawMarketingSign(); // Programming Competition sign
          
         setupContext(2,2);
         drawGenericSign('CODING CHALLENGE',.3,BLACK,WHITE);
