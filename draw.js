@@ -26,15 +26,15 @@ let aiCarMeshes = [];
 // ====================================================================
 // These provide easy-to-use color constants throughout the game
 
-const WHITE   = rgb(255, 255, 255);     // Pure white color
+const WHITE   = rgb(1, 1, 1);     // Pure white color
 const BLACK   = rgb(0, 0, 0);     // Pure black color
-const RED     = rgb(85, 0, 0);     // Pure red color
-const YELLOW  = rgb(253, 253, 7);     // Pure yellow color (red + green)
+const RED     = rgb(1, 0, 0);     // Pure red color
+const YELLOW  = rgb(1, 1, 0);     // Pure yellow color (red + green)
 const GREEN   = rgb(0, 1, 0);     // Pure green color
 const CYAN    = rgb(115, 115, 8); // Custom cyan/yellow-green color (note: unusual RGB values)
-const BLUE    = rgb(11, 11, 216);     // Pure blue color
+const BLUE    = rgb(0, 0, 1);     // Pure blue color
 const MAGENTA = rgb(1, 0, 1);     // Pure magenta color (red + blue)
-const GRAY    = rgb(37, 37, 37);  // 50% gray color
+const GRAY    = rgb(.5, .5, .5);  // 50% gray color
 
 const PLAYER_CAR_COLOR = hsl(.6, .8, .4);     // Distinctive blue-green for player
 const AI_CAR_COLORS = [
@@ -93,8 +93,11 @@ function drawInit() {
     
     // CREATE CYLINDER MESH
     {
-        const points = [];
-        const sides = 12;  // Number of sides for the cylinder (12-sided = smooth appearance)
+        const points = [
+    vec3(1, 0.7), vec3(0.7, 1), vec3(-0.7, 1), vec3(-1, 0.7),
+    vec3(-1, -0.7), vec3(-0.7, -1), vec3(0.7, -1), vec3(1, -0.7)
+];;
+        const sides = 16;  // Number of sides for the cylinder (12-sided = smooth appearance)
         
         // Generate points around a circle to form the cylinder's cross-section
         for (let i = sides; i--;) {
@@ -111,9 +114,9 @@ function drawInit() {
     {
         // Keep original car mesh for compatibility
         const points = [
-    vec3(-1, .7), vec3(-.3, .7), vec3(-.1, .4), vec3(.2, .4),
-    vec3(1, .3), vec3(1, .3), vec3(1, 0), vec3(-1, 0),
-];
+        vec3(-1, .3), vec3(-.7, .6), vec3(-.3, .7), vec3(.2, .65), 
+        vec3(.7, .4), vec3(1, .25), vec3(1, 0), vec3(-1, 0),
+    ];
         
         carMesh = new Mesh().buildExtrude(points, .5);
         carMesh.transform(0, vec3(0, -PI/2));
@@ -128,29 +131,33 @@ function drawInit() {
 
 function createCarVariations() {
     const playerPoints = [
-        vec3(-1, .6), vec3(-.6, .55), vec3(-.1, .6), vec3(.2, .55),
-        vec3(.9, .3), vec3(1, .25), vec3(1, 0), vec3(-1, 0)
-    ];
+    vec3(-1, .2), vec3(-.8, .8), vec3(-.4, .9), vec3(.1, .8), 
+    vec3(.6, .6), vec3(.9, .4), vec3(1, .2), vec3(1, 0), vec3(-1, 0)
+];
     
     playerCarMesh = new Mesh().buildExtrude(playerPoints, .6);
     playerCarMesh.transform(0, vec3(0, -PI/2));
     
-    const aiProfiles = [
-    // Tall SUV
-    [vec3(-1, .7), vec3(-.6, .75), vec3(.1, .75), vec3(.7, .4), vec3(1, .3), vec3(1, 0), vec3(-1, 0)],
-    // Sports Car
-    [vec3(-1, .3), vec3(-.8, .45), vec3(.2, .5), vec3(.8, .2), vec3(1, .15), vec3(1, 0), vec3(-1, 0)],
-    // Pickup Truck
-    [vec3(-1, .6), vec3(-.4, .6), vec3(-.2, .3), vec3(.3, .3), vec3(1, .25), vec3(1, 0), vec3(-1, 0)],
-    // Bubble Car
-    [vec3(-1, .4), vec3(-.5, .8), vec3(.2, .8), vec3(.6, .5), vec3(1, .2), vec3(1, 0), vec3(-1, 0)],
-    // Racing Car
-    [vec3(-1, .2), vec3(-.3, .2), vec3(-.1, .6), vec3(.4, .6), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],
-     // Add these new unique shapes
-    [vec3(-1, .6), vec3(-.4, .6), vec3(-.2, .3), vec3(.3, .3), vec3(1, .25), vec3(1, 0), vec3(-1, 0)], // Pickup truck
-    [vec3(-1, .2), vec3(-.3, .2), vec3(-.1, .6), vec3(.4, .6), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],   // Formula car
-    [vec3(-1, .5), vec3(-.6, .8), vec3(.1, .8), vec3(.6, .5), vec3(1, .2), vec3(1, 0), vec3(-1, 0)] 
+const aiProfiles = [
+    // Futuristic Wedge Car
+    [vec3(-1, .1), vec3(-.9, .2), vec3(-.6, .7), vec3(-.2, .8), vec3(.3, .6), vec3(.8, .3), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],
+    
+    // Bubble Pod Car
+    [vec3(-1, .3), vec3(-.7, .9), vec3(-.2, 1.0), vec3(.2, 1.0), vec3(.7, .9), vec3(1, .3), vec3(1, 0), vec3(-1, 0)],
+    
+    // Angular Stealth Car
+    [vec3(-1, .2), vec3(-.8, .2), vec3(-.6, .6), vec3(-.3, .7), vec3(.2, .5), vec3(.7, .2), vec3(1, .15), vec3(1, 0), vec3(-1, 0)],
+    
+    // Retro Muscle Car
+    [vec3(-1, .4), vec3(-.6, .5), vec3(-.4, .6), vec3(-.1, .65), vec3(.3, .6), vec3(.6, .5), vec3(1, .25), vec3(1, 0), vec3(-1, 0)],
+    
+    // Compact City Car
+    [vec3(-1, .5), vec3(-.5, .8), vec3(.0, .85), vec3(.5, .8), vec3(1, .4), vec3(1, 0), vec3(-1, 0)],
+    
+    // Off-Road Vehicle
+    [vec3(-1, .6), vec3(-.7, .75), vec3(-.3, .8), vec3(.1, .8), vec3(.4, .7), vec3(.8, .5), vec3(1, .35), vec3(1, 0), vec3(-1, 0)]
 ];
+
     
     aiCarMeshes = aiProfiles.map(profile => {
         const mesh = new Mesh().buildExtrude(profile, .5);

@@ -783,7 +783,7 @@ function generateTetures()
      */
    function drawCompSign()
     {
-        drawSignBackground(1,.6,WHITE,hsl(.2,.9,.3),.05,BLACK,.5); // Orange border, black posts
+        drawSignBackground(1,.6,RED,hsl(.2,.9,.3),.05,BLACK,.5); // Orange border, black posts
         color(BLACK);
         text('NATIONAL SKILLS',.5,.24,.28,.85,0,undefined,undefined,800);
         text('COMPETITION',.5,.46,.2,1,0,undefined,undefined,800);

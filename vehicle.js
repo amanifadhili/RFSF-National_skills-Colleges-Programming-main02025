@@ -92,7 +92,7 @@ class Vehicle {
         // Front and rear bumpers
         const bumperY = 130;
         const bumperZ = -440;
-        cubeMesh.render(m1.multiply(buildMatrix(vec3(0, bumperY, bumperZ), 0, vec3(140, 50, 20))), hsl(0, 0, 0.1));
+        // cubeMesh.render(m1.multiply(buildMatrix(vec3(0, bumperY, bumperZ), 0, vec3(140, 50, 20))), hsl(0, 0, 0.1));
         cubeMesh.render(m1.multiply(buildMatrix(vec3(0, 10, 440), 0, vec3(240, 30, 30))), hsl(0, 0, 0.5));
 
         // Render license plate and top number if it's the player vehicle
