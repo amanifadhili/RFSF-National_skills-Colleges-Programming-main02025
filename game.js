@@ -165,9 +165,9 @@ function gameStart()
     hsl(.45, .5, .3),  // Brown
     hsl(0, 0, .3)      // Dark Gray
 ];
-    for(let i = 10; i--;)  // Create 10 AI vehicles
-        vehicles.push(new Vehicle(5e3*i+3e3, aiColors[randInt(aiColors.length)]));
-}
+   for(let i = 50; i--;){ // Create 50 AI vehicles
+    vehicles.push(new Vehicle(randInt(10e3, 20e3)*i+3e3, aiColors[randInt(aiColors.length)])); // Random 6,000-12,000 units
+}}
 
 // ====================================================================
 // INTERNAL GAME LOGIC UPDATE FUNCTION
@@ -233,6 +233,7 @@ function gameUpdateInternal()
                 checkpointTimeLeft = 0;       // Clamp to zero
             }
         }
+       
     }
 
     // Global restart key (works in any mode)
