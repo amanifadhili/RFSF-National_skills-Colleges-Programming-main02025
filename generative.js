@@ -171,7 +171,7 @@ function generateTetures()
         
         // Tile (6,0): Regular checkpoint sign
         setupContext(6,0);
-        drawCheckpointSign();
+        // drawCheckpointSign();
         
         // Tile (7,0): Checkpoint sign variant
         setupContext(7,0);
@@ -193,28 +193,28 @@ function generateTetures()
 
         // ROW 2: Various signage
         setupContext(0,2);
-        drawRTBSign(); // RTB Skills 2025 sign
+        // drawRTBSign(); // RFSF Skills 2025 sign
         
         setupContext(1,2);
-        drawMarketingSign(); // Colorful marketing sign
+        // drawMarketingSign(); // Programming Competition sign
          
         setupContext(2,2);
-        drawGenericSign('SKILLS COMPETITION',.3,BLACK,WHITE);
+        drawGenericSign('CODING CHALLENGE',.3,BLACK,WHITE);
         
         setupContext(3,2);
-        drawLittleJSSign(); // Colorful "VISIT RWANDA" sign
+        drawLittleJSSign(); // "WELCOME RWANDA" sign
         
         setupContext(4,2);
-        drawCompSign(); // Competition sign
+        drawCompSign(); // National Skills Competition sign
+
+         setupContext(5,2);
+        drawGenericSign('RFSF ACADEMY',.4,BLACK,WHITE);
         
-        setupContext(5,2);
-        drawGenericSign('TSS SCHOOL',.4,BLACK,WHITE);
-        
-        setupContext(6,2);
-        drawDwitterSign('www.rp.ac.rw',.3,BLACK,WHITE,'courier new');
+         setupContext(6,2);
+        drawDwitterSign('www.rfsf.rw',.3,BLACK,WHITE,'courier new');
         
         setupContext(7,2);
-        drawTeaPlantSign();
+        drawTeaPlantSign(); 
         
         // Note: This overwrites the tea plant sign with stop sign
         setupContext(7,2);
@@ -222,7 +222,7 @@ function generateTetures()
 
         // ROW 3: Additional elements
         setupContext(0,3);
-        drawZZFXSign(); // Audio library branding
+        drawZZFXSign(); // RFSF Programming branding
     }
 
     // =============================================================================
@@ -612,9 +612,9 @@ function generateTetures()
     {
         drawSignBackground();
         color(); // Default color (likely black)
-        text('RTB',.25,.27,.5,.35,0,'courier new',undefined,600);
+        text('RFSF',.25,.27,.5,.35,0,'courier new',undefined,600);
         text('SKILLS',.5,.66,.5,.9,0,'courier new',undefined,600);
-        color(hsl(1,.8, .5)); // Red color for year
+        color(hsl(.6,.8, .5)); // Blue color for year
         text('2025',.67,.27,.5,.5,0,'courier new',undefined,600);
     }
 
@@ -637,8 +637,8 @@ function generateTetures()
             lineColor();
             
             // Draw animated text with vertical bounce
-            text('INYAMANZA',.5,.5-b*.15,.02+p*.3,.85,l,undefined,undefined,800);
-            text('MILK ZONE',  .5,.5+b*.12,.02+p*.3,.85,l,undefined,undefined,800);
+            text('PROGRAMMING',.5,.5-b*.15,.02+p*.25,.85,l,undefined,undefined,800);
+            text('COMPETITION',  .5,.5+b*.12,.02+p*.25,.85,l,undefined,undefined,800);
         }
     }
 
@@ -692,20 +692,21 @@ function generateTetures()
     /**
      * Draws tea plantation themed sign with triangle logo
      */
-    function drawTeaPlantSign()
+   function drawTeaPlantSign()
     {
         drawSignBackground(1,.9,hsl(0,0,.2),WHITE); // Dark background
-        let c = hsl(0, .8, .6); // Reddish color scheme
+        let c = hsl(.15, .8, .6); // Tech blue color scheme
         color(c);
         lineColor(c);
         
         let y = .37;
         circle(.5,y,.32); // Background circle
-        text('TEA PLANTS',.5,.8,.15,.9,0,undefined,undefined,600);
+        text('TECH SCHOOL',.5,.8,.15,.9,0,undefined,undefined,600);
         
-        // Draw triangle logo (represents tea leaf/mountain)
+        // Draw gear/cog logo (represents technology)
         color(WHITE);
-        polygon(3, .5,y, .25);
+        polygon(8, .5,y, .25); // Octagon for gear shape
+        circle(.5,y,.1); // Center hole
         
         // Add decorative line element
         let r = .3;
@@ -719,7 +720,7 @@ function generateTetures()
     /**
      * Draws Newgrounds website branding sign
      */
-    function drawNewgroundsSign()
+   function drawNewgroundsSign()
     {
         let size=.2,c=WHITE,color2=hsl(.57, .1, .14); // Dark blue-green background
         let signSize = size+.1
@@ -729,15 +730,15 @@ function generateTetures()
         const y = (signSize+.05)/2;
         const o = hsl(.08, 1, .61); // Orange accent color
         
-        // "NEW" in orange with outline
+        // "CODE" in orange with outline
         color(o);
         lineColor(o)
-        text('NEW',.2,y,size,.25,.02,'Verdana');
+        text('CODE',.25,y,size,.3,.02,'Verdana');
         
-        // "GROUNDS" in white with outline
+        // "FUTURE" in white with outline
         color();
         lineColor()
-        text('GROUNDS',.6,y,size,.55,.02);
+        text('FUTURE',.65,y,size,.5,.02);
     }
 
     /**
@@ -760,42 +761,42 @@ function generateTetures()
      * Draws ZZFX audio library branding with 3D effect
      * @param {string} t - Text to display (defaults to "ZZFX")
      */
-    function drawZZFXSign(t='2025 Skills competition')
+    function drawZZFXSign(t='RFSF PROGRAMMING')
     {
         drawSignBackground(1,.6,BLACK,hsl(0,0,.2)); // Dark background
         
         // Create 3D layered text effect
         color(hsl(.6,1,.5)); // Cyan base layer
         let x = .47, y = .38, o = .03; // Position and offset
-        text(t,x,y,.55,.8,0,undefined,undefined,900);
+        text(t,x,y,.45,.8,0,undefined,undefined,900);
         
         color(YELLOW); // Yellow middle layer
-        text(t,x+o,y-o,.55,.8,0,undefined,undefined,900);
+        text(t,x+o,y-o,.45,.8,0,undefined,undefined,900);
         
         color(hsl(.96,1,.5)); // Pink top layer with white outline
         lineColor(WHITE)
-        text(t,x+2*o,y-2*o,.55,.8,.01,undefined,undefined,900);
+        text(t,x+2*o,y-2*o,.45,.8,.01,undefined,undefined,900);
     }
 
     /**
      * Draws competition/event announcement sign
      */
-    function drawCompSign()
+   function drawCompSign()
     {
-        drawSignBackground(1,.6,WHITE,hsl(.6,.9,.3),.05,BLACK,.5); // Green border, black posts
-        color(WHITE);
-        text('FUTURE SKILLS',.5,.24,.31,.85,0,undefined,undefined,800);
-        text('RTB/RP 2025',.5,.46,.2,1,0,undefined,undefined,800);
+        drawSignBackground(1,.6,WHITE,hsl(.2,.9,.3),.05,BLACK,.5); // Orange border, black posts
+        color(BLACK);
+        text('NATIONAL SKILLS',.5,.24,.28,.85,0,undefined,undefined,800);
+        text('COMPETITION',.5,.46,.2,1,0,undefined,undefined,800);
     }
 
     /**
      * Draws colorful "VISIT RWANDA" sign with per-letter coloring
      */
-    function drawLittleJSSign()
+     function drawLittleJSSign()
     {
         drawSignBackground(1, .7, BLACK, WHITE, .05, WHITE, 0); // Black background, white border and posts
         color();
-        ljsText('VISIT', 0.05, .25);    // First line
+        ljsText('WELCOME', 0.05, .25);    // First line
         ljsText('RWANDA', 0.1, .5, 0);  // Second line with Rwandan flag colors
 
         /**
@@ -806,9 +807,7 @@ function generateTetures()
          */
         function ljsText(t, x, y, o = 0)
         {
-            
-            const rwandaColors = ['rgb(9, 242, 98)', 'rgb(244, 237, 11)', 'rgb(84, 191, 230)'];
- // Blue, Yellow, Green
+            const rwandaColors = ['rgb(9, 242, 98)', 'rgb(244, 237, 11)', 'rgb(84, 191, 230)']; // Green, Yellow, Blue
 
             for (let i = 0; i < t.length; i++)
             {
@@ -829,10 +828,75 @@ function generateTetures()
 
     function drawStartSign()
     {
-        drawSignBackground(1,.25,BLACK,WHITE,.05,BLACK,.5);
-        color(RED);
-        lineColor(RED);
-        text('START',.5,.16,.25,1,.01,undefined,undefined,300);
+        // Draw two vertical support poles
+        const poleColor = hsl(0, 0, 0.7); // Light gray poles
+        color(poleColor);
+        rect(0.15, 0.5, 0.04, 1);    // Left pole
+        rect(0.85, 0.5, 0.04, 1);    // Right pole
+        
+        // Add pole caps/tops
+        color(hsl(0, 0, 0.8)); // Slightly lighter gray
+        circle(0.15, 0.1, 0.03);     // Left pole cap
+        circle(0.85, 0.1, 0.03);     // Right pole cap
+        
+        // Draw banner background (white center section)
+        color(WHITE);
+        rect(0.5, 0.3, 0.6, 0.2);    // Main banner rectangle
+        
+        // Draw banner border
+        color(BLACK);
+        rectOutline(0.5, 0.3, 0.6, 0.2, 0.01);
+        
+        // Draw checkered pattern on left side
+        drawCheckeredPattern(0.2, 0.3, 0.15, 0.2);
+        
+        // Draw checkered pattern on right side  
+        drawCheckeredPattern(0.8, 0.3, 0.15, 0.2);
+        
+        // Draw "START" text in the center
+        color(BLACK);
+        text('START', 0.5, 0.3, 0.12, 0.25, 0, 'arial', 'center', 800);
+        
+        // Add banner suspension lines/ropes
+        color(hsl(0, 0, 0.3)); // Dark gray ropes
+        line(0.15, 0.15, 0.275, 0.22, 0.008);  // Left rope to banner
+        line(0.85, 0.15, 0.725, 0.22, 0.008);  // Right rope to banner
+        
+        /**
+         * Helper function to draw checkered racing flag pattern
+         * @param {number} centerX - Center X position of checkered area
+         * @param {number} centerY - Center Y position of checkered area  
+         * @param {number} width - Width of checkered area
+         * @param {number} height - Height of checkered area
+         */
+        function drawCheckeredPattern(centerX, centerY, width, height)
+        {
+            const squareSize = 0.025; // Size of individual checker squares
+            const startX = centerX - width/2;
+            const startY = centerY - height/2;
+            const cols = Math.ceil(width / squareSize);
+            const rows = Math.ceil(height / squareSize);
+            
+            for(let row = 0; row < rows; row++)
+            {
+                for(let col = 0; col < cols; col++)
+                {
+                    // Alternate between black and white squares
+                    const isBlack = (row + col) % 2 === 0;
+                    color(isBlack ? BLACK : WHITE);
+                    
+                    const squareX = startX + col * squareSize + squareSize/2;
+                    const squareY = startY + row * squareSize + squareSize/2;
+                    
+                    // Only draw squares that are within the defined area
+                    if(squareX >= startX && squareX <= startX + width &&
+                       squareY >= startY && squareY <= startY + height)
+                    {
+                        rect(squareX, squareY, squareSize, squareSize);
+                    }
+                }
+            }
+        }
     }
 
     function drawCheckpointSign(side=0)
