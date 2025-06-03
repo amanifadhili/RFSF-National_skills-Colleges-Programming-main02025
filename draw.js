@@ -104,16 +104,17 @@ function drawInit() {
     // CREATE CAR MESH AND WHEELS
     {
         // Define the car's profile as a series of 2D points
-        // These points create the silhouette of a racing car when extruded
+        // These points create the silhouette of a modern racing car when extruded
         const points = [
-            vec3(-1, .5),   // Rear bumper top
-            vec3(-.7, .4),  // Rear windshield angle
-            vec3(-.2, .5),  // Roof line start
-            vec3(.1, .5),   // Roof line end
-            vec3(1, .2),    // Front hood slope
-            vec3(1, .2),    // Front hood end (duplicate for sharp edge)
-            vec3(1, 0),     // Front bumper
-            vec3(-1, 0),    // Rear bumper bottom
+            vec3(-1, .3),    // Rear bumper top - lowered for aerodynamic look
+            vec3(-.8, .4),   // Rear windshield angle - steeper for better aerodynamics
+            vec3(-.3, .5),   // Roof line start - moved back for longer hood
+            vec3(.2, .5),    // Roof line end - extended for better visibility
+            vec3(.4, .4),    // Front windshield - more gradual slope
+            vec3(.8, .3),    // Front hood slope - longer and lower
+            vec3(1, .2),     // Front hood end
+            vec3(1, 0),      // Front bumper
+            vec3(-1, 0),     // Rear bumper bottom
         ];
         
         // Build the car body by extruding the profile with height 0.5

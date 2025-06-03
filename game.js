@@ -155,8 +155,10 @@ function gameStart()
     vehicles.push(playerVehicle);  // Add player to vehicles array
 
     // Spawn AI vehicles at intervals along the track
+    /* Commented out AI vehicle spawning
     for(let i = 10; i--;)  // Create 10 AI vehicles
         vehicles.push(new Vehicle(5e3*i+3e3, hsl(rand(),.8,.5)));  // Random colors, spaced 5000 units apart
+    */
 }
 
 // ====================================================================
@@ -170,18 +172,20 @@ function gameUpdateInternal()
         // ATTRACT MODE LOGIC (Demo/Title Screen)
         
         // Spawn vehicles periodically for visual interest
+        /* Commented out attract mode vehicle spawning
         if (vehicles.length < 10 && attractVehicleSpawnTimer-- < 0)
         {
             // Create new vehicle behind player with random color
             vehicles.push(new Vehicle(playerVehicle.pos.z-1e3, hsl(rand(),.8,.5)));
             attractVehicleSpawnTimer = randInt(100,300);  // Random spawn interval
         }
+        */
         
         // Check for player input to start game
         if (mouseWasPressed(0))  // Left mouse button clicked
         {
             attractMode = 0;      // Exit attract mode
-            sound_start.play();   // Play start sound
+            // sound_start.play();   // Play start sound
             gameStart();          // Restart game
         }
     }
@@ -193,7 +197,7 @@ function gameUpdateInternal()
         if (startCountdown > 0 && !startCountdownTimer.active())
         {
             --startCountdown;                           // Decrement countdown
-            speak(startCountdown || 'PLEASE GO!' );     // Announce countdown or "GO!"
+            // speak(startCountdown || 'PLEASE GO!' );     // Announce countdown or "GO!"
             startCountdownTimer.set(1);                 // Set timer for 1 second
         }
         
@@ -201,7 +205,7 @@ function gameUpdateInternal()
         if (keyWasPressed('Escape'))
         {
             attractMode = 1;      // Enter attract mode
-            sound_start.play();   // Play transition sound
+            // sound_start.play();   // Play transition sound
             gameStart();          // Restart in attract mode
         }
 
@@ -218,7 +222,7 @@ function gameUpdateInternal()
             checkpointTimeLeft -= timeDelta;  // Decrease time remaining
             if (checkpointTimeLeft <= 0)      // Time expired
             {
-                speak('Challenge failed. press R to restart!');   // Announce game over
+                // speak('Challenge failed. press R to restart!');   // Announce game over
                 gameOverTimer.set();          // Start game over timer
                 checkpointTimeLeft = 0;       // Clamp to zero
             }
@@ -229,7 +233,7 @@ function gameUpdateInternal()
     if (keyWasPressed('KeyR'))
     {
         attractMode = 0;      // Start in gameplay mode
-        sound_start.play();   // Play start sound
+        // sound_start.play();   // Play start sound
         gameStart();          // Restart game
     }
     
