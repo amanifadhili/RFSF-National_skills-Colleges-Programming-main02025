@@ -157,7 +157,9 @@ function generateTetures()
             rect(.5,.5,.5-a/3,.9-a/3); // Rectangle with decreasing size
         }
         
-        // Tile (3,0): Removed license plate
+        // Tile (3,0): License plate
+        setupContext(3,0);
+        drawLicensePlate();
         
         // Tile (4,0): Year text "2025"
         setupContext(4,0);
@@ -905,5 +907,15 @@ function generateTetures()
         rect(.5,0,1,.5);
         color(hsl(.3,.7,.5));
         text('CHECK POINT',.5,.16,.27,.95,.01,undefined,undefined,600);
+    }
+    
+    function drawLicensePlate(t='RTB/RP-2025')
+    {
+        color(YELLOW)
+        rect();
+        color(BLACK);
+        lineColor(BLACK);
+        text(t,.5,.6,1,.9,0,'monospace',undefined,60);
+    
     }
 }
