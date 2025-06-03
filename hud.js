@@ -4,7 +4,21 @@
 let HUDButtons = [];
 let radioMusic = -1;
 let radioBoxAnimation = 0;
-
+let playerScore = 0;
+let playerDistance = 0;
+let currentLevel = 1;
+let scoreMultiplier = 1;
+// global variables for level transition
+let levelTransitionTimer = 0;
+let levelTransitionActive = false;
+let levelMessages = [
+    "ROOKIE DRIVER",
+    "GETTING BETTER",
+    "PROFESSIONAL DRIVER",
+    "EXPERT DRIVER",
+    "MASTER OF THE ROAD"
+];
+let bonusMessages = [];
 // Initialize HUD elements with modern design
 function initHUD()
 {
@@ -395,7 +409,13 @@ else {
 }
 
 }
-
+ updateHUDValues();
+    
+    // Update level transition
+    updateLevelTransition();
+    
+    // Update bonus messages
+    updateBonusMessages();
     // speed display in top-right
     const mph = playerVehicle.velocity.z | 0;
 const aspect = mainCanvasSize.x / mainCanvasSize.y;
@@ -408,12 +428,31 @@ if (aspect > .75) {
     drawHUDText('SPEED', vec3(.85, .055), .025, hsl(.0, .8, .8), .002, BLACK, undefined, 'center', 300);
     drawHUDText(mph + ' KPH', vec3(.85, .095), .045, hsl(.0, .9, .9), .003, hsl(.0, .8, .3), undefined, 'center', 700, 'italic');
 }
+    if (!attractMode && !gameOverTimer.isSet()) {
+    // Score display in top-left
+    drawHUDRect(vec3(.15, .08), vec3(.20, .10), hsl(.3, .6, .2, .8), .003, hsl(.3, .6, .6));
+    drawHUDText('SCORE', vec3(.15, .055), .025, hsl(.3, .8, .8), .002, BLACK, undefined, 'center', 300);
+    drawHUDText(Math.floor(playerScore), vec3(.15, .095), .045, hsl(.3, .9, .9), .003, hsl(.3, .6, .3), undefined, 'center', 700, 'italic');
     
+    // Distance display below score
+    drawHUDRect(vec3(.15, .19), vec3(.20, .10), hsl(.6, .6, .2, .8), .003, hsl(.6, .6, .6));
+    drawHUDText('DISTANCE', vec3(.15, .165), .025, hsl(.6, .8, .8), .002, BLACK, undefined, 'center', 300);
+    drawHUDText(Math.floor(playerDistance) + 'm', vec3(.15, .205), .045, hsl(.6, .9, .9), .003, hsl(.6, .6, .3), undefined, 'center', 700, 'italic');
+    
+    // Level display
+    drawHUDRect(vec3(.15, .30), vec3(.20, .10), hsl(.15, .6, .2, .8), .003, hsl(.15, .6, .6));
+    drawHUDText('LEVEL', vec3(.15, .275), .025, hsl(.15, .8, .8), .002, BLACK, undefined, 'center', 300);
+    drawHUDText(currentLevel, vec3(.15, .315), .045, hsl(.15, .9, .9), .003, hsl(.15, .6, .3), undefined, 'center', 700, 'italic');
+}
     // Draw modern radio control panel
     if (!attractMode && !gameOverTimer.isSet()) {
         drawRadioPanel();
     }
+     // Draw level transition 
+    drawLevelTransition();
     
+    // Draw bonus messages 
+    drawBonusMessages();
     // Draw all HUD buttons
     for(const b of HUDButtons)
         b.draw();
@@ -576,4 +615,198 @@ function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shad
     
     context.fillStyle = color;
     context.fillText(text, pos.x, pos.y, width);
+}
+// function to hud.js
+function updateHUDValues() {
+    if (attractMode || gameOverTimer.isSet()) return;
+    
+    // Update distance based on player position (convert to meters)
+    if (playerVehicle) {
+        playerDistance = Math.floor(playerVehicle.pos.z / 100);
+        
+        // Update score based on speed and distance
+        const speed = playerVehicle.velocity.z;
+        scoreMultiplier = clamp(speed / 100, 0.5, 2);
+        playerScore += scoreMultiplier;
+        
+        // Check for level progression
+        checkLevelProgression();
+    }
+     // Check for distance milestones
+    checkDistanceMilestones();
+}
+
+// function to check for level progression
+function checkLevelProgression() {
+    // Level up every 500 meters
+    const newLevel = Math.floor(playerDistance / 500) + 1;
+    
+    if (newLevel > currentLevel) {
+        // Level up!
+        levelUp(newLevel);
+    }
+}
+
+// function to handle level up
+function levelUp(newLevel) {
+    // Store previous level
+    const oldLevel = currentLevel;
+    
+    // Update level
+    currentLevel = newLevel;
+    
+    // Play level up sound
+    sound_checkpoint.play(1, 1.2); // Slightly higher pitch for level up
+    
+    // Announce level up
+    speak(`LEVEL ${currentLevel} REACHED`);
+    
+    // Trigger level transition animation
+    startLevelTransition();
+}
+
+// function to start level transition
+function startLevelTransition() {
+    levelTransitionActive = true;
+    levelTransitionTimer = 3; // 3 seconds transition
+}
+//  function to update level transition
+function updateLevelTransition() {
+    if (levelTransitionActive) {
+        levelTransitionTimer -= 1/60; // Assuming 60fps
+        
+        if (levelTransitionTimer <= 0) {
+            levelTransitionActive = false;
+        }
+    }
+}
+//  function to draw level transition
+function drawLevelTransition() {
+    if (!levelTransitionActive) return;
+    
+    // Calculate alpha for fade in/out
+    let alpha;
+    if (levelTransitionTimer > 2.5) {
+        // Fade in
+        alpha = (3 - levelTransitionTimer) * 2;
+    } else if (levelTransitionTimer > 0.5) {
+        // Hold
+        alpha = 1;
+    } else {
+        // Fade out
+        alpha = levelTransitionTimer * 2;
+    }
+    // Draw semi-transparent overlay
+    drawHUDRect(vec3(.5, .5), vec3(1, 1), hsl(0, 0, 0, 0.7 * alpha), 0);
+    
+    // Draw level number
+    let levelColor = hsl(.15, .8, .6, alpha);
+    drawHUDText(`LEVEL ${currentLevel}`, vec3(.5, .4), .1, levelColor, .008, BLACK, undefined, 'center', 900, 'italic');
+    
+    // Draw level message
+    let messageIndex = Math.min(currentLevel - 1, levelMessages.length - 1);
+    let messageColor = hsl(.15, .7, .7, alpha);
+    drawHUDText(levelMessages[messageIndex], vec3(.5, .5), .05, messageColor, .004, BLACK, undefined, 'center', 700);
+}
+function addBonus(points, message, position) {
+    // points to score
+    playerScore += points;
+    
+    // Create bonus message
+    bonusMessages.push({
+        message: message,
+        points: points,
+        pos: position || vec3(.5, .5),
+        timeLeft: 2, // 2 seconds display time
+        alpha: 1
+    });
+    
+    // Play bonus sound
+    sound_click.play(1, 1.5); // Higher pitch for bonus
+}
+//  function to update bonus messages
+function updateBonusMessages() {
+    for (let i = bonusMessages.length - 1; i >= 0; i--) {
+        const msg = bonusMessages[i];
+        msg.timeLeft -= 1/60; // Assuming 60fps
+        
+        if (msg.timeLeft <= 0) {
+            bonusMessages.splice(i, 1);
+        } else {
+            // Fade out in the last second
+            if (msg.timeLeft < 1) {
+                msg.alpha = msg.timeLeft;
+            }
+            
+            // Move message upward
+            msg.pos.y -= 0.002;
+        }
+    }
+}
+
+//  function to draw bonus messages
+function drawBonusMessages() {
+    for (const msg of bonusMessages) {
+        let color = hsl(.15, .9, .7, msg.alpha);
+        drawHUDText(`${msg.message} +${msg.points}`, msg.pos, .05, color, .004, hsl(0, 0, 0, msg.alpha * 0.5), undefined, 'center', 700);
+    }
+}
+//function to reset HUD values
+function resetHUDValues() {
+    playerScore = 0;
+    playerDistance = 0;
+    currentLevel = 1;
+    scoreMultiplier = 1;
+    bonusMessages = [];
+    levelTransitionActive = false;
+}
+//  function to get difficulty settings based on level
+function getDifficultySettings() {
+    return {
+        trafficDensity: 0.2 + (currentLevel * 0.05),  // Increases with level
+        obstacleFrequency: 0.1 + (currentLevel * 0.03),  // Increases with level
+        maxSpeed: 150 + (currentLevel * 10)  // Increases with level
+    };
+}
+//  function to check for distance milestones
+function checkDistanceMilestones() {
+    // Check for distance milestones every 100m
+    if (playerDistance % 100 === 0 && playerDistance > 0) {
+        const bonus = 500 * currentLevel;
+        addBonus(bonus, `${playerDistance}m MILESTONE`, vec3(.5, .4));
+    }
+}
+
+//  function to award bonus points
+function addBonus(points, message, position) {
+    // points to score
+    playerScore += points;
+    
+    // Create bonus message
+    bonusMessages.push({
+        message: message,
+        points: points,
+        pos: position || vec3(.5, .5),
+        timeLeft: 2, // 2 seconds display time
+        alpha: 1
+    });
+    
+    // Play bonus sound
+    sound_click.play(1, 1.5); // Higher pitch for bonus
+}
+
+//  function to award overtake bonus
+function awardOvertakeBonus(vehicle) {
+    // Calculate bonus based on relative speed
+    const relativeSpeed = playerVehicle.velocity.z - vehicle.velocity.z;
+    const bonus = Math.floor(relativeSpeed * 10);
+    
+    // bonus
+    addBonus(bonus, "OVERTAKE", vec3(.5, .4));
+}
+
+//  function to award speed bonus
+function awardSpeedBonus() {
+    const bonus = Math.floor(playerVehicle.velocity.z * 5);
+    addBonus(bonus, "SPEED DEMON", vec3(.5, .4));
 }

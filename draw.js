@@ -18,6 +18,8 @@ let shadowMesh;      // Ground shadow projection mesh
 let cylinderMesh;    // Circular cylinder geometry
 let carMesh;         // Custom car body geometry
 let carWheel;        // Wheel geometry for vehicles
+let playerCarMesh;
+let aiCarMeshes = [];
 
 // ====================================================================
 // COLOR CONSTANTS - RGB COLOR DEFINITIONS
@@ -34,13 +36,17 @@ const BLUE    = rgb(0, 0, 1);     // Pure blue color
 const MAGENTA = rgb(1, 0, 1);     // Pure magenta color (red + blue)
 const GRAY    = rgb(.5, .5, .5);  // 50% gray color
 
-// ====================================================================
-// DRAWING SYSTEM INITIALIZATION
-// ====================================================================
+const PLAYER_CAR_COLOR = hsl(.6, .8, .4);     // Distinctive blue-green for player
+const AI_CAR_COLORS = [
+    hsl(.0, .7, .5),   // Red
+    hsl(.15, .8, .6),  // Orange  
+    hsl(.25, .6, .5),  // Yellow-green
+    hsl(.8, .6, .4),   // Purple
+    hsl(.45, .5, .3)   // Brown
+];
 
 function drawInit() {
-    // Initialize all 3D mesh geometries used throughout the game
-    // This function is called once at startup to prepare all reusable shapes
+   
     
     // CREATE CUBE MESH
     {
@@ -87,8 +93,11 @@ function drawInit() {
     
     // CREATE CYLINDER MESH
     {
-        const points = [];
-        const sides = 12;  // Number of sides for the cylinder (12-sided = smooth appearance)
+        const points = [
+    vec3(1, 0.7), vec3(0.7, 1), vec3(-0.7, 1), vec3(-1, 0.7),
+    vec3(-1, -0.7), vec3(-0.7, -1), vec3(0.7, -1), vec3(1, -0.7)
+];;
+        const sides = 16;  // Number of sides for the cylinder (12-sided = smooth appearance)
         
         // Generate points around a circle to form the cylinder's cross-section
         for (let i = sides; i--;) {
@@ -101,46 +110,63 @@ function drawInit() {
         cylinderMesh = new Mesh().buildExtrude(points);
     }
     
-    // CREATE CAR MESH AND WHEELS
+    // CREATE CAR MESHES WITH VARIATIONS
     {
-        // Define the car's profile as a series of 2D points
-        // These points create the silhouette of a racing car when extruded
+        // Keep original car mesh for compatibility
         const points = [
-            vec3(-1, .5),   // Rear bumper top
-            vec3(-.7, .4),  // Rear windshield angle
-            vec3(-.2, .5),  // Roof line start
-            vec3(.1, .5),   // Roof line end
-            vec3(1, .2),    // Front hood slope
-            vec3(1, .2),    // Front hood end (duplicate for sharp edge)
-            vec3(1, 0),     // Front bumper
-            vec3(-1, 0),    // Rear bumper bottom
-        ];
+        vec3(-1, .3), vec3(-.7, .6), vec3(-.3, .7), vec3(.2, .65), 
+        vec3(.7, .4), vec3(1, .25), vec3(1, 0), vec3(-1, 0),
+    ];
         
-        // Build the car body by extruding the profile with height 0.5
         carMesh = new Mesh().buildExtrude(points, .5);
-        
-        // Rotate the car mesh to proper orientation (facing forward)
         carMesh.transform(0, vec3(0, -PI/2));
         
-        // Create car wheels by copying and rotating the cylinder mesh
         carWheel = cylinderMesh.copy();
-        carWheel.transform(0, vec3(0, -PI/2));  // Orient wheel horizontally
+        carWheel.transform(0, vec3(0, -PI/2));
         
-        // Note: Commented debug lines for mesh visualization during development
-        // debugMesh = carMesh
-        // debugMesh = cylinderMesh
-        // carMesh.combine(cylinderMesh);
+        // Create visual variations
+        createCarVariations();
     }
 }
 
-// ====================================================================
-// TILE CLASS - TEXTURE ATLAS MANAGEMENT
-// ====================================================================
+function createCarVariations() {
+    const playerPoints = [
+    vec3(-1, .2), vec3(-.8, .8), vec3(-.4, .9), vec3(.1, .8), 
+    vec3(.6, .6), vec3(.9, .4), vec3(1, .2), vec3(1, 0), vec3(-1, 0)
+];
+    
+    playerCarMesh = new Mesh().buildExtrude(playerPoints, .6);
+    playerCarMesh.transform(0, vec3(0, -PI/2));
+    
+const aiProfiles = [
+    // Futuristic Wedge Car
+    [vec3(-1, .1), vec3(-.9, .2), vec3(-.6, .7), vec3(-.2, .8), vec3(.3, .6), vec3(.8, .3), vec3(1, .1), vec3(1, 0), vec3(-1, 0)],
+    
+    // Bubble Pod Car
+    [vec3(-1, .3), vec3(-.7, .9), vec3(-.2, 1.0), vec3(.2, 1.0), vec3(.7, .9), vec3(1, .3), vec3(1, 0), vec3(-1, 0)],
+    
+    // Angular Stealth Car
+    [vec3(-1, .2), vec3(-.8, .2), vec3(-.6, .6), vec3(-.3, .7), vec3(.2, .5), vec3(.7, .2), vec3(1, .15), vec3(1, 0), vec3(-1, 0)],
+    
+    // Retro Muscle Car
+    [vec3(-1, .4), vec3(-.6, .5), vec3(-.4, .6), vec3(-.1, .65), vec3(.3, .6), vec3(.6, .5), vec3(1, .25), vec3(1, 0), vec3(-1, 0)],
+    
+    // Compact City Car
+    [vec3(-1, .5), vec3(-.5, .8), vec3(.0, .85), vec3(.5, .8), vec3(1, .4), vec3(1, 0), vec3(-1, 0)],
+    
+    // Off-Road Vehicle
+    [vec3(-1, .6), vec3(-.7, .75), vec3(-.3, .8), vec3(.1, .8), vec3(.4, .7), vec3(.8, .5), vec3(1, .35), vec3(1, 0), vec3(-1, 0)]
+];
 
-/**
- * Represents a texture tile from a larger generative texture atlas
- * Handles texture coordinate mapping with bleed correction and normalization
- */
+    
+    aiCarMeshes = aiProfiles.map(profile => {
+        const mesh = new Mesh().buildExtrude(profile, .5);
+        mesh.transform(0, vec3(0, -PI/2));
+        return mesh;
+    });
+}
+
+
 class Tile {
     constructor(pos, size) {
         // Bleed pixels prevent texture sampling artifacts at tile edges

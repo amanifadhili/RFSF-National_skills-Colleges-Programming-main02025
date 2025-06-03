@@ -28,6 +28,7 @@ class Vehicle {
         this.velocity = vec3(0, 0, this.targetSpeed); // Initial velocity vector
         this.color = color; // Vehicle color
         this.isPlayer = 0; // Flag to identify if this is the player’s vehicle
+        this.shapeIndex = randInt(aiCarMeshes.length || 1);
 
         // Vehicle physics
         this.breaking = 0; // Is the vehicle braking
@@ -82,21 +83,22 @@ class Vehicle {
         const m1 = m2.multiply(buildMatrix(0, vec3(0, heading, 0), 0)); // Heading rotation
 
         // Render car mesh
-        carMesh.render(m1.multiply(buildMatrix(0, 0, vec3(450))), this.color);
-        cubeMesh.render(m1.multiply(buildMatrix(0, 0, this.collisionSize)), BLACK); // Draw collision box (invisible normally)
+       const carShape = aiCarMeshes[this.shapeIndex] || carMesh;
+        carShape.render(m1.multiply(buildMatrix(0, 0, vec3(450))), this.color);
+        cubeMesh.render(m1.multiply(buildMatrix(0, 0, this.collisionSize)), BLUE); // Draw collision box (invisible normally)
 
         glPolygonOffset(50); // Offset depth for later renders
 
         // Front and rear bumpers
         const bumperY = 130;
         const bumperZ = -440;
-        cubeMesh.render(m1.multiply(buildMatrix(vec3(0, bumperY, bumperZ), 0, vec3(140, 50, 20))), hsl(0, 0, 0.1));
+        // cubeMesh.render(m1.multiply(buildMatrix(vec3(0, bumperY, bumperZ), 0, vec3(140, 50, 20))), hsl(0, 0, 0.1));
         cubeMesh.render(m1.multiply(buildMatrix(vec3(0, 10, 440), 0, vec3(240, 30, 30))), hsl(0, 0, 0.5));
 
         // Render license plate and top number if it's the player vehicle
         if (this.isPlayer) {
             quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, bumperY - 80, bumperZ - 20), 0, vec3(80, 25))), YELLOW, getGenerativeTile(vec3(3, 0)));
-            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, 220, -200), vec3(Math.PI / 2 - 0.2, 0, 0), vec3(150))), GREEN, getGenerativeTile(vec3(4, 0)));
+            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, 400, -500), vec3(Math.PI / 2 - 0.2, 0, 0), vec3(150))), GREEN, getGenerativeTile(vec3(4, 0)));
         }
 
         // Draw brake and tail lights
@@ -333,6 +335,59 @@ class PlayerVehicle extends Vehicle {
                 }
             }
         }
+        // Skip if in attract mode or game over
+if (attractMode || gameOverTimer.isSet()) return;
+
+// Keep track of vehicles that have been overtaken
+if (!this.overtakenVehicles) {
+    this.overtakenVehicles = new Set();
+}
+
+// Check all vehicles for overtaking
+for (const v of vehicles) {
+    if (v.isPlayer || this.overtakenVehicles.has(v)) continue;
+    
+    // If we're ahead of a vehicle that was behind us
+    if (this.pos.z > v.pos.z && 
+        Math.abs(this.pos.x - v.pos.x) < trackWidth &&
+        this.pos.z - v.pos.z < 500) { // Within reasonable distance
+        
+        // Mark as overtaken
+        this.overtakenVehicles.add(v);
+        
+        // Award bonus if the function exists
+        if (typeof awardOvertakeBonus === 'function') {
+            awardOvertakeBonus(v);
+        }
+    }
+}
+
+// Clean up overtaken vehicles that are far behind
+for (const v of this.overtakenVehicles) {
+    if (this.pos.z - v.pos.z > 1000) {
+        this.overtakenVehicles.delete(v);
+    }
+}
+
+// Track high-speed duration
+if (!this.highSpeedTimer) {
+    this.highSpeedTimer = 0;
+}
+
+// Check if player is going fast
+if (this.velocity.z > 150) {
+    this.highSpeedTimer += timeDelta; // Use the game's time delta
+    
+    // Award bonus every 5 seconds of high speed
+    if (this.highSpeedTimer >= 5 && this.highSpeedTimer % 5 < timeDelta) {
+        if (typeof awardSpeedBonus === 'function') {
+            awardSpeedBonus();
+        }
+    }
+} else {
+    // Reset timer if speed drops
+    this.highSpeedTimer = 0;
+}
     }
 
     hit(){
