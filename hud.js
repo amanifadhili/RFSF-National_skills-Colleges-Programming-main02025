@@ -146,7 +146,7 @@ for(let i = 4; i--;) {
         return;
     }
     
-// Game countdown display with enhanced modern design
+// Game countdown display
 if (startCountdownTimer.active() || startCountdown > 0) {
     if (startCountdown < 4) {
         let a = 1 - time % 1;
@@ -271,7 +271,7 @@ else {
         }
     }
     
-    // Enhanced "GAME" text with glitch and glow
+    //  "GAME" text with glitch and glow
     let gameGlitch = Math.random() > .9 ? Math.random() * .01 - .005 : 0;
     let gameColor = baseColor.copy();
     gameColor.a = .9 + Math.sin(time * 4) * .1;
