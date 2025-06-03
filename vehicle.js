@@ -98,7 +98,7 @@ class Vehicle {
         // Render license plate and top number if it's the player vehicle
         if (this.isPlayer) {
             quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, bumperY - 80, bumperZ - 20), 0, vec3(80, 25))), YELLOW, getGenerativeTile(vec3(3, 0)));
-            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, 220, -200), vec3(Math.PI / 2 - 0.2, 0, 0), vec3(150))), GREEN, getGenerativeTile(vec3(4, 0)));
+            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, 400, -500), vec3(Math.PI / 2 - 0.2, 0, 0), vec3(150))), GREEN, getGenerativeTile(vec3(4, 0)));
         }
 
         // Draw brake and tail lights

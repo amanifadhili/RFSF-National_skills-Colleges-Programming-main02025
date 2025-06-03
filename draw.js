@@ -26,15 +26,15 @@ let aiCarMeshes = [];
 // ====================================================================
 // These provide easy-to-use color constants throughout the game
 
-const WHITE   = rgb(1, 1, 1);     // Pure white color
+const WHITE   = rgb(255, 255, 255);     // Pure white color
 const BLACK   = rgb(0, 0, 0);     // Pure black color
-const RED     = rgb(1, 0, 0);     // Pure red color
-const YELLOW  = rgb(1, 1, 0);     // Pure yellow color (red + green)
+const RED     = rgb(85, 0, 0);     // Pure red color
+const YELLOW  = rgb(253, 253, 7);     // Pure yellow color (red + green)
 const GREEN   = rgb(0, 1, 0);     // Pure green color
 const CYAN    = rgb(115, 115, 8); // Custom cyan/yellow-green color (note: unusual RGB values)
-const BLUE    = rgb(0, 0, 1);     // Pure blue color
+const BLUE    = rgb(11, 11, 216);     // Pure blue color
 const MAGENTA = rgb(1, 0, 1);     // Pure magenta color (red + blue)
-const GRAY    = rgb(.5, .5, .5);  // 50% gray color
+const GRAY    = rgb(37, 37, 37);  // 50% gray color
 
 const PLAYER_CAR_COLOR = hsl(.6, .8, .4);     // Distinctive blue-green for player
 const AI_CAR_COLORS = [

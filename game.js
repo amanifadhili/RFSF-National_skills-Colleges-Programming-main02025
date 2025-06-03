@@ -155,8 +155,18 @@ function gameStart()
     vehicles.push(playerVehicle);  // Add player to vehicles array
 
     // Spawn AI vehicles at intervals along the track
+    const aiColors = [
+    hsl(0, .8, .5),    // Red
+    hsl(.15, .9, .6),  // Orange
+    hsl(.3, .7, .5),   // Green
+    hsl(.6, .8, .4),   // Blue
+    hsl(.8, .6, .4),   // Purple
+    hsl(.1, .9, .7),   // Yellow
+    hsl(.45, .5, .3),  // Brown
+    hsl(0, 0, .3)      // Dark Gray
+];
     for(let i = 10; i--;)  // Create 10 AI vehicles
-        vehicles.push(new Vehicle(5e3*i+3e3, YELLOW));  // Random colors, spaced 5000 units apart
+        vehicles.push(new Vehicle(5e3*i+3e3, aiColors[randInt(aiColors.length)]));
 }
 
 // ====================================================================
