@@ -111,9 +111,9 @@ function drawInit() {
     {
         // Keep original car mesh for compatibility
         const points = [
-            vec3(-1, .5), vec3(-.7, .4), vec3(-.2, .5), vec3(.1, .5),
-            vec3(1, .2), vec3(1, .2), vec3(1, 0), vec3(-1, 0),
-        ];
+    vec3(-1, .7), vec3(-.3, .7), vec3(-.1, .4), vec3(.2, .4),
+    vec3(1, .3), vec3(1, .3), vec3(1, 0), vec3(-1, 0),
+];
         
         carMesh = new Mesh().buildExtrude(points, .5);
         carMesh.transform(0, vec3(0, -PI/2));
