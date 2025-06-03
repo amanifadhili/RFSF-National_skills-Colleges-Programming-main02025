@@ -115,7 +115,7 @@ function drawRoad(zwrite = 0)
                 if (pass == 0)
                 {
                     // PASS 1: Ground/grass extending beyond road
-                    color = rgb(139, 69, 19);  // Brown ground color
+                    color = rgb(139, 69, 19); 
                     offset = p1.z * 20;        // Wide offset fills screen horizontally
                 }
                 else if (pass == 1)

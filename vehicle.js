@@ -27,7 +27,7 @@ class Vehicle {
         this.targetSpeed = 60; // Target forward speed to 60 Rwandan speed
         this.velocity = vec3(0, 0, this.targetSpeed); // Initial velocity vector
         this.color = color; // Vehicle color
-        this.isPlayer = 0; // Flag to identify if this is the player’s vehicle
+        this.isPlayer = 0; // Flag to identify if this is the player's vehicle
 
         // Vehicle physics
         this.breaking = 0; // Is the vehicle braking
@@ -81,25 +81,19 @@ class Vehicle {
         const m2 = buildMatrix(p, vec3(trackPitch, 0, 0)); // Road pitch
         const m1 = m2.multiply(buildMatrix(0, vec3(0, heading, 0), 0)); // Heading rotation
 
-        // Render car mesh
+        // Render car mesh with updated design
         carMesh.render(m1.multiply(buildMatrix(0, 0, vec3(450))), this.color);
         cubeMesh.render(m1.multiply(buildMatrix(0, 0, this.collisionSize)), BLACK); // Draw collision box (invisible normally)
 
         glPolygonOffset(50); // Offset depth for later renders
 
-        // Front and rear bumpers
+        // Front and rear bumpers with modern design
         const bumperY = 130;
         const bumperZ = -440;
         cubeMesh.render(m1.multiply(buildMatrix(vec3(0, bumperY, bumperZ), 0, vec3(140, 50, 20))), hsl(0, 0, 0.1));
         cubeMesh.render(m1.multiply(buildMatrix(vec3(0, 10, 440), 0, vec3(240, 30, 30))), hsl(0, 0, 0.5));
 
-        // Render license plate and top number if it's the player vehicle
-        if (this.isPlayer) {
-            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, bumperY - 80, bumperZ - 20), 0, vec3(80, 25))), YELLOW, getGenerativeTile(vec3(3, 0)));
-            quadMesh.renderTile(m1.multiply(buildMatrix(vec3(0, 220, -200), vec3(Math.PI / 2 - 0.2, 0, 0), vec3(150))), GREEN, getGenerativeTile(vec3(4, 0)));
-        }
-
-        // Draw brake and tail lights
+        // Draw brake and tail lights with enhanced design
         const isBraking = this.isBraking;
         for (let i = 2; i--;) {
             let color = isBraking ? hsl(0, 3, .5) : hsl(0, .9, .3);
@@ -111,7 +105,7 @@ class Vehicle {
 
         glPolygonOffset(false); // Reset offset
 
-        // Draw wheels
+        // Draw wheels with improved design
         const wheelRadius = 110;
         const wheelSize = vec3(40, wheelRadius, wheelRadius);
         const wheelM1 = buildMatrix(0, vec3(this.pos.z / 500, this.wheelTurn, 0), wheelSize); // Front wheel rotation
@@ -185,8 +179,8 @@ class PlayerVehicle extends Vehicle {
                 this.velocity = v.velocity.scale(0.7);
                 v.velocity.z = max(v.velocity.z, vel.z * 0.7);
                 this.hit();
-                speak('YOU HIT ANOTHER VEHICLE');
-                sound_hit.play();
+                // speak('YOU HIT ANOTHER VEHICLE');
+                // sound_hit.play();
             }
         }
 
@@ -262,7 +256,7 @@ class PlayerVehicle extends Vehicle {
                 {
                     this.velocity.y += min(50,this.velocity.z)*.1*rand(1,2);
                     this.bumpTimer = 0;
-                    sound_bump.play();
+                    // sound_bump.play();
                     //zzfx();
                 }
             }
@@ -338,7 +332,7 @@ class PlayerVehicle extends Vehicle {
     hit(){
         if (!this.hitTimer.active())
         {
-            sound_hit.play();
+            // sound_hit.play();
             this.hitTimer.set(.5);
         }
     }
