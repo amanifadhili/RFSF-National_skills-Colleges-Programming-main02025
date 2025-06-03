@@ -372,8 +372,8 @@ class TrackSegment
             if (random.bool(.01))  // 1% chance for billboard
             {
                 // Billboard placement
-                offset = vec3((width + 700) * random.sign(), 0, 0)
-                addSprite(offset, vec3(400), hsl(0, 0, random.float(.9, 1)), vec3(random.int(8), 2));
+                offset = vec3((width + 1200) * random.sign(), 0, 0)  // Increased distance from track
+                addSprite(offset, vec3(800), hsl(0, 0, random.float(.9, 1)), vec3(random.int(8), 2));  // Doubled size from 400 to 800
             }
             else
             {
