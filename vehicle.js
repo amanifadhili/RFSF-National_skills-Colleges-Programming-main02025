@@ -333,6 +333,59 @@ class PlayerVehicle extends Vehicle {
                 }
             }
         }
+        // Skip if in attract mode or game over
+if (attractMode || gameOverTimer.isSet()) return;
+
+// Keep track of vehicles that have been overtaken
+if (!this.overtakenVehicles) {
+    this.overtakenVehicles = new Set();
+}
+
+// Check all vehicles for overtaking
+for (const v of vehicles) {
+    if (v.isPlayer || this.overtakenVehicles.has(v)) continue;
+    
+    // If we're ahead of a vehicle that was behind us
+    if (this.pos.z > v.pos.z && 
+        Math.abs(this.pos.x - v.pos.x) < trackWidth &&
+        this.pos.z - v.pos.z < 500) { // Within reasonable distance
+        
+        // Mark as overtaken
+        this.overtakenVehicles.add(v);
+        
+        // Award bonus if the function exists
+        if (typeof awardOvertakeBonus === 'function') {
+            awardOvertakeBonus(v);
+        }
+    }
+}
+
+// Clean up overtaken vehicles that are far behind
+for (const v of this.overtakenVehicles) {
+    if (this.pos.z - v.pos.z > 1000) {
+        this.overtakenVehicles.delete(v);
+    }
+}
+
+// Track high-speed duration
+if (!this.highSpeedTimer) {
+    this.highSpeedTimer = 0;
+}
+
+// Check if player is going fast
+if (this.velocity.z > 150) {
+    this.highSpeedTimer += timeDelta; // Use the game's time delta
+    
+    // Award bonus every 5 seconds of high speed
+    if (this.highSpeedTimer >= 5 && this.highSpeedTimer % 5 < timeDelta) {
+        if (typeof awardSpeedBonus === 'function') {
+            awardSpeedBonus();
+        }
+    }
+} else {
+    // Reset timer if speed drops
+    this.highSpeedTimer = 0;
+}
     }
 
     hit(){
