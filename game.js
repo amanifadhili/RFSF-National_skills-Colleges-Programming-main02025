@@ -1,9 +1,6 @@
 // Enable strict mode for better error detection and performance
 'use strict';
 
-// ====================================================================
-// GLOBAL GAME STATE VARIABLES
-// ====================================================================
 
 // UI and display settings
 showMap = 0;        // Toggle for showing minimap (0 = hidden, 1 = visible)
@@ -13,10 +10,6 @@ speakEnable = 1;    // Enable text-to-speech announcements (0 = disabled, 1 = en
 debugInfo = 0;      // Show debug information overlay (0 = hidden, 1 = visible)
 soundVolume = .3;   // Master volume level (0.0 to 1.0)
 
-// ====================================================================
-// ENGINE CONFIGURATION CONSTANTS
-// ====================================================================
-// NOTE: These settings must be configured before gameInit() is called
 
 // Engine metadata
 const engineVersion = '0.1.0';              // Current version of the game engine
@@ -28,7 +21,7 @@ const testDrive = 0;        // Enable test drive mode (0 = normal game, 1 = test
 const enableTexture = 1;    // Enable texture rendering (0 = disabled, 1 = enabled)
 const enableLighting = 1;   // Enable lighting effects (0 = disabled, 1 = enabled)
 const pixelate = 0;         // Enable pixel art style (0 = smooth, 1 = pixelated)
-const canvasFixedSize = 0;  // Use fixed canvas size (0 = responsive, 1 = fixed)
+const canvasFixedSize = 1;  // Use fixed canvas size (0 = responsive, 1 = fixed)
 
 // Performance settings
 const frameRate = 60;       // Target frames per second
@@ -54,16 +47,14 @@ const checkpointDistance = checkpointTrackSegments * trackSegmentLength;  // Dis
 const checkpointMaxDifficulty = 9;    // Maximum difficulty level (after 9 checkpoints)
 const startCheckpointTime = 60;       // Initial time given to reach first checkpoint (seconds)
 
-// ====================================================================
 // RUNTIME GAME STATE VARIABLES
-// ====================================================================
 
 // Game mode control
 let quickStart = 0;     // Skip intro sequence (0 = normal start, 1 = quick start)
 let attractMode = 1;    // Attract mode (demo) active (0 = gameplay, 1 = attract mode)
 
 // Display configuration
-let mainCanvasSize = pixelate ? vec3(640, 1420) : vec3(1280, 720);  // Canvas resolution
+let mainCanvasSize = pixelate ? vec3(1440, 900) : vec3(1280, 720);  // Canvas resolution
 let mainCanvas;         // Main rendering canvas element
 let mainContext;        // 2D rendering context for main canvas
 
@@ -83,9 +74,7 @@ let startCountdownTimer;       // Timer object for countdown
 let gameOverTimer;             // Timer for game over screen
 let nextCheckpointDistance;    // Distance to next checkpoint
 
-// ====================================================================
 // WORLD AND CAMERA VARIABLES
-// ====================================================================
 
 let cameraPos;          // Camera position in 3D space (vec3)
 let cameraRot;          // Camera rotation angles (vec3)
@@ -100,9 +89,7 @@ let track;              // Track geometry and data
 let vehicles;           // Array of all vehicles in the game
 let playerVehicle;      // Reference to the player's vehicle
 
-// ====================================================================
 // MAIN GAME INITIALIZATION FUNCTION
-// ====================================================================
 
 function gameInit()
 {
