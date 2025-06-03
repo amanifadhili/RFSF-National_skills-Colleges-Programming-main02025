@@ -35,6 +35,7 @@ const CYAN    = rgb(115, 115, 8); // Custom cyan/yellow-green color (note: unusu
 const BLUE    = rgb(0, 0, 1);     // Pure blue color
 const MAGENTA = rgb(1, 0, 1);     // Pure magenta color (red + blue)
 const GRAY    = rgb(.5, .5, .5);  // 50% gray color
+const LIGHT_GRAY = rgb(52, 61, 55); // 80% gray color
 
 const PLAYER_CAR_COLOR = hsl(.6, .8, .4);     // Distinctive blue-green for player
 const AI_CAR_COLORS = [
