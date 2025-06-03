@@ -151,12 +151,12 @@ function gameStart()
     
     // Initialize vehicle array and create player vehicle
     vehicles = [];
-    playerVehicle = new PlayerVehicle(2e3, hsl(0,.8,.5));  // Create player at position 2000, red color
+    playerVehicle = new PlayerVehicle(2e3, hsl(0.3, 0.8, 0.5));  // Create player at position 2000, red color
     vehicles.push(playerVehicle);  // Add player to vehicles array
 
     // Spawn AI vehicles at intervals along the track
     for(let i = 10; i--;)  // Create 10 AI vehicles
-        vehicles.push(new Vehicle(5e3*i+3e3, hsl(rand(),.8,.5)));  // Random colors, spaced 5000 units apart
+        vehicles.push(new Vehicle(5e3*i+3e3, YELLOW));  // Random colors, spaced 5000 units apart
 }
 
 // ====================================================================
