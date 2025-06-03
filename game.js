@@ -137,9 +137,9 @@ function gameStart()
         worldHeading = cameraOffset = checkpointTimeLeft = 0;
     
     // Set up race start sequence
-    startCountdown = quickStart ? 0 : 4;        // Skip countdown if quick start enabled
-    checkpointTimeLeft = startCheckpointTime;   // Set initial checkpoint time
-    nextCheckpointDistance = checkpointDistance; // Set distance to first checkpoint
+    startCountdown = quickStart ? 0 : 4;       
+    checkpointTimeLeft = startCheckpointTime;   
+    nextCheckpointDistance = checkpointDistance; 
     
     // Initialize timer objects
     startCountdownTimer = new Timer;
@@ -151,13 +151,23 @@ function gameStart()
     
     // Initialize vehicle array and create player vehicle
     vehicles = [];
-    playerVehicle = new PlayerVehicle(2e3, hsl(0,.8,.5));  // Create player at position 2000, red color
+    playerVehicle = new PlayerVehicle(2e3, hsl(0.3, 0.8, 0.5));  // Create player at position 2000, red color
     vehicles.push(playerVehicle);  // Add player to vehicles array
 
     // Spawn AI vehicles at intervals along the track
-    for(let i = 10; i--;)  // Create 10 AI vehicles
-        vehicles.push(new Vehicle(5e3*i+3e3, hsl(rand(),.8,.5)));  // Random colors, spaced 5000 units apart
-}
+    const aiColors = [
+    hsl(0, .8, .5),    // Red
+    hsl(.15, .9, .6),  // Orange
+    hsl(.3, .7, .5),   // Green
+    hsl(.6, .8, .4),   // Blue
+    hsl(.8, .6, .4),   // Purple
+    hsl(.1, .9, .7),   // Yellow
+    hsl(.45, .5, .3),  // Brown
+    hsl(0, 0, .3)      // Dark Gray
+];
+   for(let i = 50; i--;){ // Create 50 AI vehicles
+    vehicles.push(new Vehicle(randInt(10e3, 20e3)*i+3e3, aiColors[randInt(aiColors.length)])); // Random 6,000-12,000 units
+}}
 
 // ====================================================================
 // INTERNAL GAME LOGIC UPDATE FUNCTION
@@ -223,6 +233,7 @@ function gameUpdateInternal()
                 checkpointTimeLeft = 0;       // Clamp to zero
             }
         }
+       
     }
 
     // Global restart key (works in any mode)
