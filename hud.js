@@ -633,7 +633,7 @@ function updateHUDValues() {
         checkLevelProgression();
     }
      // Check for distance milestones
-    // checkDistanceMilestones();
+    checkDistanceMilestones();
 }
 
 // function to check for level progression
@@ -709,7 +709,7 @@ function drawLevelTransition() {
     drawHUDText(levelMessages[messageIndex], vec3(.5, .5), .05, messageColor, .004, BLACK, undefined, 'center', 700);
 }
 function addBonus(points, message, position) {
-    // Add points to score
+    // points to score
     playerScore += points;
     
     // Create bonus message
@@ -767,4 +767,46 @@ function getDifficultySettings() {
         obstacleFrequency: 0.1 + (currentLevel * 0.03),  // Increases with level
         maxSpeed: 150 + (currentLevel * 10)  // Increases with level
     };
+}
+//  function to check for distance milestones
+function checkDistanceMilestones() {
+    // Check for distance milestones every 100m
+    if (playerDistance % 100 === 0 && playerDistance > 0) {
+        const bonus = 500 * currentLevel;
+        addBonus(bonus, `${playerDistance}m MILESTONE`, vec3(.5, .4));
+    }
+}
+
+//  function to award bonus points
+function addBonus(points, message, position) {
+    // points to score
+    playerScore += points;
+    
+    // Create bonus message
+    bonusMessages.push({
+        message: message,
+        points: points,
+        pos: position || vec3(.5, .5),
+        timeLeft: 2, // 2 seconds display time
+        alpha: 1
+    });
+    
+    // Play bonus sound
+    sound_click.play(1, 1.5); // Higher pitch for bonus
+}
+
+//  function to award overtake bonus
+function awardOvertakeBonus(vehicle) {
+    // Calculate bonus based on relative speed
+    const relativeSpeed = playerVehicle.velocity.z - vehicle.velocity.z;
+    const bonus = Math.floor(relativeSpeed * 10);
+    
+    // bonus
+    addBonus(bonus, "OVERTAKE", vec3(.5, .4));
+}
+
+//  function to award speed bonus
+function awardSpeedBonus() {
+    const bonus = Math.floor(playerVehicle.velocity.z * 5);
+    addBonus(bonus, "SPEED DEMON", vec3(.5, .4));
 }
