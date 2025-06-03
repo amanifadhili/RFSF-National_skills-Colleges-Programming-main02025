@@ -167,6 +167,10 @@ function gameStart()
 ];
    for(let i = 50; i--;){ // Create 50 AI vehicles
     vehicles.push(new Vehicle(randInt(10e3, 20e3)*i+3e3, aiColors[randInt(aiColors.length)])); // Random 6,000-12,000 units
+ // ADD THIS CODE HERE - Reset HUD values when game starts
+    if (typeof resetHUDValues === 'function') {
+        resetHUDValues();
+    }
 }}
 
 // ====================================================================
@@ -233,9 +237,25 @@ function gameUpdateInternal()
                 checkpointTimeLeft = 0;       // Clamp to zero
             }
         }
-       
-    }
+        // ADD THIS CODE HERE - Update HUD values and apply difficulty settings
+        if (typeof updateHUDValues === 'function') {
+            updateHUDValues();
+        }
+        
+        // Get difficulty settings based on level
+        if (typeof getDifficultySettings === 'function') {
+            const difficulty = getDifficultySettings();
 
+             // Apply difficulty to game systems
+            // For example, adjust traffic density for AI vehicle spawning
+            if (vehicles.length < 10 + (difficulty.trafficDensity * 10) && 
+                Math.random() < difficulty.trafficDensity * 0.01) {
+                // Spawn a new AI vehicle ahead of player
+                vehicles.push(new Vehicle(playerVehicle.pos.z + randInt(500, 2000), 
+                                         hsl(rand(),.8,.5)));
+            }
+    }
+    }
     // Global restart key (works in any mode)
     if (keyWasPressed('KeyR'))
     {

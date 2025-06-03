@@ -633,7 +633,7 @@ function updateHUDValues() {
         checkLevelProgression();
     }
      // Check for distance milestones
-    checkDistanceMilestones();
+    // checkDistanceMilestones();
 }
 
 // function to check for level progression
