@@ -10,23 +10,39 @@ function trackPreRender()
     cameraOffset = playerVehicle.pos.z - cameraPlayerOffset.z;
     
     // Get track segment information at camera position for terrain following
-    cameraTrackInfo = new TrackSegmentInfo(cameraOffset);
+     cameraTrackInfo = new TrackSegmentInfo(cameraOffset);
     
+     // Enhanced world heading for curves - smoother rotation
+    const curveStrength = cameraTrackInfo.offset.x / 1000; // Normalize curve intensity
+    worldHeading += 0.0001 * curveStrength * playerVehicle.velocity.z; // Smoother curve rotation
+
     // Gradually rotate world heading based on track curves and player speed
     // Creates subtle banking effect when going around turns
-    worldHeading += .00005 * cameraTrackInfo.offset.x * playerVehicle.velocity.z;
+    // worldHeading += .00005 * cameraTrackInfo.offset.x * playerVehicle.velocity.z;
+    
 
     // Set camera height - much higher in attract mode for overview effect
-    if (attractMode)
+   if (attractMode)
         cameraPos.y = cameraTrackInfo.offset.y + 1e3; // 1000 units high for attract mode
-    else
-        cameraPos.y = cameraTrackInfo.offset.y + cameraPlayerOffset.y; // Follow track height
+    else {
+        // Smoother hill following with look-ahead
+        const lookAheadInfo = new TrackSegmentInfo(cameraOffset + trackSegmentLength * 5);
+        const avgHeight = (cameraTrackInfo.offset.y + lookAheadInfo.offset.y) / 2;
+        cameraPos.y = avgHeight + cameraPlayerOffset.y; // Follow average height
+    }
 
     // Tilt camera based on track pitch (up/down slopes) for immersion
-    cameraRot.x = cameraTrackInfo.pitch / 2;
+   cameraRot.x = cameraTrackInfo.pitch / 1.5;
+   cameraRot.z = curveStrength * 0.1; // Add banking/roll effect for curves
     
+   // Enhanced camera lateral movement - follows curves better
+    const lookAheadDistance = playerVehicle.velocity.z * 2;
+    const lookAheadInfo = new TrackSegmentInfo(cameraOffset + lookAheadDistance);
+    const avgCurve = (cameraTrackInfo.offset.x + lookAheadInfo.offset.x) / 2;
+    cameraPos.x = playerVehicle.pos.x * 0.7 + avgCurve * 0.3;
+
     // Smooth camera horizontal movement - follows 70% of player's lateral position
-    cameraPos.x = playerVehicle.pos.x * .7;
+    // cameraPos.x = playerVehicle.pos.x * .7;
 
     // === LIGHTING AND ATMOSPHERE SETUP ===
     // Dynamic lighting that rotates with world heading for consistent shadows
@@ -39,9 +55,9 @@ function trackPreRender()
 
     // === TRACK GEOMETRY PROJECTION ===
     // Calculate world positions for track segments (iterate in reverse for proper Z-order)
-    const cameraTrackSegment = cameraTrackInfo.segment;           // Current camera segment index
-    const cameraTrackSegmentPercent = cameraTrackInfo.percent;   // Position within segment (0-1)
-    const turnScale = 2;  // Multiplier for how sharp turns appear
+    const cameraTrackSegment = cameraTrackInfo.segment;           
+    const cameraTrackSegmentPercent = cameraTrackInfo.percent;   
+    const turnScale = 3; // Increased from 2 for more dramatic curves
     
     let x = 0;  // Accumulated horizontal offset
     let v = 0;  // Velocity/rate of horizontal change
@@ -61,13 +77,12 @@ function trackPreRender()
         const s = i < 1 ? 1 - cameraTrackSegmentPercent : 1;
         
         // Create world position for this track segment
-        track[j].pos = track[j].offset.copy();  // Start with track's base offset
+         track[j].pos = track[j].offset.copy();    // Start with track's base offset
         
         // Apply accumulated horizontal curvature
         // This creates the "projection" effect where turns appear curved
-        track[j].pos.x = x += v += turnScale * s * track[j].pos.x;
+         track[j].pos.x = x += v += turnScale * s * track[j].offset.x;
         
-        // Adjust Z position relative to camera for proper depth
         track[j].pos.z -= cameraOffset;
     }
 }
@@ -348,40 +363,81 @@ class TrackSegment
 
         // === PLACE SCENERY OBJECTS ===
         // Helper function to add sprites to this segment
-        const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
-        
-        if (segmentIndex % checkpointTrackSegments == 0) // Checkpoint markers
-        {
-            // Left checkpoint post
-            addSprite(vec3(-width + 100, 0), vec3(800), WHITE, vec3(6, 0), 0);
-            // Right checkpoint post  
-            addSprite(vec3(width - 100, 0), vec3(800), WHITE, vec3(7, 0), 0);
-        }
-        if (segmentIndex == 30) // Starting line banner
-            addSprite(vec3(0, -700, 0), vec3(1300), WHITE, vec3(5, 0), 0);
-        else
-        {
-            // Regular trackside scenery
-            let s = random.float(1200, 2000);        // Random size (favors taller trees)
-            let sideTree = random.bool(.8);   // Place tree more frequently (80% chance)
-            let m = segmentIndex % 2 ? 1 : -1;      // Alternate sides
-            let m2 = sideTree ? m : random.sign();  // Direction for placement
-            let o = (width + (sideTree ? 2000 : random.float(2e5))) * m2;  // Distance from track (increased for side trees)
-            let offset = vec3(o, 0, 0);
+       // === EASY CITY SCENERY SYSTEM ===
+      // === IMPROVED CITY SCENERY SYSTEM ===
+const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
 
-            if (random.bool(.01))  // 1% chance for billboard
-            {
-                // Billboard placement
-                offset = vec3((width + 1200) * random.sign(), 0, 0)  // Increased distance from track
-                addSprite(offset, vec3(800), hsl(0, 0, random.float(.9, 1)), vec3(random.int(8), 2));  // Doubled size from 400 to 800
-            }
-            else
-            {
-                // Use maple trees with random red/yellow foliage
-                const isRed = random.bool(0.5);
-                addSprite(offset, vec3(s * m, s, s), isRed ? hsl(0.95, 0.8, 0.5) : hsl(0.1, 0.8, 0.6), vec3(0, 1));
-            }
-        }
+const BARE_AREA_CHANCE = 0.6;     // 60% empty space (lots of open land)
+const BUILDING_CHANCE = 0.05;     // 5% chance of building (very few buildings)
+const HOUSE_CHANCE = 0.15;        // 15% chance of house (scattered houses)
+const TREE_CHANCE = 0.4;          // 40% chance of tree (lots of trees)
+const SIGN_CHANCE = 0.02;         // 2% chance of sign (rare signs)
+
+
+
+if (segmentIndex % checkpointTrackSegments == 0) // Checkpoint markers
+{
+    // Keep existing checkpoint code
+    addSprite(vec3(-width + 100, 0), vec3(800), WHITE, vec3(6, 0), 0);
+    addSprite(vec3(width - 100, 0), vec3(800), WHITE, vec3(7, 0), 0);
+}
+else if (segmentIndex == 30) // Starting line banner
+{
+    addSprite(vec3(0, -700, 0), vec3(1300), WHITE, vec3(5, 0), 0);
+}
+else
+{
+    // REALISTIC CITY SCENERY GENERATION
+    random.setSeed(segmentIndex); // Consistent random for each segment
+    
+    // Left side of road - only add something if NOT bare area
+if (random.bool(BUILDING_CHANCE)) {
+    // Office/Commercial Building - use different building types
+    const buildingType = random.int(4); // 0,1,2,3 for different buildings
+    const buildingHeight = random.float(1200, 2000);
+    const buildingWidth = random.float(600, 1000);
+    addSprite(vec3(-(width + 1800), 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+}
+else if (random.bool(HOUSE_CHANCE)) {
+    // Residential House - use house tile
+    const houseSize = random.float(400, 700);
+    addSprite(vec3(-(width + 1200), 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+}
+else if (random.bool(TREE_CHANCE)) {
+    // Tree/Park area
+    const treeSize = random.float(600, 1000);
+    addSprite(vec3(-(width + 1000), 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+}
+    
+    // Right side of road - only add something if NOT bare area
+if (!random.bool(BARE_AREA_CHANCE)) {
+    if (random.bool(BUILDING_CHANCE)) {
+        // Office/Commercial Building - use different building types
+        const buildingType = random.int(4); // 0,1,2,3 for different buildings
+        const buildingHeight = random.float(1200, 2000);
+        const buildingWidth = random.float(600, 1000);
+        addSprite(vec3(width + 1800, 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+    }
+    else if (random.bool(HOUSE_CHANCE)) {
+        // Residential House - use house tile
+        const houseSize = random.float(400, 700);
+        addSprite(vec3(width + 1200, 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+    }
+    else if (random.bool(TREE_CHANCE)) {
+        // Tree/Park area
+        const treeSize = random.float(600, 1000);
+        addSprite(vec3(width + 1000, 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+    }
+}
+
+    // Occasional road signs (less frequent)
+    if (random.bool(SIGN_CHANCE)) {
+        const signSide = random.bool() ? 1 : -1;
+        addSprite(vec3((width + 600) * signSide, 0, 0), vec3(400), WHITE, vec3(random.int(8), 2));
+    }
+}
+
+
     }
 }
 
@@ -436,20 +492,17 @@ function buildTrack()
         }
         
         // Generate track geometry for this segment
-        let x = 0;  // Horizontal offset (curves disabled)
-        let ys = 0;  // No hills currently
-        let y = ys;  // Vertical offset
-
-        // Calculate horizontal and vertical offsets based on sine waves
-        /*
-        let x = Math.sin(i*roadGenWaveFrequencyX) * roadGenWaveScaleX;  // Commented: sine wave curves
-        let ys = min(2e3,10/roadGenWaveFrequencyY);  // Commented: hill calculation
-        let y = ys * Math.sin(i*roadGenWaveFrequencyY);  // Commented: sine wave hills
-        */
-        let z = i * trackSegmentLength;  // Z position along track
-        let o = vec3(x, y, z);           // 3D offset for this segment
-        let w = i > trackEnd ? roadGenWidth : roadGenWidth;  // Width (0 after track end)
+        let x = Math.sin(i * roadGenWaveFrequencyX) * roadGenWaveScaleX;  // Sine wave curves
         
+        // ENABLE HILLS - Replace the commented hill code
+        let ys = Math.min(2e3, 10/roadGenWaveFrequencyY);  
+        let y = ys * Math.sin(i * roadGenWaveFrequencyY);   
+        
+        let z = i * trackSegmentLength;  
+        let o = vec3(x, y, z);           
+        let w = i > trackEnd ? 0 : roadGenWidth;  
+
+
         let t = track[i];  // Check if segment already exists (for tapering)
         if (t)
         {
