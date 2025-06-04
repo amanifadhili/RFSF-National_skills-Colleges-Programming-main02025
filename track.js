@@ -116,8 +116,8 @@ function drawRoad(zwrite = 0)
         {
             const normals = [segment1.normal, segment1.normal, segment2.normal, segment2.normal];
             
-            // FIXED: Only 4 passes (ground, road, 2 lane dividers)
-            for(let pass = 0; pass < (zwrite ? 1 : 4); ++pass) // Changed from 5 to 4
+            // Enhanced: 6 passes (ground, road, 2 lane dividers, 2 curbs)
+            for(let pass = 0; pass < (zwrite ? 1 : 6); ++pass) // Changed from 4 to 6
             {
                 let color, offset, laneOffset = 0;
                 
@@ -135,17 +135,33 @@ function drawRoad(zwrite = 0)
                 }
                 else if (pass == 2)
                 {
-                    // PASS 3: Left lane divider (between left and center lane)
+                    // PASS 3: Left lane divider
                     color = segment1.colorLine;
                     offset = 15;
-                    laneOffset = -segment1.width / 3; // 1/3 to the left
+                    laneOffset = -segment1.width / 3;
                 }
                 else if (pass == 3)
                 {
-                    // PASS 4: Right lane divider (between center and right lane)  
+                    // PASS 4: Right lane divider
                     color = segment1.colorLine;
                     offset = 15;
-                    laneOffset = segment1.width / 3; // 1/3 to the right
+                    laneOffset = segment1.width / 3;
+                }
+                else if (pass == 4)
+                {
+                    // PASS 5: Left road curb (black and white stripes)
+                    const curbPattern = (segmentIndex % 6 < 3) ? WHITE : BLACK;
+                    color = curbPattern;
+                    offset = 25; // Curb width
+                    laneOffset = -segment1.width - 30; // Outside left edge
+                }
+                else if (pass == 5)
+                {
+                    // PASS 6: Right road curb (black and white stripes)
+                    const curbPattern = (segmentIndex % 6 < 3) ? WHITE : BLACK;
+                    color = curbPattern;
+                    offset = 25; // Curb width
+                    laneOffset = segment1.width + 30; // Outside right edge
                 }
 
                 // Create quad vertices
@@ -158,7 +174,7 @@ function drawRoad(zwrite = 0)
                     point2a = vec3(p2.x + offset, p2.y, p2.z);
                     point2b = vec3(p2.x - offset, p2.y, p2.z);
                 } else {
-                    // Lane dividers - positioned correctly
+                    // Lane dividers and curbs - positioned correctly
                     point1a = vec3(p1.x + laneOffset + offset, p1.y, p1.z);
                     point1b = vec3(p1.x + laneOffset - offset, p1.y, p1.z);
                     point2a = vec3(p2.x + laneOffset + offset, p2.y, p2.z);
@@ -175,6 +191,7 @@ function drawRoad(zwrite = 0)
     glRender();
     glSetDepthTest();
 }
+
 
 
 /**
