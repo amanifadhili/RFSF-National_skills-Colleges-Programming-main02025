@@ -430,22 +430,92 @@ if (aspect > .75) {
     drawHUDText('SPEED', vec3(.85, .055), .025, hsl(.0, .8, .8), .002, BLACK, undefined, 'center', 300);
     drawHUDText(mph + ' KPH', vec3(.85, .095), .045, hsl(.0, .9, .9), .003, hsl(.0, .8, .3), undefined, 'center', 700, 'italic');
 }
-    if (!attractMode && !gameOverTimer.isSet()) {
-    // Score display in top-left
-    drawHUDRect(vec3(.15, .08), vec3(.20, .10), hsl(.3, .6, .2, .8), .003, hsl(.3, .6, .6));
-    drawHUDText('SCORE', vec3(.15, .055), .025, hsl(.3, .8, .8), .002, BLACK, undefined, 'center', 300);
-    drawHUDText(Math.floor(playerScore), vec3(.15, .095), .045, hsl(.3, .9, .9), .003, hsl(.3, .6, .3), undefined, 'center', 700, 'italic');
+// score, distance, and level:
+if (!attractMode && !gameOverTimer.isSet()) {
+    // Create a unified stats panel in the top-left
+    const panelWidth = .45;
+    const panelHeight = .22;
+    const panelX = .18;
+    const panelY = .15;
     
-    // Distance display below score
-    drawHUDRect(vec3(.15, .19), vec3(.20, .10), hsl(.6, .6, .2, .8), .003, hsl(.6, .6, .6));
-    drawHUDText('DISTANCE', vec3(.15, .165), .025, hsl(.6, .8, .8), .002, BLACK, undefined, 'center', 300);
-    drawHUDText(Math.floor(playerDistance) + 'm', vec3(.15, .205), .045, hsl(.6, .9, .9), .003, hsl(.6, .6, .3), undefined, 'center', 700, 'italic');
+    // Main panel background with gradient-like effect
+    drawHUDRect(vec3(panelX, panelY), vec3(panelWidth, panelHeight), 
+                hsl(.6, .4, .15, .85), .004, hsl(.6, .6, .4));
     
-    // Level display
-    drawHUDRect(vec3(.15, .30), vec3(.20, .10), hsl(.15, .6, .2, .8), .003, hsl(.15, .6, .6));
-    drawHUDText('LEVEL', vec3(.15, .275), .025, hsl(.15, .8, .8), .002, BLACK, undefined, 'center', 300);
-    drawHUDText(currentLevel, vec3(.15, .315), .045, hsl(.15, .9, .9), .003, hsl(.15, .6, .3), undefined, 'center', 700, 'italic');
+    // Panel header
+    drawHUDRect(vec3(panelX, panelY - panelHeight * 0.38), 
+                vec3(panelWidth, .04), hsl(.6, .5, .25, .9), 0);
+    drawHUDText('DRIVER STATS', vec3(panelX, panelY - panelHeight * 0.38), 
+                .03, hsl(.6, .2, .9), .002, BLACK, undefined, 'center', 700);
+    
+    // Decorative corner accents
+    for(let i = 4; i--;) {
+        let cornerX = panelX - panelWidth * 0.45 + (i % 2) * panelWidth * 0.9;
+        let cornerY = panelY - panelHeight * 0.45 + Math.floor(i/2) * panelHeight * 0.9;
+        let cornerColor = hsl(.6, .6, .5, .6);
+        
+        // L-shaped corner accents
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.02, .002), cornerColor, 0);
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .02), cornerColor, 0);
+    }
+    
+    // Score section with icon and value
+    const scoreY = panelY - panelHeight * 0.2;
+    drawHUDText('⭐', vec3(panelX - panelWidth * 0.35, scoreY), 
+                .035, hsl(.15, .9, .7), 0, undefined, undefined, 'center', 400);
+    drawHUDText('SCORE', vec3(panelX - panelWidth * 0.15, scoreY), 
+                .025, hsl(.15, .7, .8), .001, BLACK, undefined, 'left', 500);
+    drawHUDText(Math.floor(playerScore).toLocaleString(), vec3(panelX + panelWidth * 0.50, scoreY), 
+                .035, hsl(.15, .9, .9), .002, hsl(.15, .8, .2, .5), undefined, 'right', 700);
+    
+    // Horizontal separator
+    drawHUDRect(vec3(panelX, panelY), 
+                vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
+    
+    // Distance section with icon and value
+    const distanceY = panelY + panelHeight * 0.1;
+    drawHUDText('🏁', vec3(panelX - panelWidth * 0.35, distanceY), 
+                .035, hsl(.6, .9, .7), 0, undefined, undefined, 'center', 400);
+    drawHUDText('DISTANCE', vec3(panelX - panelWidth * 0.15, distanceY), 
+                .025, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 500);
+    
+    // Animate distance counter for a more dynamic feel
+    const displayDistance = Math.floor(playerDistance);
+    const distanceText = displayDistance.toLocaleString() + 'm';
+    drawHUDText(distanceText, vec3(panelX + panelWidth * 0.5, distanceY), 
+                .035, hsl(.6, .9, .9), .002, hsl(.6, .8, .2, .5), undefined, 'right', 700);
+    
+    // Horizontal separator
+    drawHUDRect(vec3(panelX, panelY + panelHeight * 0.2), 
+                vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
+    
+    // Level section with icon and value
+    const levelY = panelY + panelHeight * 0.3;
+    drawHUDText('🏆', vec3(panelX - panelWidth * 0.35, levelY), 
+                .035, hsl(.3, .9, .7), 0, undefined, undefined, 'center', 400);
+    drawHUDText('LEVEL', vec3(panelX - panelWidth * 0.15, levelY), 
+                .025, hsl(.3, .7, .8), .001, BLACK, undefined, 'left', 500);
+    
+    // Add a subtle pulse effect to the level number
+    const levelPulse = Math.sin(time * 3) * .005;
+    const levelSize = .04 + levelPulse;
+    drawHUDText(currentLevel.toString(), vec3(panelX + panelWidth * 0.50, levelY), 
+                levelSize, hsl(.3, .9, .9), .002, hsl(.3, .8, .2, .5), undefined, 'right', 800);
+    
+    // Level progress bar
+    const nextLevelDistance = currentLevel * 500;
+    const prevLevelDistance = (currentLevel - 1) * 500;
+    const levelProgress = (playerDistance - prevLevelDistance) / (nextLevelDistance - prevLevelDistance);
+    
+    // Progress bar background
+    drawHUDRect(vec3(panelX, panelY + panelHeight * 0.4), 
+                vec3(panelWidth - .04, .015), hsl(.3, .2, .2, .6), .001, hsl(.3, .3, .4, .4));
+    
+    // Progress bar fill
+    drawHUDRect(vec3(panelX - (panelWidth - .04) * (0.5 - levelProgress/2), panelY + panelHeight * 0.4), 
+                vec3((panelWidth - .04) * levelProgress, .015), hsl(.3, .8, .5 + Math.sin(time * 4) * .1), 0);
 }
+
     // Draw modern radio control panel
     // if (!attractMode && !gameOverTimer.isSet()) {
     //     // call to drawRadioPanel function
@@ -457,8 +527,8 @@ if (aspect > .75) {
     // Draw bonus messages 
     drawBonusMessages();
     // Draw all HUD buttons
-    for(const b of HUDButtons)
-        b.draw();
+    // for(const b of HUDButtons)
+    //     b.draw();
 }
 
 // // Draw modern radio control panel with animations
@@ -500,65 +570,65 @@ if (aspect > .75) {
 //     }
 // }
 
-// Enhanced HUD Button class with modern styling
-class HUDButton
-{
-    constructor(text, pos, size, onClick, color = WHITE, backgroundColor = hsl(.6, 1, .2))
-    {
-        this.text = text;
-        this.pos = pos;
-        this.size = size;
-        this.onClick = onClick;
-        this.color = color;
-        this.backgroundColor = backgroundColor;
-        this.hoverTime = 0;
-    }
+// HUD Button class with modern styling
+// class HUDButton
+// {
+//     constructor(text, pos, size, onClick, color = WHITE, backgroundColor = hsl(.6, 1, .2))
+//     {
+//         this.text = text;
+//         this.pos = pos;
+//         this.size = size;
+//         this.onClick = onClick;
+//         this.color = color;
+//         this.backgroundColor = backgroundColor;
+//         this.hoverTime = 0;
+//     }
     
-    draw()
-    {
-        let pos = this.pos.copy();
-        let backgroundColor = this.backgroundColor;
-        let color = this.color;
-        let outlineColor = WHITE;
+//     draw()
+//     {
+//         let pos = this.pos.copy();
+//         let backgroundColor = this.backgroundColor;
+//         let color = this.color;
+//         let outlineColor = WHITE;
         
-        // Enhanced active button styling
-        if (this.musicTrack == radioMusic) {
-            backgroundColor = hsl(.3, .9, .5 + .2 * Math.sin(time * 4));
-            color = WHITE;
-            outlineColor = hsl(.3, .8, .8);
+//         // Enhanced active button styling
+//         if (this.musicTrack == radioMusic) {
+//             backgroundColor = hsl(.3, .9, .5 + .2 * Math.sin(time * 4));
+//             color = WHITE;
+//             outlineColor = hsl(.3, .8, .8);
             
-            // Active button glow effect
-            drawHUDRect(pos, this.size.scale(1.2), hsl(.3, .6, .3, .3), 0);
-        }
+//             // Active button glow effect
+//             drawHUDRect(pos, this.size.scale(1.2), hsl(.3, .6, .3, .3), 0);
+//         }
         
-        // Button with rounded corners effect (simulated)
-        backgroundColor && drawHUDRect(pos, this.size, backgroundColor, .003, outlineColor);
+//         // Button with rounded corners effect (simulated)
+//         backgroundColor && drawHUDRect(pos, this.size, backgroundColor, .003, outlineColor);
         
-        // Button text with better positioning
-        pos.y += this.size.y * .02;
-        drawHUDText(this.text, pos, this.size.y * .7, color, .002, BLACK, undefined, 'center', 600, undefined, this.size.x * .9);
+//         // Button text with better positioning
+//         pos.y += this.size.y * .02;
+//         drawHUDText(this.text, pos, this.size.y * .7, color, .002, BLACK, undefined, 'center', 600, undefined, this.size.x * .9);
         
-        // Handle mouse interaction with hover effects
-        {
-            pos = HUDstickToSides(pos);
+//         // Handle mouse interaction with hover effects
+//         {
+//             pos = HUDstickToSides(pos);
             
-            const size = this.size.scale(mainCanvasSize.y);
-            const p1 = pos.multiply(mainCanvasSize);
-            const p2 = mousePos.multiply(mainCanvasSize);
+//             const size = this.size.scale(mainCanvasSize.y);
+//             const p1 = pos.multiply(mainCanvasSize);
+//             const p2 = mousePos.multiply(mainCanvasSize);
             
-            // Check for hover
-            if (isOverlapping(p1, size, p2)) {
-                this.hoverTime = time;
-                // Hover glow effect
-                drawHUDRect(this.pos, this.size.scale(1.1), hsl(.15, .4, .4, .2), 0);
-            }
+//             // Check for hover
+//             if (isOverlapping(p1, size, p2)) {
+//                 this.hoverTime = time;
+//                 // Hover glow effect
+//                 drawHUDRect(this.pos, this.size.scale(1.1), hsl(.15, .4, .4, .2), 0);
+//             }
             
-            if (this.onClick && mouseWasPressed(0))
-                if (isOverlapping(p1, size, p2))
-                    this.onClick();
-        }
-    }
-}
+//             if (this.onClick && mouseWasPressed(0))
+//                 if (isOverlapping(p1, size, p2))
+//                     this.onClick();
+//         }
+//     }
+// }
 
 // Adjust UI positioning for different screen aspect ratios
 function HUDstickToSides(pos)
@@ -753,7 +823,7 @@ function updateBonusMessages() {
 function drawBonusMessages() {
     for (const msg of bonusMessages) {
         let color = hsl(.15, .9, .7, msg.alpha);
-        drawHUDText(`${msg.message} +${msg.points}`, msg.pos, .05, color, .004, hsl(0, 0, 0, msg.alpha * 0.5), undefined, 'center', 700);
+        drawHUDText(`${msg.message} `, msg.pos, .05, color, .004, hsl(0, 0, 0, msg.alpha * 0.5), undefined, 'center', 700);
     }
 }
 //function to reset HUD values
@@ -778,8 +848,11 @@ function checkDistanceMilestones() {
     // Check for distance milestones every 100m
     if (playerDistance % 100 === 0 && playerDistance > 0) {
         const bonus = 500 * currentLevel;
+        
+        // Changed message format to not include the bonus points
         addBonus(bonus, `${playerDistance}m MILESTONE`, vec3(.5, .4));
     }
+
 }
 
 //  function to award bonus points
