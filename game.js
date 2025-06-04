@@ -16,6 +16,11 @@ const engineVersion = '0.1.0';              // Current version of the game engin
 const engineVersionDate = '2023-10-01';     // Release date of current version
 const engineName = 'RTB-competition';       // Name identifier for the racing game engine
 
+
+// hill-specific settings
+const hillIntensity = 1.5;      // How steep hills can be (1.0 = normal, 2.0 = very steep)
+const hillFrequency = 0.02;     // How often hills occur (0.01 = rare, 0.05 = frequent)
+
 // Game mode settings
 const testDrive = 0;        // Enable test drive mode (0 = normal game, 1 = test mode)
 const enableTexture = 1;    // Enable texture rendering (0 = disabled, 1 = enabled)
