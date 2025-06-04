@@ -2,8 +2,8 @@
 
 // Global variables for HUD management
 let HUDButtons = [];
-let radioMusic = -1;
-let radioBoxAnimation = 0;
+// let radioMusic = -1;
+// let radioBoxAnimation = 0;
 let playerScore = 0;
 let playerDistance = 0;
 let currentLevel = 1;
@@ -23,27 +23,27 @@ let bonusMessages = [];
 function initHUD()
 {
     // Create sleek radio panel header
-    HUDButtons.push(new HUDButton('♫ RADIO', vec3(.15,.06), vec3(.18,.05), 0, hsl(.55, .8, .9), hsl(.55, .6, .2, .9)));
+    // HUDButtons.push(new HUDButton('♫ RADIO', vec3(.15,.06), vec3(.18,.05), 0, hsl(.55, .8, .9), hsl(.55, .6, .2, .9)));
     
     // Create radio station buttons in horizontal layout
-    for(let i = 4; i--;) {
-        let buttonText = i == 3 ? 'OFF' : `FM ${i + 1}`;
+    // for(let i = 4; i--;) {
+    //     let buttonText = i == 3 ? 'OFF' : `FM ${i + 1}`;
         
-        // Horizontal layout with better spacing
-        let buttonPos = vec3(.06 + i * .045, .13);
+    //     // Horizontal layout with better spacing
+    //     let buttonPos = vec3(.06 + i * .045, .13);
         
-        let b = new HUDButton(buttonText, buttonPos, vec3(.04, .035), undefined, WHITE, hsl(.15, .8, .4));
-        b.musicTrack = i == 3 ? -1 : i;
+    //     let b = new HUDButton(buttonText, buttonPos, vec3(.04, .035), undefined, WHITE, hsl(.15, .8, .4));
+    //     b.musicTrack = i == 3 ? -1 : i;
         
-        b.onClick = o => {
-            sound_click.play();
-            playMusicTrack(i);
-            radioMusic = b.musicTrack;
-            radioBoxAnimation = time; // Trigger animation
-        }
+    //     b.onClick = o => {
+    //         sound_click.play();
+    //         playMusicTrack(i);
+    //         radioMusic = b.musicTrack;
+    //         radioBoxAnimation = time; // Trigger animation
+    //     }
         
-        HUDButtons.push(b);
-    }
+    //     HUDButtons.push(b);
+    // }
 }
 
 // Main HUD rendering function
@@ -445,9 +445,10 @@ if (aspect > .75) {
     drawHUDText(currentLevel, vec3(.15, .315), .045, hsl(.15, .9, .9), .003, hsl(.15, .6, .3), undefined, 'center', 700, 'italic');
 }
     // Draw modern radio control panel
-    if (!attractMode && !gameOverTimer.isSet()) {
-        drawRadioPanel();
-    }
+    // if (!attractMode && !gameOverTimer.isSet()) {
+    //     // call to drawRadioPanel function
+    //     // drawRadioPanel();
+    // }
      // Draw level transition 
     drawLevelTransition();
     
@@ -458,44 +459,44 @@ if (aspect > .75) {
         b.draw();
 }
 
-// Draw modern radio control panel with animations
-function drawRadioPanel() {
-    // Animated glow effect
-    let glowIntensity = .3 + .2 * Math.sin(time * 3);
-    let animPulse = radioBoxAnimation > 0 ? Math.max(0, 1 - (time - radioBoxAnimation) * 2) : 0;
+// // Draw modern radio control panel with animations
+// function drawRadioPanel() {
+//     // Animated glow effect
+//     let glowIntensity = .3 + .2 * Math.sin(time * 3);
+//     let animPulse = radioBoxAnimation > 0 ? Math.max(0, 1 - (time - radioBoxAnimation) * 2) : 0;
     
-    // Main panel background with gradient effect
-    drawHUDRect(vec3(.15, .095), vec3(.22, .12), hsl(.55, .6, .15, .9), .004, hsl(.55, .8, .4 + glowIntensity * .3));
+//     // Main panel background with gradient effect
+//     drawHUDRect(vec3(.15, .095), vec3(.22, .12), hsl(.55, .6, .15, .9), .004, hsl(.55, .8, .4 + glowIntensity * .3));
     
-    // Inner panel for buttons
-    drawHUDRect(vec3(.15, .13), vec3(.20, .05), hsl(.55, .4, .1, .8), .002, hsl(.55, .6, .3));
+//     // Inner panel for buttons
+//     drawHUDRect(vec3(.15, .13), vec3(.20, .05), hsl(.55, .4, .1, .8), .002, hsl(.55, .6, .3));
     
-    // Animated corner accents
-    for(let i = 4; i--;) {
-        let corner = vec3(.05 + (i % 2) * .20, .04 + Math.floor(i/2) * .11);
-        let accentColor = hsl(.55 + i * .1, .8, .6 + animPulse * .4, .6);
-        drawHUDRect(corner, vec3(.01, .01), accentColor, 0);
-    }
+//     // Animated corner accents
+//     for(let i = 4; i--;) {
+//         let corner = vec3(.05 + (i % 2) * .20, .04 + Math.floor(i/2) * .11);
+//         let accentColor = hsl(.55 + i * .1, .8, .6 + animPulse * .4, .6);
+//         drawHUDRect(corner, vec3(.01, .01), accentColor, 0);
+//     }
     
-    // Status indicator
-    if (radioMusic >= 0) {
-        let statusColor = hsl(.3, .8, .7 + .3 * Math.sin(time * 4));
-        drawHUDRect(vec3(.25, .06), vec3(.008, .008), statusColor, 0);
+//     // Status indicator
+//     if (radioMusic >= 0) {
+//         let statusColor = hsl(.3, .8, .7 + .3 * Math.sin(time * 4));
+//         drawHUDRect(vec3(.25, .06), vec3(.008, .008), statusColor, 0);
         
-        // Now playing text with scroll effect
-        let trackName = musicTrackNames[radioMusic];
-        let scrollOffset = (time * .05) % 1;
-        drawHUDText(`♪ ${trackName}`, vec3(.15, .175), .025, hsl(.55, .8, .9), .002, BLACK, undefined, 'center', 300, 'italic');
-    }
+//         // Now playing text with scroll effect
+//         let trackName = musicTrackNames[radioMusic];
+//         let scrollOffset = (time * .05) % 1;
+//         drawHUDText(`♪ ${trackName}`, vec3(.15, .175), .025, hsl(.55, .8, .9), .002, BLACK, undefined, 'center', 300, 'italic');
+//     }
     
-    // Signal strength bars animation
-    for(let i = 5; i--;) {
-        let barHeight = (.02 + i * .008) * (1 + .3 * Math.sin(time * 2 + i));
-        let barColor = hsl(.3, .8, .4 + i * .1);
-        let barPos = vec3(.26 + i * .008, .12);
-        drawHUDRect(barPos, vec3(.005, barHeight), barColor, 0);
-    }
-}
+//     // Signal strength bars animation
+//     for(let i = 5; i--;) {
+//         let barHeight = (.02 + i * .008) * (1 + .3 * Math.sin(time * 2 + i));
+//         let barColor = hsl(.3, .8, .4 + i * .1);
+//         let barPos = vec3(.26 + i * .008, .12);
+//         drawHUDRect(barPos, vec3(.005, barHeight), barColor, 0);
+//     }
+// }
 
 // Enhanced HUD Button class with modern styling
 class HUDButton
@@ -622,10 +623,12 @@ function updateHUDValues() {
     
     // Update distance based on player position (convert to meters)
     if (playerVehicle) {
-        playerDistance = Math.floor(playerVehicle.pos.z / 100);
+
+        const startingPosition = 2000; // This is the initial z position of the player
+        playerDistance = Math.floor((playerVehicle.pos.z - startingPosition) / 100);
         
         // Update score based on speed and distance
-        const speed = playerVehicle.velocity.z;
+       const speed = playerVehicle.velocity.z;
         scoreMultiplier = clamp(speed / 100, 0.5, 2);
         playerScore += scoreMultiplier;
         
