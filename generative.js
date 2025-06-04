@@ -241,6 +241,21 @@ function generateTetures()
 
         setupContext(5,4);
         drawWarehouse();
+
+
+
+       // Add obstacle textures 
+    setupContext(1,3);
+    drawTrafficCone();
+    
+    setupContext(2,3);
+    drawPothole();
+    
+    setupContext(3,3);
+    drawBarrier();
+    
+    setupContext(4,3);
+    drawOilSpill();
     }
 
     // =============================================================================
@@ -1020,4 +1035,116 @@ function generateTetures()
         rect(0.5, 0.9, 0.4, 0.2);
     }
 
+/**
+     * Draws traffic cone obstacle
+     */
+    function drawTrafficCone()
+    {
+        // Cone base (black)
+        color(BLACK);
+        rect(0.5, 0.8, 0.6, 0.2);
+        
+        // Cone body (orange)
+        color(hsl(0.08, 1, 0.5)); // Orange
+        polygon(3, 0.5, 0.5, 0.35, 0); // Triangle for cone shape
+        
+        // White reflective stripes
+        color(WHITE);
+        rect(0.5, 0.4, 0.5, 0.05);
+        rect(0.5, 0.6, 0.4, 0.05);
+        
+        // Cone tip
+        color(hsl(0.08, 1, 0.6)); // Lighter orange
+        circle(0.5, 0.2, 0.08);
+    }
+    
+    /**
+     * Draws pothole obstacle
+     */
+function drawPothole()
+{
+    // Bright warning border (high contrast)
+    color(YELLOW);
+    circle(0.5, 0.5, 0.45);
+    
+    // Secondary warning ring
+    color(hsl(0.08, 1, 0.5)); // Bright orange
+    circle(0.5, 0.5, 0.42);
+    
+    // Pothole outer rim (light gray)
+    color(hsl(0, 0, 0.7)); // Very light gray
+    circle(0.5, 0.5, 0.38);
+    
+    // Pothole inner (medium gray for contrast)
+    color(hsl(0, 0, 0.3)); 
+    circle(0.5, 0.5, 0.3);
+    
+    // Pothole center (darkest)
+    color(hsl(0, 0, 0.1));
+    circle(0.5, 0.5, 0.2);
+    
+    // Bright reflective water puddle effect
+    color(hsl(0.55, 0.8, 0.8, 0.7)); // Bright cyan water
+    circle(0.45, 0.45, 0.15);
+    
+    // Enhanced warning markers (larger and brighter)
+    color(RED);
+    for(let i = 8; i--;) {
+        let angle = i/8 * PI * 2;
+        let x = 0.5 + Math.cos(angle) * 0.5;
+        let y = 0.5 + Math.sin(angle) * 0.5;
+        rect(x, y, 0.12, 0.04); // Large red warning strips
+    }
+    
+    // Flashing effect simulation (alternating bright spots)
+    color(WHITE);
+    for(let i = 4; i--;) {
+        let angle = i/4 * PI * 2 + 0.4;
+        let x = 0.5 + Math.cos(angle) * 0.35;
+        let y = 0.5 + Math.sin(angle) * 0.35;
+        circle(x, y, 0.06); // Bright white highlights
+    }
+}
+    /**
+     * Draws road barrier
+     */
+    function drawBarrier()
+    {
+        // Barrier base (concrete gray)
+        color(hsl(0, 0, 0.7));
+        rect(0.5, 0.7, 0.8, 0.4);
+        
+        // Red and white stripes
+        for(let i = 4; i--;) {
+            color(i % 2 ? RED : WHITE);
+            rect(0.2 + i * 0.15, 0.5, 0.12, 0.6);
+        }
+        
+        // Barrier posts
+        color(hsl(0, 0, 0.5));
+        rect(0.2, 0.5, 0.08, 0.8);
+        rect(0.8, 0.5, 0.08, 0.8);
+    }
+    
+    /**
+     * Draws oil spill hazard
+     */
+    function drawOilSpill()
+    {
+        // Oil spill (dark, irregular shape)
+        color(hsl(0.7, 0.3, 0.1)); // Dark purple-black
+        
+        // Create irregular oil spill shape
+        for(let i = 12; i--;) {
+            let angle = i/12 * PI * 2;
+            let radius = 0.2 + Math.sin(i) * 0.1;
+            let x = 0.5 + Math.cos(angle) * radius;
+            let y = 0.5 + Math.sin(angle) * radius;
+            circle(x, y, 0.08 + Math.sin(i*2) * 0.03);
+        }
+        
+        // Oil shine effect
+        color(hsl(0.7, 0.5, 0.3, 0.5)); // Semi-transparent shine
+        circle(0.5, 0.5, 0.15);
+    }
 }
