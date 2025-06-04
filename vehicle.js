@@ -35,6 +35,9 @@ class Vehicle {
         this.turn = 0; // Current turning angle (direction change)
         this.wheelTurn = 1; // Rotation of wheels for visual effect
         this.collisionSize = vec3(240, 200, 350); // Bounding box for collision detection
+        this.laneChangeTimer = randInt(300, 600); // Time until next lane change
+        this.targetLane = this.lane; // Which lane car wants to be in  
+        this.laneChangeSpeed = 0.02; // How fast to change lanes
     }
 
     update() {
@@ -67,6 +70,27 @@ class Vehicle {
         let playerDelta = this.pos.z - playerVehicle.pos.z;
         if (playerDelta > 50000 || playerDelta < -2000)
             this.destroyed = 0; // Mark for deletion
+         this.destroyed = 0; // Mark for deletion
+
+        // ADD THESE 15 LINES:
+        // Simple lane switching logic
+        this.laneChangeTimer--;
+
+        // Decide to change lanes occasionally  
+        if (this.laneChangeTimer <= 0) {
+            this.targetLane = randInt(2); // Pick random lane (0 or 1)
+            this.laneChangeTimer = randInt(400, 800); // Reset timer
+        }
+
+        // Smoothly move toward target lane
+        if (this.lane < this.targetLane) {
+            this.lane += this.laneChangeSpeed; // Move right
+        } else if (this.lane > this.targetLane) {
+            this.lane -= this.laneChangeSpeed; // Move left  
+        }
+
+        // Keep lane in bounds
+        this.lane = Math.max(0, Math.min(1, this.lane));
     }
 
     draw() {
