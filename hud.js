@@ -236,179 +236,181 @@ if (startCountdownTimer.active() || startCountdown > 0) {
         }
     }
 }
-else {
-    // Game timer display (existing code continues...)
- if (gameOverTimer.isSet()) {
-    // Enhanced Game Over screen with dramatic effects
-    const baseColor = hsl(.0, .8, .8); // Red-tinted white
-    const pulseSpeed = 3;
-    const s1 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed)));
-    const s2 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed + PI/2)));
-    
-    // Screen darkening overlay with pulsing effect
-    let overlayAlpha = .4 + Math.sin(time * 2) * .1;
-    let overlayColor = BLACK.copy();
-    overlayColor.a = overlayAlpha;
-    drawHUDRect(vec3(.5, .5), vec3(1.2, 1.2), overlayColor, 0);
-    
-    // Animated background elements - falling debris effect
-    for(let i = 8; i--;) {
-        let debrisX = .2 + (i * .1) + Math.sin(time + i) * .05;
-        let debrisY = ((time * .3 + i * .5) % 1.5) - .25; // Falling effect
-        let debrisSize = .02 + Math.sin(time * 4 + i) * .01;
-        let debrisColor = hsl(.0, .6, .3 + Math.sin(time * 2 + i) * .2, .6);
-        drawHUDRect(vec3(debrisX, debrisY), vec3(debrisSize, debrisSize), debrisColor, 0);
-    }
-    
-    // Main background panel with glitch effect
-    let panelGlitch = Math.sin(time * 15) * .02;
-    let panelColor = hsl(.0, .7, .15, .8);
-    let panelBorder = hsl(.0, .9, .6);
-    drawHUDRect(vec3(.5 + panelGlitch, .15), vec3(.6, .25), panelColor, .008, panelBorder);
-    
-    // Animated corner warning indicators
-    for(let i = 4; i--;) {
-        let cornerX = .15 + (i % 2) * .7;
-        let cornerY = .05 + Math.floor(i/2) * .2;
-        let warningPulse = Math.sin(time * 8 + i * 2) * .5 + .5;
-        let warningColor = hsl(.0, .9, .7, warningPulse * .8);
-        let warningSize = .03 + warningPulse * .02;
-        drawHUDRect(vec3(cornerX, cornerY), vec3(warningSize, warningSize), warningColor, 0);
-        
-        // Warning triangle effect (simulated with smaller squares)
-        for(let j = 3; j--;) {
-            let triX = cornerX + (j - 1) * .015;
-            let triY = cornerY - .02 + j * .01;
-            let triColor = WHITE.copy();
-            triColor.a = warningPulse * .6;
-            drawHUDRect(vec3(triX, triY), vec3(.008, .008), triColor, 0);
-        }
-    }
-    
-    //  "GAME" text with glitch and glow
-    let gameGlitch = Math.random() > .9 ? Math.random() * .01 - .005 : 0;
-    let gameColor = baseColor.copy();
-    gameColor.a = .9 + Math.sin(time * 4) * .1;
-    
-    // Multiple text layers for glow effect
-    for(let layer = 3; layer--;) {
-        let offset = layer * .003;
-        let layerColor = layer === 0 ? gameColor : hsl(.0, .8, .4, .3);
-        drawHUDText('GAME', vec3(.5 + gameGlitch + offset, .1 + offset), .15 + s1, layerColor, .008, BLACK, undefined, 'center', 900, 'italic', .5, 0);
-    }
-    
-    // "OVER!" text with shake effect
-    let overShake = Math.sin(time * 12) * .005;
-    let overColor = hsl(.0, .9, .9);
-    overColor.a = .9 + Math.sin(time * 6) * .1;
-    
-    // Multiple text layers for dramatic effect
-    for(let layer = 3; layer--;) {
-        let offset = layer * .004;
-        let layerColor = layer === 0 ? overColor : hsl(.0, .7, .3, .4);
-        drawHUDText('OVER!', vec3(.5 + overShake + offset, .2 + offset), .18 + s2, layerColor, .01, BLACK, undefined, 'center', 900, 'italic', .5, 0);
-    }
-    
-        // Animated scan lines effect
-    for(let i = 5; i--;) {
-        let scanY = .05 + i * .05 + (time * .2) % .3;
-        let scanAlpha = Math.sin(scanY * 20 + time * 10) * .3 + .3;
-        let scanColor = hsl(.0, .5, .8, scanAlpha * .2);
-        drawHUDRect(vec3(.5, scanY), vec3(.8, .005), scanColor, 0);
-    }
-    
-    // Pulsing restart hint
-    let hintAlpha = Math.sin(time * 2) * .3 + .7;
-    let hintColor = WHITE.copy();
-    hintColor.a = hintAlpha;
-    drawHUDText('Press R to Restart', vec3(.5, .35), .04, hintColor, .003, BLACK, undefined, 'center', 400, 'italic');
-}
 
-  else {
-    // Enhanced checkpoint timer with modern UI
-    const timeLeft = checkpointTimeLeft | 0;
-    const isUrgent = checkpointTimeLeft < 3;
-    const isWarning = checkpointTimeLeft < 10;
+// Game over screen with dramatic effects
+// else {
+//     // Game timer display
+//  if (gameOverTimer.isSet()) {
+//     // Enhanced Game Over screen with dramatic effects
+//     const baseColor = hsl(.0, .8, .8); // Red-tinted white
+//     const pulseSpeed = 3;
+//     const s1 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed)));
+//     const s2 = .06 * (1 - Math.abs(Math.sin(time * pulseSpeed + PI/2)));
     
-    // Dynamic colors based on urgency
-    const bgColor = isUrgent ? hsl(.0, .8, .2, .9) : 
-                   isWarning ? hsl(.15, .8, .2, .9) : 
-                   hsl(.6, .6, .2, .8);
-    const textColor = isUrgent ? hsl(.0, .9, .9) : 
-                     isWarning ? hsl(.15, .9, .8) : 
-                     hsl(.6, .8, .9);
-    const borderColor = isUrgent ? hsl(.0, .9, .6) : 
-                       isWarning ? hsl(.15, .9, .6) : 
-                       hsl(.6, .8, .6);
+//     // Screen darkening overlay with pulsing effect
+//     let overlayAlpha = .4 + Math.sin(time * 2) * .1;
+//     let overlayColor = BLACK.copy();
+//     overlayColor.a = overlayAlpha;
+//     drawHUDRect(vec3(.5, .5), vec3(1.2, 1.2), overlayColor, 0);
     
-    // Pulsing effect for urgency
-    let pulseIntensity = isUrgent ? Math.sin(time * 8) * .3 + .7 : 
-                        isWarning ? Math.sin(time * 4) * .2 + .8 : 1;
+//     // Animated background elements - falling debris effect
+//     for(let i = 8; i--;) {
+//         let debrisX = .2 + (i * .1) + Math.sin(time + i) * .05;
+//         let debrisY = ((time * .3 + i * .5) % 1.5) - .25; // Falling effect
+//         let debrisSize = .02 + Math.sin(time * 4 + i) * .01;
+//         let debrisColor = hsl(.0, .6, .3 + Math.sin(time * 2 + i) * .2, .6);
+//         drawHUDRect(vec3(debrisX, debrisY), vec3(debrisSize, debrisSize), debrisColor, 0);
+//     }
     
-    // Main timer panel with dynamic sizing
-    let panelSize = vec3(.25, .12);
-    if (isUrgent) panelSize = panelSize.scale(1 + Math.sin(time * 6) * .1);
+//     // Main background panel with glitch effect
+//     let panelGlitch = Math.sin(time * 15) * .02;
+//     let panelColor = hsl(.0, .7, .15, .8);
+//     let panelBorder = hsl(.0, .9, .6);
+//     drawHUDRect(vec3(.5 + panelGlitch, .15), vec3(.6, .25), panelColor, .008, panelBorder);
     
-    drawHUDRect(vec3(.5, .12), panelSize, bgColor, .006, borderColor);
-    
-    // Progress bar showing time remaining (visual indicator)
-    let maxTime = startCheckpointTime; // Use initial checkpoint time as max
-    let progress = Math.max(0, checkpointTimeLeft / maxTime);
-    let progressWidth = .20 * progress;
-    let progressColor = isUrgent ? hsl(.0, .8, .5) : 
-                       isWarning ? hsl(.15, .8, .5) : 
-                       hsl(.3, .8, .5);
-    
-    drawHUDRect(vec3(.5, .16), vec3(progressWidth, .02), progressColor, 0);
-    drawHUDRect(vec3(.5, .16), vec3(.20, .02), 0, .002, hsl(.0, .0, .8, .5));
-    
-    // Timer label
-    drawHUDText('CHECKPOINT', vec3(.5, .08), .03, textColor, .002, BLACK, undefined, 'center', 600);
-    
-    // Main time display with enhanced styling
-    let timeSize = .08 + (isUrgent ? Math.sin(time * 10) * .01 : 0);
-    drawHUDText(timeLeft + 's', vec3(.5, .12), timeSize, textColor, .004, BLACK, undefined, 'center', 900, undefined, undefined, 0);
-    
-    // Animated warning indicators for urgent state
-    if (isUrgent) {
-        for(let i = 6; i--;) {
-            let angle = (i / 6) * Math.PI * 2 + time * 5;
-            let warningX = .5 + Math.cos(angle) * .15;
-            let warningY = .12 + Math.sin(angle) * .08;
-            let warningPulse = Math.sin(time * 8 + i) * .5 + .5;
-            let warningColor = hsl(.0, .9, .7, warningPulse * .8);
-            drawHUDRect(vec3(warningX, warningY), vec3(.015, .015), warningColor, 0);
-        }
+//     // Animated corner warning indicators
+//     for(let i = 4; i--;) {
+//         let cornerX = .15 + (i % 2) * .7;
+//         let cornerY = .05 + Math.floor(i/2) * .2;
+//         let warningPulse = Math.sin(time * 8 + i * 2) * .5 + .5;
+//         let warningColor = hsl(.0, .9, .7, warningPulse * .8);
+//         let warningSize = .03 + warningPulse * .02;
+//         drawHUDRect(vec3(cornerX, cornerY), vec3(warningSize, warningSize), warningColor, 0);
         
-        // Screen edge warning flash
-        let flashAlpha = Math.sin(time * 12) * .2 + .1;
-        let flashColor = hsl(.0, .8, .5, flashAlpha);
-        drawHUDRect(vec3(.5, .02), vec3(1, .03), flashColor, 0);
-        drawHUDRect(vec3(.5, .98), vec3(1, .03), flashColor, 0);
-    }
+//         // Warning triangle effect (simulated with smaller squares)
+//         for(let j = 3; j--;) {
+//             let triX = cornerX + (j - 1) * .015;
+//             let triY = cornerY - .02 + j * .01;
+//             let triColor = WHITE.copy();
+//             triColor.a = warningPulse * .6;
+//             drawHUDRect(vec3(triX, triY), vec3(.008, .008), triColor, 0);
+//         }
+//     }
     
-    // Side warning indicators for warning state
-    if (isWarning && !isUrgent) {
-        for(let i = 2; i--;) {
-            let sideX = .35 + i * .3;
-            let sidePulse = Math.sin(time * 6 + i * 3) * .3 + .7;
-            let sideColor = hsl(.15, .8, .6, sidePulse * .6);
-            drawHUDRect(vec3(sideX, .12), vec3(.02, .06), sideColor, 0);
-        }
-    }
+//     //  "GAME" text with glitch and glow
+//     let gameGlitch = Math.random() > .9 ? Math.random() * .01 - .005 : 0;
+//     let gameColor = baseColor.copy();
+//     gameColor.a = .9 + Math.sin(time * 4) * .1;
     
-    // Subtle corner accents for normal state
-    if (!isWarning) {
-        for(let i = 4; i--;) {
-            let cornerX = .38 + (i % 2) * .24;
-            let cornerY = .06 + Math.floor(i/2) * .12;
-            let accentColor = hsl(.6, .6, .5, .4);
-            drawHUDRect(vec3(cornerX, cornerY), vec3(.008, .008), accentColor, 0);
-        }
-    }
-}
+//     // Multiple text layers for glow effect
+//     for(let layer = 3; layer--;) {
+//         let offset = layer * .003;
+//         let layerColor = layer === 0 ? gameColor : hsl(.0, .8, .4, .3);
+//         drawHUDText('GAME', vec3(.5 + gameGlitch + offset, .1 + offset), .15 + s1, layerColor, .008, BLACK, undefined, 'center', 900, 'italic', .5, 0);
+//     }
+    
+//     // "OVER!" text with shake effect
+//     let overShake = Math.sin(time * 12) * .005;
+//     let overColor = hsl(.0, .9, .9);
+//     overColor.a = .9 + Math.sin(time * 6) * .1;
+    
+//     // Multiple text layers for dramatic effect
+//     for(let layer = 3; layer--;) {
+//         let offset = layer * .004;
+//         let layerColor = layer === 0 ? overColor : hsl(.0, .7, .3, .4);
+//         drawHUDText('OVER!', vec3(.5 + overShake + offset, .2 + offset), .18 + s2, layerColor, .01, BLACK, undefined, 'center', 900, 'italic', .5, 0);
+//     }
+    
+//         // Animated scan lines effect
+//     for(let i = 5; i--;) {
+//         let scanY = .05 + i * .05 + (time * .2) % .3;
+//         let scanAlpha = Math.sin(scanY * 20 + time * 10) * .3 + .3;
+//         let scanColor = hsl(.0, .5, .8, scanAlpha * .2);
+//         drawHUDRect(vec3(.5, scanY), vec3(.8, .005), scanColor, 0);
+//     }
+    
+//     // Pulsing restart hint
+//     let hintAlpha = Math.sin(time * 2) * .3 + .7;
+//     let hintColor = WHITE.copy();
+//     hintColor.a = hintAlpha;
+//     drawHUDText('Press R to Restart', vec3(.5, .35), .04, hintColor, .003, BLACK, undefined, 'center', 400, 'italic');
+// }
 
-}
+//   else {
+//     // Enhanced checkpoint timer with modern UI
+//     const timeLeft = checkpointTimeLeft | 0;
+//     const isUrgent = checkpointTimeLeft < 3;
+//     const isWarning = checkpointTimeLeft < 10;
+    
+//     // Dynamic colors based on urgency
+//     const bgColor = isUrgent ? hsl(.0, .8, .2, .9) : 
+//                    isWarning ? hsl(.15, .8, .2, .9) : 
+//                    hsl(.6, .6, .2, .8);
+//     const textColor = isUrgent ? hsl(.0, .9, .9) : 
+//                      isWarning ? hsl(.15, .9, .8) : 
+//                      hsl(.6, .8, .9);
+//     const borderColor = isUrgent ? hsl(.0, .9, .6) : 
+//                        isWarning ? hsl(.15, .9, .6) : 
+//                        hsl(.6, .8, .6);
+    
+//     // Pulsing effect for urgency
+//     let pulseIntensity = isUrgent ? Math.sin(time * 8) * .3 + .7 : 
+//                         isWarning ? Math.sin(time * 4) * .2 + .8 : 1;
+    
+//     // Main timer panel with dynamic sizing
+//     let panelSize = vec3(.25, .12);
+//     if (isUrgent) panelSize = panelSize.scale(1 + Math.sin(time * 6) * .1);
+    
+//     drawHUDRect(vec3(.5, .12), panelSize, bgColor, .006, borderColor);
+    
+//     // Progress bar showing time remaining (visual indicator)
+//     let maxTime = startCheckpointTime; // Use initial checkpoint time as max
+//     let progress = Math.max(0, checkpointTimeLeft / maxTime);
+//     let progressWidth = .20 * progress;
+//     let progressColor = isUrgent ? hsl(.0, .8, .5) : 
+//                        isWarning ? hsl(.15, .8, .5) : 
+//                        hsl(.3, .8, .5);
+    
+//     drawHUDRect(vec3(.5, .16), vec3(progressWidth, .02), progressColor, 0);
+//     drawHUDRect(vec3(.5, .16), vec3(.20, .02), 0, .002, hsl(.0, .0, .8, .5));
+    
+//     // Timer label
+//     drawHUDText('CHECKPOINT', vec3(.5, .08), .03, textColor, .002, BLACK, undefined, 'center', 600);
+    
+//     // Main time display with enhanced styling
+//     let timeSize = .08 + (isUrgent ? Math.sin(time * 10) * .01 : 0);
+//     drawHUDText(timeLeft + 's', vec3(.5, .12), timeSize, textColor, .004, BLACK, undefined, 'center', 900, undefined, undefined, 0);
+    
+//     // Animated warning indicators for urgent state
+//     if (isUrgent) {
+//         for(let i = 6; i--;) {
+//             let angle = (i / 6) * Math.PI * 2 + time * 5;
+//             let warningX = .5 + Math.cos(angle) * .15;
+//             let warningY = .12 + Math.sin(angle) * .08;
+//             let warningPulse = Math.sin(time * 8 + i) * .5 + .5;
+//             let warningColor = hsl(.0, .9, .7, warningPulse * .8);
+//             drawHUDRect(vec3(warningX, warningY), vec3(.015, .015), warningColor, 0);
+//         }
+        
+//         // Screen edge warning flash
+//         let flashAlpha = Math.sin(time * 12) * .2 + .1;
+//         let flashColor = hsl(.0, .8, .5, flashAlpha);
+//         drawHUDRect(vec3(.5, .02), vec3(1, .03), flashColor, 0);
+//         drawHUDRect(vec3(.5, .98), vec3(1, .03), flashColor, 0);
+//     }
+    
+//     // Side warning indicators for warning state
+//     if (isWarning && !isUrgent) {
+//         for(let i = 2; i--;) {
+//             let sideX = .35 + i * .3;
+//             let sidePulse = Math.sin(time * 6 + i * 3) * .3 + .7;
+//             let sideColor = hsl(.15, .8, .6, sidePulse * .6);
+//             drawHUDRect(vec3(sideX, .12), vec3(.02, .06), sideColor, 0);
+//         }
+//     }
+    
+//     // Subtle corner accents for normal state
+//     if (!isWarning) {
+//         for(let i = 4; i--;) {
+//             let cornerX = .38 + (i % 2) * .24;
+//             let cornerY = .06 + Math.floor(i/2) * .12;
+//             let accentColor = hsl(.6, .6, .5, .4);
+//             drawHUDRect(vec3(cornerX, cornerY), vec3(.008, .008), accentColor, 0);
+//         }
+//     }
+// }
+
+// }
  updateHUDValues();
     
     // Update level transition
