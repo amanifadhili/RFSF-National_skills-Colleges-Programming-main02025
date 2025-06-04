@@ -108,6 +108,7 @@ function drawRoad(zwrite = 0)
             segment2 = segment1;
             continue;
         }
+        
 
         const p1 = segment1.pos;
         const p2 = segment2.pos;
