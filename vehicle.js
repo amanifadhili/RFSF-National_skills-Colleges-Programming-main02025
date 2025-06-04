@@ -187,7 +187,8 @@ class PlayerVehicle extends Vehicle {
                 this.velocity = v.velocity.scale(0.7);
                 v.velocity.z = max(v.velocity.z, vel.z * 0.7);
                 this.hit();
-                speak('YOU HIT ANOTHER VEHICLE');
+                // Trigger vibration on obstacle collision (if supported)
+                if (navigator.vibrate) navigator.vibrate(200);
                 sound_hit.play();
             }
         }
