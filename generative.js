@@ -223,6 +223,24 @@ function generateTetures()
         // ROW 3: Additional elements
         setupContext(0,3);
         drawZZFXSign(); // RFSF Programming branding
+        // ROW 4: Urban Buildings and Houses
+        setupContext(0,4);
+        drawSimpleHouse();
+
+        setupContext(1,4);
+        drawApartmentBuilding();
+
+        setupContext(2,4);
+        drawOfficeBuilding();
+
+        setupContext(3,4);
+        drawShop();
+
+        setupContext(4,4);
+        drawSkyscraper();
+
+        setupContext(5,4);
+        drawWarehouse();
     }
 
     // =============================================================================
@@ -918,4 +936,88 @@ function generateTetures()
         text(t,.5,.6,1,.9,0,'monospace',undefined,60);
     
     }
+
+    function drawSimpleHouse() {
+        color(hsl(0.1, 0.6, 0.7)); // Beige house
+        rect(0.5, 0.7, 0.8, 0.5); // Main house body
+        color(hsl(0.0, 0.8, 0.4)); // Red roof
+        polygon(3, 0.5, 0.35, 0.5, 0); // Triangle roof
+        color(hsl(0.08, 0.8, 0.3)); // Brown door
+        rect(0.4, 0.8, 0.1, 0.2);
+        color(hsl(0.6, 0.8, 0.8)); // Blue windows
+        rect(0.3, 0.6, 0.08, 0.08);
+        rect(0.7, 0.6, 0.08, 0.08);
+    }
+
+    function drawApartmentBuilding() {
+        color(hsl(0.0, 0.0, 0.6)); // Gray building
+        rect(0.5, 0.5, 0.9, 1.0);
+        color(hsl(0.15, 0.9, 0.9)); // Yellow windows
+        for(let row = 0; row < 4; row++) {
+            for(let col = 0; col < 3; col++) {
+                if(random.bool(0.7)) {
+                    rect(0.25 + col * 0.25, 0.2 + row * 0.2, 0.08, 0.08);
+                }
+            }
+        }
+        color(hsl(0.0, 0.0, 0.2)); // Dark entrance
+        rect(0.5, 0.9, 0.2, 0.2);
+    }
+
+    function drawOfficeBuilding() {
+        color(hsl(0.6, 0.2, 0.4)); // Blue-gray office
+        rect(0.5, 0.4, 0.8, 0.8);
+        color(hsl(0.6, 0.8, 0.8)); // Light blue glass
+        for(let row = 0; row < 3; row++) {
+            for(let col = 0; col < 4; col++) {
+                rect(0.2 + col * 0.15, 0.2 + row * 0.2, 0.1, 0.15);
+            }
+        }
+        color(WHITE);
+        rect(0.5, 0.1, 0.6, 0.1);
+        color(BLACK);
+        text('OFFICE', 0.5, 0.1, 0.08, 0.5, 0);
+    }
+
+    function drawShop() {
+        color(hsl(0.8, 0.6, 0.6)); // Purple shop
+        rect(0.5, 0.6, 0.9, 0.7);
+        color(hsl(0.0, 0.0, 0.9)); // White shop window
+        rect(0.5, 0.7, 0.6, 0.3);
+        color(hsl(0.1, 0.9, 0.5)); // Orange sign
+        rect(0.5, 0.4, 0.8, 0.15);
+        color(WHITE);
+        text('SHOP', 0.5, 0.4, 0.1, 0.7, 0);
+        color(hsl(0.08, 0.8, 0.3)); // Brown door
+        rect(0.3, 0.85, 0.15, 0.25);
+    }
+
+    function drawSkyscraper() {
+        color(hsl(0.0, 0.0, 0.3)); // Dark gray skyscraper
+        rect(0.5, 0.3, 0.6, 0.6);
+        color(hsl(0.15, 0.9, 0.7)); // Yellow windows
+        for(let row = 0; row < 8; row++) {
+            for(let col = 0; col < 2; col++) {
+                if(random.bool(0.8)) {
+                    rect(0.35 + col * 0.3, 0.1 + row * 0.08, 0.06, 0.06);
+                }
+            }
+        }
+        color(RED);
+        rect(0.5, 0.05, 0.02, 0.1);
+    }
+
+    function drawWarehouse() {
+        color(hsl(0.0, 0.0, 0.5)); // Gray warehouse
+        rect(0.5, 0.6, 0.95, 0.8);
+        color(hsl(0.08, 0.6, 0.4)); // Brown doors
+        rect(0.3, 0.8, 0.25, 0.4);
+        rect(0.7, 0.8, 0.25, 0.4);
+        color(hsl(0.6, 0.3, 0.7)); // Gray-blue windows
+        rect(0.2, 0.4, 0.08, 0.08);
+        rect(0.8, 0.4, 0.08, 0.08);
+        color(hsl(0.0, 0.0, 0.4)); // Dark loading area
+        rect(0.5, 0.9, 0.4, 0.2);
+    }
+
 }
