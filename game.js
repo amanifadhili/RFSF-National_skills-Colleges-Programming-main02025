@@ -215,7 +215,7 @@ function gameUpdateInternal()
         if (startCountdown > 0 && !startCountdownTimer.active())
         {
             --startCountdown;                           // Decrement countdown
-            speak(startCountdown || 'PLEASE GO!' );     // Announce countdown or "GO!"
+            // speak(startCountdown || 'PLEASE GO!' );     // Announce countdown or "GO!"
             startCountdownTimer.set(1);                 // Set timer for 1 second
         }
         

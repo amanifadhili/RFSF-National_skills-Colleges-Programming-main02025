@@ -39,20 +39,19 @@ function initSounds() {
 // You can modify the array to change tone, duration, pitch, etc.
 
 // Sound played when something is hit or impacted
-let sound_hit = new Sound([1.6, .3, 599, .03, .04, .23, , 3.1, , , , , , 1.7, , .2, , .7, .06, .2, -2328]);
+let sound_hit = new Sound([1.2, .2, 800, .02, .03, .18, , 2.8, , , , , , 1.4, , .15, , .6, .05, .15, -1800]);
 
-// Sound played when clicking a button or UI element
-let sound_click = new Sound([1.1, , 22, .01, , .04, 3, 2.3, -42, , , , .01, , , .02, .64, , .08, 352]);
+// Gentler, more pleasant click sound
+let sound_click = new Sound([0.8, , 35, .008, , .03, 2, 2.1, -30, , , , .008, , , .015, .5, , .06, 280]);
 
-// Sound played when bumping or colliding softly
-let sound_bump = new Sound([3.7, .2, 387, .01, .01, .01, , .8, -59, -75, -99, .08, .03, .1, , , .04, .57, .01, .35, 369]);
+// Softer bump sound with higher pitch
+let sound_bump = new Sound([2.5, .15, 450, .008, .008, .008, , .6, -40, -60, -80, .06, .02, .08, , , .03, .45, .008, .25, 280]);
 
-// Sound played at the start of a game or event
-let sound_start = new Sound([.3, , 403, .07, .33, .02, 2, 0, -79, -6, -328, .05, .06, , .3, , , .71, .14, , 267]);
+// More pleasant start sound with chime-like quality
+let sound_start = new Sound([.4, , 520, .05, .25, .015, 1, 0, -60, -4, -250, .04, .05, , .25, , , .65, .12, , 350]);
 
-// Sound played when a checkpoint is reached (can be different from start sound)
-let sound_checkpoint = new Sound([.3, , 403, .07, .33, .02, 2, 0, -79, -6, -328, .05, .06, , .3, , , .71, .14, , 267]);
-
+// Harmonious checkpoint sound
+let sound_checkpoint = new Sound([.4, , 520, .05, .25, .015, 1, 0, -60, -4, -250, .04, .05, , .25, , , .65, .12, , 350]);
 // ----------------------------------------------------------
 // 🎶 Music Management
 
