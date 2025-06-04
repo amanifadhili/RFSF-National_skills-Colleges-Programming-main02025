@@ -50,112 +50,10 @@ function initHUD()
 function drawHUD() {
     // Attract mode title screen
     if (attractMode) {
-        let t = 'Click to Play';
-        let s = 'KIGALI-2025';
-        let a = 1 - Math.abs(Math.sin(time * 2));
-        a = .5 + a * .5;
-        // Enhanced year display with subtle effect (reduced shadow/glow)
-        let yearGlow = .7 + Math.sin(time * 3) * .1;
-        drawHUDText(
-            s,
-            vec3(.50, .60),
-            .08,
-            hsl(.3, .9, yearGlow),
-            .002, // Reduced shadow offset for minimal glow
-            hsl(.3, .6, .2, .5), // Lower alpha for softer shadow
-            undefined,
-            'center',
-            700,
-            'italic',
-            undefined,
-            0
-        );
-// Enhanced "Click to Play" with multiple effects
-let clickPulse = Math.sin(time * 2.5) * .02;
-let clickColor = hsl(.1, 1, a + clickPulse);
-drawHUDText(t, vec3(.5, .95), .07 + clickPulse, clickColor, .008, BLACK, undefined, 'center', 800, 'italic', undefined, 0);
-// Animated background elements for attract mode
-for(let i = 8; i--;) {
-    let starX = .1 + (i * .1) + Math.sin(time + i * 2) * .05;
-    let starY = .8 + Math.sin(time * .5 + i) * .1;
-    let starSize = .008 + Math.sin(time * 4 + i) * .004;
-    let starAlpha = Math.sin(time * 3 + i * 1.5) * .3 + .5;
-    let starColor = hsl(.15, .8, .7, starAlpha);
-    drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), starColor, 0);
-}       
-// Animated title logo
-      // Professional animated title logo
-for(let j = 2; j--;) {
-    let text = j ? 'RTB&RP SKILLS COMPETITION' : 'FUTURE SKILLS';
-    let pos = vec3(.5, .3 - j * .12);
-    let size = .07;
-    let weight = 700;
-    
-    // Subtle background glow for readability
-    let glowColor = hsl(.15, .4, .2, .3);
-    drawHUDRect(pos, vec3(.9, .08), glowColor, 0);
-    
-    pos = pos.multiply(mainCanvasSize);
-    size = size * mainCanvasSize.y;
-    let style = '';
-    let font = 'arial';
-    
-    const context = mainContext;
-    context.strokeStyle = BLACK;
-    context.lineWidth = size * .08;
-    context.textBaseline = 'middle';
-    context.textAlign = 'center';
-    context.lineJoin = 'round';
-    
-    let totalWidth = 0;
-    
-    // Calculate total width first
-    context.font = style + ' ' + weight + ' ' + size + 'px ' + font;
-    totalWidth = context.measureText(text).width;
-    
-    // Draw text with professional styling
-    let startX = pos.x - totalWidth / 2;
-    
-    for(let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const w = context.measureText(c).width;
-        
-        // Professional color scheme - gold/orange gradient
-        let charColor = hsl(.12, .8, .7);
-        
-        // Draw character shadow
-        context.fillStyle = hsl(.12, .6, .2, .8);
-        context.fillText(c, startX + w/2 + size * .02, pos.y + size * .02);
-        
-        // Draw main character
-        context.fillStyle = charColor;
-        context.fillText(c, startX + w/2, pos.y);
-        
-        startX += w;
-    }
-    
-    // Professional side accents - minimal and clean
-    let accentColor = hsl(.12, .6, .5, .6);
-    let accentY = .3 - j * .12;
-    drawHUDRect(vec3(.15, accentY), vec3(.02, .003), accentColor, 0);
-    drawHUDRect(vec3(.85, accentY), vec3(.02, .003), accentColor, 0);
-}
+      
+        welcomeScreen();
 
-// Professional subtitle with clean animation
-let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
-let subtitleColor = hsl(.12, .6, .8, subtitleAlpha);
-drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(.5, .45), .035, subtitleColor, .002, BLACK, undefined, 'center', 400, undefined, undefined, 0);
-
-// Clean corner decorations
-for(let i = 4; i--;) {
-    let cornerX = .12 + (i % 2) * .76;
-    let cornerY = .15 + Math.floor(i/2) * .35;
-    let cornerColor = hsl(.12, .5, .4, .4);
-    
-    // Simple corner lines
-    drawHUDRect(vec3(cornerX, cornerY), vec3(.03, .002), cornerColor, 0);
-    drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .03), cornerColor, 0);
-}
+       controlMenu();
 
         return;
     }
@@ -530,7 +428,152 @@ if (!attractMode && !gameOverTimer.isSet()) {
     // for(const b of HUDButtons)
     //     b.draw();
 }
+function welcomeScreen()
+{
+      // Centered container panel
+    const containerCenter = vec3(0.5, .5);
+    const containerSize = vec3(.7, .7);
+    const containerGlow = .15 + Math.sin(time * 2) * .05;
 
+    // Draw container background with glow and border
+    drawHUDRect(containerCenter, containerSize, hsl(.6, .2, .12, .92), .008, hsl(.15, .7, .5, .7 + containerGlow));
+    // Subtle inner glow
+    drawHUDRect(containerCenter, containerSize.scale(.98), hsl(.15, .5, .2, .15 + containerGlow), 0);
+
+    // All elements are now relative to containerCenter
+    let bannerY = containerCenter.y - containerSize.y * 0.38 + Math.sin(time * 2) * .02;
+    let bannerPulse = .8 + Math.sin(time * 3) * .2;
+
+    // Banner background
+    drawHUDRect(vec3(containerCenter.x, bannerY), vec3(containerSize.x * .95, .08), 
+                hsl(.15, .6, .2, .7), .003, 
+                hsl(.15, .8, .5, bannerPulse * .8));
+    // Banner text
+    drawHUDText('RTB COMPETITION FUTURE SKILLS', vec3(containerCenter.x, bannerY), 
+                .04, hsl(.15, .9, .9), .003, 
+                hsl(.15, .6, .3, .8), undefined, 'center', 800, 'italic');
+    // Side decorations
+    for(let i = 2; i--;) {
+        let sideX = containerCenter.x - containerSize.x * 0.45 + i * containerSize.x * 0.9;
+        let sideGlow = Math.sin(time * 4 + i * Math.PI) * .3 + .7;
+        drawHUDRect(vec3(sideX, bannerY), vec3(.03, .003), 
+                    hsl(.15, .8, .6, sideGlow), 0);
+    }
+
+    // Main title
+    let titleY = containerCenter.y - containerSize.y * 0.13;
+    let titleGlow = .7 + Math.sin(time * 3) * .2;
+    drawHUDRect(vec3(containerCenter.x, titleY), vec3(containerSize.x * .85, .12), 
+                hsl(.3, .4, .2, .4), 0);
+    drawHUDText('KIGALI-2025', vec3(containerCenter.x, titleY), 
+                .08, hsl(.3, .9, titleGlow), 
+                .004, hsl(.3, .6, .2, .6), 
+                undefined, 'center', 700, 'italic');
+    // Scan lines
+    for(let i = 3; i--;) {
+        let scanY = titleY - .04 + i * .03 + Math.sin(time * 8 + i) * .01;
+        let scanAlpha = Math.sin(time * 6 + i * 2) * .2 + .3;
+        drawHUDRect(vec3(containerCenter.x, scanY), vec3(containerSize.x * .75, .002), 
+                    hsl(.3, .5, .8, scanAlpha), 0);
+    }
+
+    // Subtitle
+    let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
+    let subtitleY = containerCenter.y + containerSize.y * 0.05;
+    drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(containerCenter.x, subtitleY), 
+                .035, hsl(.3, .6, .8, subtitleAlpha), 
+                .002, BLACK, undefined, 'center', 400);
+
+    // "Click to Play"
+    let clickY = containerCenter.y + containerSize.y * 0.22;
+    let clickPulse = Math.sin(time * 2.5) * .02;
+    let clickAlpha = .7 + Math.sin(time * 2) * .3;
+    let clickColor = hsl(.1, 1, clickAlpha + clickPulse);
+    drawHUDRect(vec3(containerCenter.x, clickY), vec3(containerSize.x * .45, .06), 
+                hsl(.1, .6, .2, clickAlpha * .5), .002, 
+                hsl(.1, .8, .5, clickAlpha * .8));
+    drawHUDText('Click to Play', vec3(containerCenter.x, clickY), 
+                .05 + clickPulse, clickColor, 
+                .004, BLACK, undefined, 'center', 800, 'italic');
+
+    // Animated background elements (stars/particles) inside container
+    for(let i = 12; i--;) {
+        let starX = containerCenter.x - containerSize.x * 0.45 + (i * containerSize.x * 0.07) + Math.sin(time + i * 2) * .03;
+        let starY = containerCenter.y + containerSize.y * 0.32 + Math.sin(time * .8 + i) * .15;
+        let starSize = .006 + Math.sin(time * 5 + i) * .003;
+        let starAlpha = Math.sin(time * 3 + i * 1.5) * .4 + .6;
+        let starColor = hsl(.15 + i * .05, .8, .7, starAlpha);
+        drawHUDRect(vec3(starX, starY), vec3(starSize * 2, starSize * 2), 
+                    hsl(.15 + i * .05, .6, .4, starAlpha * .3), 0);
+        drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), 
+                    starColor, 0);
+    }
+
+    // Retro corner decorations (inside container)
+    for(let i = 4; i--;) {
+        let cornerX = containerCenter.x - containerSize.x * 0.45 + (i % 2) * containerSize.x * 0.9;
+        let cornerY = containerCenter.y - containerSize.y * 0.45 + Math.floor(i/2) * containerSize.y * 0.9;
+        let cornerPulse = Math.sin(time * 4 + i) * .3 + .7;
+        let cornerColor = hsl(.15, .7, .5, cornerPulse * .6);
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.025, .003), cornerColor, 0);
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.003, .025), cornerColor, 0);
+        drawHUDRect(vec3(cornerX, cornerY + .02), vec3(.025, .003), cornerColor, 0);
+        drawHUDRect(vec3(cornerX + .022, cornerY), vec3(.003, .025), cornerColor, 0);
+    }
+
+}
+function controlMenu() {   
+
+     // Controls panel (keeping your existing controls code but repositioned)
+        const controls = [
+            { icon: '↑', key: 'W', desc: 'ACCELERATE' },
+            { icon: '↓', key: 'S', desc: 'BRAKE' },
+            { icon: '←', key: 'A', desc: 'TURN LEFT' },
+            { icon: '→', key: 'D', desc: 'TURN RIGHT' },
+            { icon: '⎋', key: 'ESC', desc: 'MENU' },
+            { icon: '🔄', key: 'R', desc: 'RESTART' }
+        ];
+        
+        // Controls panel positioned at bottom right
+        const controlsPanelX = .21;
+        const controlsPanelY = .83;
+        const controlsPanelWidth = .42;
+        const controlsPanelHeight = .35;
+        
+        // Main controls panel with retro styling
+        drawHUDRect(vec3(controlsPanelX, controlsPanelY), 
+                    vec3(controlsPanelWidth, controlsPanelHeight), 
+                    hsl(.6, .3, .1, .8), .003, 
+                    hsl(.6, .5, .3, .7 + Math.sin(time * 2) * .2));
+        
+        // Controls header
+        drawHUDRect(vec3(controlsPanelX, controlsPanelY - controlsPanelHeight * 0.42), 
+                    vec3(controlsPanelWidth, .04), 
+                    hsl(.6, .4, .2, .9), 0);
+        drawHUDText('CONTROLS', vec3(controlsPanelX, controlsPanelY - controlsPanelHeight * 0.42), 
+                    .028, hsl(.6, .2, .9), .002, BLACK, undefined, 'center', 700);
+        
+        // Draw each control with retro styling
+        for(let i = 0; i < controls.length; i++) {
+            const control = controls[i];
+            const controlY = controlsPanelY - controlsPanelHeight * 0.25 + (i * .045);
+            
+            // Control icon
+            drawHUDText(control.icon, vec3(controlsPanelX - controlsPanelWidth * 0.35, controlY), 
+                        .025, hsl(.15, .8, .8), 0, undefined, undefined, 'center', 400);
+            
+            // Key binding with glow
+            drawHUDRect(vec3(controlsPanelX - controlsPanelWidth * 0.15, controlY), 
+                        vec3(.03, .025), hsl(.15, .6, .2, .8), .001, 
+                        hsl(.15, .8, .4 + Math.sin(time * 3 + i) * .2));
+            drawHUDText(control.key, vec3(controlsPanelX - controlsPanelWidth * 0.15, controlY), 
+                        .02, hsl(.15, .9, .9), 0, undefined, undefined, 'center', 600);
+            
+            // Description
+            drawHUDText(control.desc, vec3(controlsPanelX + controlsPanelWidth * 0.15, controlY), 
+                        .02, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 400);
+        }
+ }
 // // Draw modern radio control panel with animations
 // function drawRadioPanel() {
 //     // Animated glow effect
