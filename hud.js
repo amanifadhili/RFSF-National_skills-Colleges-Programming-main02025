@@ -736,23 +736,75 @@ function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shad
 function updateHUDValues() {
     if (attractMode || gameOverTimer.isSet()) return;
     
-    // Update distance based on player position (convert to meters)
+    // Update distance based on player position (convert to meters) - SLOWED DOWN
     if (playerVehicle) {
-
-        const startingPosition = 2000; // This is the initial z position of the player
-        playerDistance = Math.floor((playerVehicle.pos.z - startingPosition) / 100);
+        // Slow down distance calculation - divide by 200 instead of 100
+        const startingPosition = 2000; 
+        playerDistance = Math.floor((playerVehicle.pos.z - startingPosition) / 200); // Changed from 100 to 200
         
-        // Update score based on speed and distance
-       const speed = playerVehicle.velocity.z;
-        scoreMultiplier = clamp(speed / 100, 0.5, 2);
-        playerScore += scoreMultiplier;
+        // Ensure distance is never negative
+        playerDistance = Math.max(0, playerDistance);
+        
+        // SLOWER SCORING SYSTEM
+        const speed = playerVehicle.velocity.z;
+        const minSpeedForScore = 30;  // Minimum speed to earn points
+        
+        // Only award points if moving at decent speed
+        if (speed > minSpeedForScore) {
+            // Reduced base score multiplier (much slower scoring)
+            let speedMultiplier = Math.pow(speed / 100, 1.2); // Reduced from 1.5 to 1.2
+            
+            // Reduced speed tier bonuses
+            if (speed > 150) speedMultiplier *= 1.3;      // Reduced from 2.0 to 1.3
+            else if (speed > 120) speedMultiplier *= 1.2; // Reduced from 1.5 to 1.2
+            else if (speed > 80) speedMultiplier *= 1.1;  // Reduced from 1.2 to 1.1
+            
+            // Level difficulty modifier
+            const levelMultiplier = 1 + (currentLevel - 1) * 0.2; // Reduced from 0.3 to 0.2
+            
+            // Much slower time-based scoring
+            const frameScore = speedMultiplier * levelMultiplier * 0.03; // Reduced from 0.1 to 0.03
+            
+            playerScore += frameScore;
+        }
+        
+        // PENALTY SYSTEM (keep penalties to make it challenging)
+        if (speed < minSpeedForScore && speed > 5) {
+            playerScore = Math.max(0, playerScore - 0.2); // Reduced penalty from 0.5 to 0.2
+        }
+        
+        if (playerVehicle.offRoad) {
+            playerScore = Math.max(0, playerScore - 0.5); // Reduced penalty from 1.0 to 0.5
+        }
         
         // Check for level progression
         checkLevelProgression();
     }
-     // Check for distance milestones
+    
+    // Check for distance milestones
     checkDistanceMilestones();
 }
+
+// Modify checkDistanceMilestones for slower progression
+function checkDistanceMilestones() {
+    // Check for distance milestones every 100m (back to 100m but distance counts slower)
+    if (playerDistance % 100 === 0 && playerDistance > 0) {
+        const currentSpeed = playerVehicle.velocity.z;
+        
+        if (currentSpeed > 50) {
+            const baseBonus = 150 * currentLevel; // Reduced from 300 to 150
+            
+            // Reduced speed bonus for milestones
+            const speedBonus = currentSpeed > 120 ? baseBonus * 1.2 : 
+                              currentSpeed > 80 ? baseBonus * 1.1 : baseBonus;
+            
+            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        } else {
+            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+        }
+    }
+}
+
 
 // function to check for level progression
 function checkLevelProgression() {
@@ -773,11 +825,7 @@ function levelUp(newLevel) {
     // Update level
     currentLevel = newLevel;
     
-    // Play level up sound
-    sound_checkpoint.play(1, 1.2); // Slightly higher pitch for level up
-    
-    // Announce level up
-    speak(`LEVEL ${currentLevel} REACHED`);
+
     
     // Trigger level transition animation
     startLevelTransition();
@@ -814,9 +862,7 @@ function drawLevelTransition() {
         // Fade out
         alpha = levelTransitionTimer * 2;
     }
-    // Draw semi-transparent overlay
-    drawHUDRect(vec3(.5, .5), vec3(1, 1), hsl(0, 0, 0, 0.7 * alpha), 0);
-    
+
     // Draw level number
     let levelColor = hsl(.15, .8, .6, alpha);
     drawHUDText(`LEVEL ${currentLevel}`, vec3(.5, .4), .1, levelColor, .008, BLACK, undefined, 'center', 900, 'italic');
@@ -863,12 +909,32 @@ function updateBonusMessages() {
 }
 
 //  function to draw bonus messages
+// Replace the drawBonusMessages function with this improved version
 function drawBonusMessages() {
     for (const msg of bonusMessages) {
         let color = hsl(.15, .9, .7, msg.alpha);
-        drawHUDText(`${msg.message} `, msg.pos, .05, color, .004, hsl(0, 0, 0, msg.alpha * 0.5), undefined, 'center', 700);
+        
+        // Improved shadow with better positioning and color
+        let shadowColor = hsl(0, 0, 0, msg.alpha * 0.8); // Darker, more opaque shadow
+        let shadowOffset = .003; // Consistent shadow offset
+        
+        // Draw shadow first (behind the text)
+        drawHUDText(msg.message, 
+                   vec3(msg.pos.x + shadowOffset, msg.pos.y + shadowOffset), 
+                   .05, shadowColor, 0, undefined, undefined, 'center', 700);
+        
+        // Draw main text with better contrast
+        drawHUDText(msg.message, msg.pos, .05, color, 0, undefined, undefined, 'center', 700);
+        
+        // Optional: Add a subtle glow effect for better visibility
+        if (msg.alpha > 0.5) {
+            let glowColor = hsl(.15, .6, .9, msg.alpha * 0.3);
+            drawHUDText(msg.message, msg.pos, .052, glowColor, 0, undefined, undefined, 'center', 700);
+        }
     }
 }
+
+
 //function to reset HUD values
 function resetHUDValues() {
     playerScore = 0;
@@ -881,22 +947,50 @@ function resetHUDValues() {
 //  function to get difficulty settings based on level
 function getDifficultySettings() {
     return {
-        trafficDensity: 0.2 + (currentLevel * 0.05),  // Increases with level
-        obstacleFrequency: 0.1 + (currentLevel * 0.03),  // Increases with level
-        maxSpeed: 150 + (currentLevel * 10)  // Increases with level
+        trafficDensity: 0.15 + (currentLevel * 0.08),        // More aggressive increase
+        obstacleFrequency: 0.08 + (currentLevel * 0.05),     // More obstacles
+        maxSpeed: 140 + (currentLevel * 8),                  // Slower max speed increase
+        aiAggressiveness: 0.5 + (currentLevel * 0.1),        // More aggressive AI
+        scoreRequirement: currentLevel * 5000,               // Score needed for next level
+        windResistance: 1 + (currentLevel * 0.1),            // Harder to maintain speed
+        fuelConsumption: 1 + (currentLevel * 0.15)           // If fuel system exists
     };
 }
 //  function to check for distance milestones
 function checkDistanceMilestones() {
-    // Check for distance milestones every 100m
-    if (playerDistance % 100 === 0 && playerDistance > 0) {
-        const bonus = 500 * currentLevel;
+    // Check for distance milestones every 200m (increased from 100m)
+    if (playerDistance % 200 === 0 && playerDistance > 0) {
+        // Only award milestone bonus if player is maintaining good speed
+        const currentSpeed = playerVehicle.velocity.z;
         
-        // Changed message format to not include the bonus points
-        addBonus(bonus, `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        if (currentSpeed > 50) { // Must be going at least 50 speed units
+            const baseBonus = 300 * currentLevel; // Reduced base bonus
+            
+            // Speed bonus for milestones
+            const speedBonus = currentSpeed > 120 ? baseBonus * 1.5 : 
+                              currentSpeed > 80 ? baseBonus * 1.2 : baseBonus;
+            
+            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        } else {
+            // Show message but no bonus for slow milestone
+            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+        }
     }
-
 }
+
+// level progression to be more challenging
+// Modify the checkLevelProgression function to remove score requirements
+function checkLevelProgression() {
+    // Level up every 500 meters (distance-based only)
+    const newLevel = Math.floor(playerDistance / 500) + 1;
+    
+    if (newLevel > currentLevel) {
+        // Level up immediately when distance is reached
+        levelUp(newLevel);
+    }
+}
+
+
 
 //  function to award bonus points
 function addBonus(points, message, position) {
@@ -918,16 +1012,45 @@ function addBonus(points, message, position) {
 
 //  function to award overtake bonus
 function awardOvertakeBonus(vehicle) {
-    // Calculate bonus based on relative speed
     const relativeSpeed = playerVehicle.velocity.z - vehicle.velocity.z;
-    const bonus = Math.floor(relativeSpeed * 10);
+    const bonus = Math.floor(relativeSpeed * 5); // Reduced from 10 to 5
     
-    // bonus
     addBonus(bonus, "OVERTAKE", vec3(.5, .4));
 }
 
+
 //  function to award speed bonus
 function awardSpeedBonus() {
-    const bonus = Math.floor(playerVehicle.velocity.z * 5);
+    const bonus = Math.floor(playerVehicle.velocity.z * 2); // Reduced from 5 to 2
     addBonus(bonus, "SPEED DEMON", vec3(.5, .4));
+}
+// Add a performance tracking system
+function updatePerformanceMetrics() {
+    if (!playerVehicle.performanceMetrics) {
+        playerVehicle.performanceMetrics = {
+            averageSpeed: 0,
+            topSpeed: 0,
+            timeAtHighSpeed: 0,
+            totalTime: 0,
+            crashes: 0
+        };
+    }
+    
+    const metrics = playerVehicle.performanceMetrics;
+    const currentSpeed = playerVehicle.velocity.z;
+    
+    // Update metrics
+    metrics.totalTime += 1/60; // Assuming 60fps
+    metrics.averageSpeed = (metrics.averageSpeed * 0.99) + (currentSpeed * 0.01);
+    metrics.topSpeed = Math.max(metrics.topSpeed, currentSpeed);
+    
+    if (currentSpeed > 120) {
+        metrics.timeAtHighSpeed += 1/60;
+    }
+    
+    // Performance bonuses
+    if (metrics.timeAtHighSpeed > 10 && metrics.timeAtHighSpeed % 10 < 1/60) {
+        const bonus = Math.floor(metrics.averageSpeed * 50);
+        addBonus(bonus, "HIGH SPEED MASTER", vec3(.5, .4));
+    }
 }
