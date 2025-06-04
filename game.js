@@ -21,6 +21,9 @@ const engineName = 'RTB-competition';       // Name identifier for the racing ga
 const hillIntensity = 1.5;      // How steep hills can be (1.0 = normal, 2.0 = very steep)
 const hillFrequency = 0.02;     // How often hills occur (0.01 = rare, 0.05 = frequent)
 
+const laneWidth = 400;              // Width of each individual lane
+const numberOfLanes = 3;            // Total number of lanes
+
 // Game mode settings
 const testDrive = 0;        // Enable test drive mode (0 = normal game, 1 = test mode)
 const enableTexture = 1;    // Enable texture rendering (0 = disabled, 1 = enabled)
@@ -37,7 +40,7 @@ const timeDelta = 1/60;     // Time step for physics calculations (1/frameRate)
 // ====================================================================
 
 // Track dimensions and layout
-const trackWidth = 1000;            // Width of the racing track in game units
+const trackWidth = 1500;            // Width of the racing track in game units
 const trackEnd = 1e4;               // Total number of track segments (10,000)
 const trackSegmentLength = 100;     // Length of each track segment in game units
 const drawDistance = 1e3;           // Number of segments to render ahead (1,000)
