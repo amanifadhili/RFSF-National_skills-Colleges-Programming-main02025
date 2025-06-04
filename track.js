@@ -93,80 +93,107 @@ function trackPreRender()
  */
 function drawRoad(zwrite = 0)
 {
-    // Configure depth testing based on pass type
     glSetDepthTest(zwrite, zwrite);
     
-    // Draw road segments from far to near for proper alpha blending
     const cameraTrackSegment = cameraTrackInfo.segment;
-    let segment2; // Previous segment for creating quads
+    let segment2;
     
     for(let i = drawDistance; i--; )
     {
         const segmentIndex = cameraTrackSegment + i;
         const segment1 = track[segmentIndex];
         
-        // Skip if segment doesn't exist or we don't have a pair yet
         if (!segment1 || !segment2)
         {
             segment2 = segment1;
             continue;
         }
-
-        const p1 = segment1.pos;  // Current segment position
-        const p2 = segment2.pos;  // Previous segment position
         
-        // Level-of-detail: reduce road resolution for distant segments
-        // Closer segments (i near 0) draw every segment, distant ones skip segments
+
+        const p1 = segment1.pos;
+        const p2 = segment2.pos;
+        
         if (i % (lerp(i / drawDistance, 1, 6) | 0) == 0)
         {
-            // Set up surface normals for lighting (same for all vertices in segment)
             const normals = [segment1.normal, segment1.normal, segment2.normal, segment2.normal];
             
-            // Multi-pass rendering: ground, road surface, then lane markings
-            for(let pass = 0; pass < (zwrite ? 1 : 3); ++pass)
+            // Enhanced: 6 passes (ground, road, 2 lane dividers, 2 curbs)
+            for(let pass = 0; pass < (zwrite ? 1 : 6); ++pass) // Changed from 4 to 6
             {
-                let color, offset;
+                let color, offset, laneOffset = 0;
                 
                 if (pass == 0)
                 {
-                    // PASS 1: Ground/grass extending beyond road
-                    color = hsl(0.25, 0.5, 0.3);  // Brown ground color
-                    offset = p1.z * 20;        // Wide offset fills screen horizontally
+                    // PASS 1: Ground/grass
+                    color = hsl(0.25, 0.5, 0.3);
+                    offset = p1.z * 20;
                 }
                 else if (pass == 1)
                 {
                     // PASS 2: Road surface
-                    color = segment1.colorRoad;  // Road color (varies by segment)
-                    offset = segment1.width;     // Road width
+                    color = segment1.colorRoad;
+                    offset = segment1.width;
                 }
                 else if (pass == 2)
                 {
-                    // PASS 3: Lane markings/stripes
-                    color = segment1.colorLine;  // Stripe color
-                    offset = 20;                 // Narrow stripe width
+                    // PASS 3: Left lane divider
+                    color = segment1.colorLine;
+                    offset = 15;
+                    laneOffset = -segment1.width / 3;
+                }
+                else if (pass == 3)
+                {
+                    // PASS 4: Right lane divider
+                    color = segment1.colorLine;
+                    offset = 15;
+                    laneOffset = segment1.width / 3;
+                }
+                else if (pass == 4)
+                {
+                    // PASS 5: Left road curb (black and white stripes)
+                    const curbPattern = (segmentIndex % 6 < 3) ? WHITE : BLACK;
+                    color = curbPattern;
+                    offset = 25; // Curb width
+                    laneOffset = -segment1.width - 30; // Outside left edge
+                }
+                else if (pass == 5)
+                {
+                    // PASS 6: Right road curb (black and white stripes)
+                    const curbPattern = (segmentIndex % 6 < 3) ? WHITE : BLACK;
+                    color = curbPattern;
+                    offset = 25; // Curb width
+                    laneOffset = segment1.width + 30; // Outside right edge
                 }
 
-                // Create quad vertices for this road section
-                const point1a = vec3(p1.x + offset, p1.y, p1.z);  // Right edge, current segment
-                const point1b = vec3(p1.x - offset, p1.y, p1.z);  // Left edge, current segment
-                const point2a = vec3(p2.x + offset, p2.y, p2.z);  // Right edge, previous segment
-                const point2b = vec3(p2.x - offset, p2.y, p2.z);  // Left edge, previous segment
+                // Create quad vertices
+                let point1a, point1b, point2a, point2b;
                 
-                const poly = [point1a, point1b, point2a, point2b];  // Quad vertices
+                if (pass <= 1) {
+                    // Ground and road surface - full width
+                    point1a = vec3(p1.x + offset, p1.y, p1.z);
+                    point1b = vec3(p1.x - offset, p1.y, p1.z);
+                    point2a = vec3(p2.x + offset, p2.y, p2.z);
+                    point2b = vec3(p2.x - offset, p2.y, p2.z);
+                } else {
+                    // Lane dividers and curbs - positioned correctly
+                    point1a = vec3(p1.x + laneOffset + offset, p1.y, p1.z);
+                    point1b = vec3(p1.x + laneOffset - offset, p1.y, p1.z);
+                    point2a = vec3(p2.x + laneOffset + offset, p2.y, p2.z);
+                    point2b = vec3(p2.x + laneOffset - offset, p2.y, p2.z);
+                }
                 
-                // Add polygon to render queue if it has alpha (visible)
+                const poly = [point1a, point1b, point2a, point2b];
                 color.a && glPushPoints(poly, normals, color, 0, 1);
             }
-            segment2 = segment1;  // Update previous segment for next iteration
+            segment2 = segment1;
         }
     }
 
-    // Execute all queued polygon rendering
     glRender();
-    
-    // Reset depth testing to default state
     glSetDepthTest();
 }
+
+
 
 /**
  * Renders trackside scenery including trees, billboards, and decorative elements
@@ -344,21 +371,17 @@ class TrackSegment
             checkpointLine = 1;  // Regular checkpoint intervals
 
         {
-            // Calculate colors based on segment position
-            const largeSegmentIndex = segmentIndex / 6 | 0;  // Group segments for pattern
-            const stripe = largeSegmentIndex % 2 ? .1 : 0;   // Alternating stripe pattern
+            const largeSegmentIndex = segmentIndex / 6 | 0;
+            const stripe = largeSegmentIndex % 2 ? .1 : 0;
             
-            // Ground color with subtle variation
             this.colorGround = hsl(.083, .2, .7 + Math.cos(segmentIndex * 2 / PI) * .05);
-            
-            // Road surface color - black for all segments
             this.colorRoad = BLACK;
             
             if (checkpointLine)
-                this.colorRoad = WHITE; // White for starting/checkpoint lines
+                this.colorRoad = WHITE;
             
-            // Lane stripe visibility - only visible on stripe segments
-            this.colorLine = hsl(0, 0, 1, stripe ? 1 : 0);
+            // Enhanced lane markings for 3-lane system
+            this.colorLine = hsl(0, 0, 1, stripe ? 0.8 : 0); // More visible lane lines
         }
 
         // === PLACE SCENERY OBJECTS ===
@@ -387,6 +410,9 @@ else if (segmentIndex == 30) // Starting line banner
 }
 else
 {
+     // OBSTACLE PLACEMENT LOGIC
+         this.placeObstacles(segmentIndex, addSprite, width);
+            
     // REALISTIC CITY SCENERY GENERATION
     random.setSeed(segmentIndex); // Consistent random for each segment
     
@@ -438,6 +464,91 @@ if (!random.bool(BARE_AREA_CHANCE)) {
 }
 
 
+    }
+
+     /**
+     * Places road obstacles randomly
+     */
+    placeObstacles(segmentIndex, addSprite, width)
+    {
+        // Don't place obstacles too early in the race
+        if (segmentIndex < 100) return;
+        
+        // Obstacle placement probability (adjust for difficulty)
+        const obstacleChance = 0.01; // 1% chance per segment
+        
+        if (random.bool(obstacleChance))
+        {
+            // Choose obstacle type
+            const obstacleType = random.int(4); // 0-3 for different obstacles
+            let obstacleSprite;
+            
+            // Choose lane (0=left, 1=center, 2=right)
+            const lane = random.int(3);
+            const laneWidth = width / 3;
+            const laneOffset = (lane - 1) * laneWidth; // Convert to world position
+            
+            // Add some random offset within the lane
+            const randomOffset = random.floatSign(laneWidth * 0.3);
+            const xPosition = laneOffset + randomOffset;
+            
+            switch(obstacleType)
+            {
+                case 0: // Traffic Cone
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, 0, 0),     // Position
+                        vec3(200),                 // Size
+                        WHITE,                     // Color tint
+                        vec3(1, 3),               // Texture tile (cone texture)
+                        120                        // Collision size
+                    );
+                    obstacleSprite.obstacleType = 'cone';
+                    obstacleSprite.speedPenalty = 0.7; // Slow down to 70% speed
+                    break;
+                    
+                case 1: // Pothole
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, -20, 0),   // Slightly below ground
+                        vec3(300, 50, 300),        // Wider, flatter
+                        hsl(0, 0, 0.3),           // Dark gray tint
+                        vec3(2, 3),               // Texture tile (pothole texture)
+                        180                        // Larger collision area
+                    );
+                    obstacleSprite.obstacleType = 'pothole';
+                    obstacleSprite.speedPenalty = 0.5; // Major slowdown
+                    obstacleSprite.damageAmount = 10;   // Causes damage
+                    break;
+                    
+                case 2: // Road Barrier
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, 0, 0),
+                        vec3(400, 300, 200),       // Wide barrier
+                        WHITE,
+                        vec3(3, 3),               // Texture tile (barrier texture)
+                        250                        // Large collision
+                    );
+                    obstacleSprite.obstacleType = 'barrier';
+                    obstacleSprite.speedPenalty = 0.3; // Major impact
+                    obstacleSprite.damageAmount = 20;
+                    break;
+                    
+                case 3: // Oil Spill
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, -5, 0),    // Slightly below surface
+                        vec3(400, 20, 400),        // Wide, flat spill
+                        hsl(0.7, 0.5, 0.2),      // Dark oily color
+                        vec3(4, 3),               // Texture tile (oil texture)
+                        200                        // Medium collision
+                    );
+                    obstacleSprite.obstacleType = 'oil';
+                    obstacleSprite.speedPenalty = 0.8;  // Slight slowdown
+                    obstacleSprite.slippery = true;     // Makes car slide
+                    break;
+            }
+            
+            // Add the obstacle to the track
+            this.sprites.push(obstacleSprite);
+        }
     }
 }
 
