@@ -50,112 +50,10 @@ function initHUD()
 function drawHUD() {
     // Attract mode title screen
     if (attractMode) {
-        let t = 'Click to Play';
-        let s = 'KIGALI-2025';
-        let a = 1 - Math.abs(Math.sin(time * 2));
-        a = .5 + a * .5;
-        // Enhanced year display with subtle effect (reduced shadow/glow)
-        let yearGlow = .7 + Math.sin(time * 3) * .1;
-        drawHUDText(
-            s,
-            vec3(.50, .60),
-            .08,
-            hsl(.3, .9, yearGlow),
-            .002, // Reduced shadow offset for minimal glow
-            hsl(.3, .6, .2, .5), // Lower alpha for softer shadow
-            undefined,
-            'center',
-            700,
-            'italic',
-            undefined,
-            0
-        );
-// Enhanced "Click to Play" with multiple effects
-let clickPulse = Math.sin(time * 2.5) * .02;
-let clickColor = hsl(.1, 1, a + clickPulse);
-drawHUDText(t, vec3(.5, .95), .07 + clickPulse, clickColor, .008, BLACK, undefined, 'center', 800, 'italic', undefined, 0);
-// Animated background elements for attract mode
-for(let i = 8; i--;) {
-    let starX = .1 + (i * .1) + Math.sin(time + i * 2) * .05;
-    let starY = .8 + Math.sin(time * .5 + i) * .1;
-    let starSize = .008 + Math.sin(time * 4 + i) * .004;
-    let starAlpha = Math.sin(time * 3 + i * 1.5) * .3 + .5;
-    let starColor = hsl(.15, .8, .7, starAlpha);
-    drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), starColor, 0);
-}       
-// Animated title logo
-      // Professional animated title logo
-for(let j = 2; j--;) {
-    let text = j ? 'RTB&RP SKILLS COMPETITION' : 'FUTURE SKILLS';
-    let pos = vec3(.5, .3 - j * .12);
-    let size = .07;
-    let weight = 700;
-    
-    // Subtle background glow for readability
-    let glowColor = hsl(.15, .4, .2, .3);
-    drawHUDRect(pos, vec3(.9, .08), glowColor, 0);
-    
-    pos = pos.multiply(mainCanvasSize);
-    size = size * mainCanvasSize.y;
-    let style = '';
-    let font = 'arial';
-    
-    const context = mainContext;
-    context.strokeStyle = BLACK;
-    context.lineWidth = size * .08;
-    context.textBaseline = 'middle';
-    context.textAlign = 'center';
-    context.lineJoin = 'round';
-    
-    let totalWidth = 0;
-    
-    // Calculate total width first
-    context.font = style + ' ' + weight + ' ' + size + 'px ' + font;
-    totalWidth = context.measureText(text).width;
-    
-    // Draw text with professional styling
-    let startX = pos.x - totalWidth / 2;
-    
-    for(let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const w = context.measureText(c).width;
-        
-        // Professional color scheme - gold/orange gradient
-        let charColor = hsl(.12, .8, .7);
-        
-        // Draw character shadow
-        context.fillStyle = hsl(.12, .6, .2, .8);
-        context.fillText(c, startX + w/2 + size * .02, pos.y + size * .02);
-        
-        // Draw main character
-        context.fillStyle = charColor;
-        context.fillText(c, startX + w/2, pos.y);
-        
-        startX += w;
-    }
-    
-    // Professional side accents - minimal and clean
-    let accentColor = hsl(.12, .6, .5, .6);
-    let accentY = .3 - j * .12;
-    drawHUDRect(vec3(.15, accentY), vec3(.02, .003), accentColor, 0);
-    drawHUDRect(vec3(.85, accentY), vec3(.02, .003), accentColor, 0);
-}
+      
+        welcomeScreen();
 
-// Professional subtitle with clean animation
-let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
-let subtitleColor = hsl(.12, .6, .8, subtitleAlpha);
-drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(.5, .45), .035, subtitleColor, .002, BLACK, undefined, 'center', 400, undefined, undefined, 0);
-
-// Clean corner decorations
-for(let i = 4; i--;) {
-    let cornerX = .12 + (i % 2) * .76;
-    let cornerY = .15 + Math.floor(i/2) * .35;
-    let cornerColor = hsl(.12, .5, .4, .4);
-    
-    // Simple corner lines
-    drawHUDRect(vec3(cornerX, cornerY), vec3(.03, .002), cornerColor, 0);
-    drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .03), cornerColor, 0);
-}
+       controlMenu();
 
         return;
     }
@@ -530,7 +428,152 @@ if (!attractMode && !gameOverTimer.isSet()) {
     // for(const b of HUDButtons)
     //     b.draw();
 }
+function welcomeScreen()
+{
+      // Centered container panel
+    const containerCenter = vec3(0.5, .5);
+    const containerSize = vec3(.7, .7);
+    const containerGlow = .15 + Math.sin(time * 2) * .05;
 
+    // Draw container background with glow and border
+    drawHUDRect(containerCenter, containerSize, hsl(.6, .2, .12, .92), .008, hsl(.15, .7, .5, .7 + containerGlow));
+    // Subtle inner glow
+    drawHUDRect(containerCenter, containerSize.scale(.98), hsl(.15, .5, .2, .15 + containerGlow), 0);
+
+    // All elements are now relative to containerCenter
+    let bannerY = containerCenter.y - containerSize.y * 0.38 + Math.sin(time * 2) * .02;
+    let bannerPulse = .8 + Math.sin(time * 3) * .2;
+
+    // Banner background
+    drawHUDRect(vec3(containerCenter.x, bannerY), vec3(containerSize.x * .95, .08), 
+                hsl(.15, .6, .2, .7), .003, 
+                hsl(.15, .8, .5, bannerPulse * .8));
+    // Banner text
+    drawHUDText('RTB COMPETITION FUTURE SKILLS', vec3(containerCenter.x, bannerY), 
+                .04, hsl(.15, .9, .9), .003, 
+                hsl(.15, .6, .3, .8), undefined, 'center', 800, 'italic');
+    // Side decorations
+    for(let i = 2; i--;) {
+        let sideX = containerCenter.x - containerSize.x * 0.45 + i * containerSize.x * 0.9;
+        let sideGlow = Math.sin(time * 4 + i * Math.PI) * .3 + .7;
+        drawHUDRect(vec3(sideX, bannerY), vec3(.03, .003), 
+                    hsl(.15, .8, .6, sideGlow), 0);
+    }
+
+    // Main title
+    let titleY = containerCenter.y - containerSize.y * 0.13;
+    let titleGlow = .7 + Math.sin(time * 3) * .2;
+    drawHUDRect(vec3(containerCenter.x, titleY), vec3(containerSize.x * .85, .12), 
+                hsl(.3, .4, .2, .4), 0);
+    drawHUDText('KIGALI-2025', vec3(containerCenter.x, titleY), 
+                .08, hsl(.3, .9, titleGlow), 
+                .004, hsl(.3, .6, .2, .6), 
+                undefined, 'center', 700, 'italic');
+    // Scan lines
+    for(let i = 3; i--;) {
+        let scanY = titleY - .04 + i * .03 + Math.sin(time * 8 + i) * .01;
+        let scanAlpha = Math.sin(time * 6 + i * 2) * .2 + .3;
+        drawHUDRect(vec3(containerCenter.x, scanY), vec3(containerSize.x * .75, .002), 
+                    hsl(.3, .5, .8, scanAlpha), 0);
+    }
+
+    // Subtitle
+    let subtitleAlpha = .6 + Math.sin(time * 1.5) * .2;
+    let subtitleY = containerCenter.y + containerSize.y * 0.05;
+    drawHUDText('DRIVING SIMULATION CHALLENGE', vec3(containerCenter.x, subtitleY), 
+                .035, hsl(.3, .6, .8, subtitleAlpha), 
+                .002, BLACK, undefined, 'center', 400);
+
+    // "Click to Play"
+    let clickY = containerCenter.y + containerSize.y * 0.22;
+    let clickPulse = Math.sin(time * 2.5) * .02;
+    let clickAlpha = .7 + Math.sin(time * 2) * .3;
+    let clickColor = hsl(.1, 1, clickAlpha + clickPulse);
+    drawHUDRect(vec3(containerCenter.x, clickY), vec3(containerSize.x * .45, .06), 
+                hsl(.1, .6, .2, clickAlpha * .5), .002, 
+                hsl(.1, .8, .5, clickAlpha * .8));
+    drawHUDText('Click to Play', vec3(containerCenter.x, clickY), 
+                .05 + clickPulse, clickColor, 
+                .004, BLACK, undefined, 'center', 800, 'italic');
+
+    // Animated background elements (stars/particles) inside container
+    for(let i = 12; i--;) {
+        let starX = containerCenter.x - containerSize.x * 0.45 + (i * containerSize.x * 0.07) + Math.sin(time + i * 2) * .03;
+        let starY = containerCenter.y + containerSize.y * 0.32 + Math.sin(time * .8 + i) * .15;
+        let starSize = .006 + Math.sin(time * 5 + i) * .003;
+        let starAlpha = Math.sin(time * 3 + i * 1.5) * .4 + .6;
+        let starColor = hsl(.15 + i * .05, .8, .7, starAlpha);
+        drawHUDRect(vec3(starX, starY), vec3(starSize * 2, starSize * 2), 
+                    hsl(.15 + i * .05, .6, .4, starAlpha * .3), 0);
+        drawHUDRect(vec3(starX, starY), vec3(starSize, starSize), 
+                    starColor, 0);
+    }
+
+    // Retro corner decorations (inside container)
+    for(let i = 4; i--;) {
+        let cornerX = containerCenter.x - containerSize.x * 0.45 + (i % 2) * containerSize.x * 0.9;
+        let cornerY = containerCenter.y - containerSize.y * 0.45 + Math.floor(i/2) * containerSize.y * 0.9;
+        let cornerPulse = Math.sin(time * 4 + i) * .3 + .7;
+        let cornerColor = hsl(.15, .7, .5, cornerPulse * .6);
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.025, .003), cornerColor, 0);
+        drawHUDRect(vec3(cornerX, cornerY), vec3(.003, .025), cornerColor, 0);
+        drawHUDRect(vec3(cornerX, cornerY + .02), vec3(.025, .003), cornerColor, 0);
+        drawHUDRect(vec3(cornerX + .022, cornerY), vec3(.003, .025), cornerColor, 0);
+    }
+
+}
+function controlMenu() {   
+
+     // Controls panel (keeping your existing controls code but repositioned)
+        const controls = [
+            { icon: '↑', key: 'W', desc: 'ACCELERATE' },
+            { icon: '↓', key: 'S', desc: 'BRAKE' },
+            { icon: '←', key: 'A', desc: 'TURN LEFT' },
+            { icon: '→', key: 'D', desc: 'TURN RIGHT' },
+            { icon: '⎋', key: 'ESC', desc: 'MENU' },
+            { icon: '🔄', key: 'R', desc: 'RESTART' }
+        ];
+        
+        // Controls panel positioned at bottom right
+        const controlsPanelX = .21;
+        const controlsPanelY = .83;
+        const controlsPanelWidth = .42;
+        const controlsPanelHeight = .35;
+        
+        // Main controls panel with retro styling
+        drawHUDRect(vec3(controlsPanelX, controlsPanelY), 
+                    vec3(controlsPanelWidth, controlsPanelHeight), 
+                    hsl(.6, .3, .1, .8), .003, 
+                    hsl(.6, .5, .3, .7 + Math.sin(time * 2) * .2));
+        
+        // Controls header
+        drawHUDRect(vec3(controlsPanelX, controlsPanelY - controlsPanelHeight * 0.42), 
+                    vec3(controlsPanelWidth, .04), 
+                    hsl(.6, .4, .2, .9), 0);
+        drawHUDText('CONTROLS', vec3(controlsPanelX, controlsPanelY - controlsPanelHeight * 0.42), 
+                    .028, hsl(.6, .2, .9), .002, BLACK, undefined, 'center', 700);
+        
+        // Draw each control with retro styling
+        for(let i = 0; i < controls.length; i++) {
+            const control = controls[i];
+            const controlY = controlsPanelY - controlsPanelHeight * 0.25 + (i * .045);
+            
+            // Control icon
+            drawHUDText(control.icon, vec3(controlsPanelX - controlsPanelWidth * 0.35, controlY), 
+                        .025, hsl(.15, .8, .8), 0, undefined, undefined, 'center', 400);
+            
+            // Key binding with glow
+            drawHUDRect(vec3(controlsPanelX - controlsPanelWidth * 0.15, controlY), 
+                        vec3(.03, .025), hsl(.15, .6, .2, .8), .001, 
+                        hsl(.15, .8, .4 + Math.sin(time * 3 + i) * .2));
+            drawHUDText(control.key, vec3(controlsPanelX - controlsPanelWidth * 0.15, controlY), 
+                        .02, hsl(.15, .9, .9), 0, undefined, undefined, 'center', 600);
+            
+            // Description
+            drawHUDText(control.desc, vec3(controlsPanelX + controlsPanelWidth * 0.15, controlY), 
+                        .02, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 400);
+        }
+ }
 // // Draw modern radio control panel with animations
 // function drawRadioPanel() {
 //     // Animated glow effect
@@ -693,23 +736,75 @@ function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shad
 function updateHUDValues() {
     if (attractMode || gameOverTimer.isSet()) return;
     
-    // Update distance based on player position (convert to meters)
+    // Update distance based on player position (convert to meters) - SLOWED DOWN
     if (playerVehicle) {
-
-        const startingPosition = 2000; // This is the initial z position of the player
-        playerDistance = Math.floor((playerVehicle.pos.z - startingPosition) / 100);
+        // Slow down distance calculation - divide by 200 instead of 100
+        const startingPosition = 2000; 
+        playerDistance = Math.floor((playerVehicle.pos.z - startingPosition) / 200); // Changed from 100 to 200
         
-        // Update score based on speed and distance
-       const speed = playerVehicle.velocity.z;
-        scoreMultiplier = clamp(speed / 100, 0.5, 2);
-        playerScore += scoreMultiplier;
+        // Ensure distance is never negative
+        playerDistance = Math.max(0, playerDistance);
+        
+        // SLOWER SCORING SYSTEM
+        const speed = playerVehicle.velocity.z;
+        const minSpeedForScore = 30;  // Minimum speed to earn points
+        
+        // Only award points if moving at decent speed
+        if (speed > minSpeedForScore) {
+            // Reduced base score multiplier (much slower scoring)
+            let speedMultiplier = Math.pow(speed / 100, 1.2); // Reduced from 1.5 to 1.2
+            
+            // Reduced speed tier bonuses
+            if (speed > 150) speedMultiplier *= 1.3;      // Reduced from 2.0 to 1.3
+            else if (speed > 120) speedMultiplier *= 1.2; // Reduced from 1.5 to 1.2
+            else if (speed > 80) speedMultiplier *= 1.1;  // Reduced from 1.2 to 1.1
+            
+            // Level difficulty modifier
+            const levelMultiplier = 1 + (currentLevel - 1) * 0.2; // Reduced from 0.3 to 0.2
+            
+            // Much slower time-based scoring
+            const frameScore = speedMultiplier * levelMultiplier * 0.03; // Reduced from 0.1 to 0.03
+            
+            playerScore += frameScore;
+        }
+        
+        // PENALTY SYSTEM (keep penalties to make it challenging)
+        if (speed < minSpeedForScore && speed > 5) {
+            playerScore = Math.max(0, playerScore - 0.2); // Reduced penalty from 0.5 to 0.2
+        }
+        
+        if (playerVehicle.offRoad) {
+            playerScore = Math.max(0, playerScore - 0.5); // Reduced penalty from 1.0 to 0.5
+        }
         
         // Check for level progression
         checkLevelProgression();
     }
-     // Check for distance milestones
+    
+    // Check for distance milestones
     checkDistanceMilestones();
 }
+
+// Modify checkDistanceMilestones for slower progression
+function checkDistanceMilestones() {
+    // Check for distance milestones every 100m (back to 100m but distance counts slower)
+    if (playerDistance % 100 === 0 && playerDistance > 0) {
+        const currentSpeed = playerVehicle.velocity.z;
+        
+        if (currentSpeed > 50) {
+            const baseBonus = 150 * currentLevel; // Reduced from 300 to 150
+            
+            // Reduced speed bonus for milestones
+            const speedBonus = currentSpeed > 120 ? baseBonus * 1.2 : 
+                              currentSpeed > 80 ? baseBonus * 1.1 : baseBonus;
+            
+            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        } else {
+            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+        }
+    }
+}
+
 
 // function to check for level progression
 function checkLevelProgression() {
@@ -730,11 +825,7 @@ function levelUp(newLevel) {
     // Update level
     currentLevel = newLevel;
     
-    // Play level up sound
-    sound_checkpoint.play(1, 1.2); // Slightly higher pitch for level up
-    
-    // Announce level up
-    speak(`LEVEL ${currentLevel} REACHED`);
+
     
     // Trigger level transition animation
     startLevelTransition();
@@ -771,9 +862,7 @@ function drawLevelTransition() {
         // Fade out
         alpha = levelTransitionTimer * 2;
     }
-    // Draw semi-transparent overlay
-    drawHUDRect(vec3(.5, .5), vec3(1, 1), hsl(0, 0, 0, 0.7 * alpha), 0);
-    
+
     // Draw level number
     let levelColor = hsl(.15, .8, .6, alpha);
     drawHUDText(`LEVEL ${currentLevel}`, vec3(.5, .4), .1, levelColor, .008, BLACK, undefined, 'center', 900, 'italic');
@@ -820,12 +909,32 @@ function updateBonusMessages() {
 }
 
 //  function to draw bonus messages
+// Replace the drawBonusMessages function with this improved version
 function drawBonusMessages() {
     for (const msg of bonusMessages) {
         let color = hsl(.15, .9, .7, msg.alpha);
-        drawHUDText(`${msg.message} `, msg.pos, .05, color, .004, hsl(0, 0, 0, msg.alpha * 0.5), undefined, 'center', 700);
+        
+        // Improved shadow with better positioning and color
+        let shadowColor = hsl(0, 0, 0, msg.alpha * 0.8); // Darker, more opaque shadow
+        let shadowOffset = .003; // Consistent shadow offset
+        
+        // Draw shadow first (behind the text)
+        drawHUDText(msg.message, 
+                   vec3(msg.pos.x + shadowOffset, msg.pos.y + shadowOffset), 
+                   .05, shadowColor, 0, undefined, undefined, 'center', 700);
+        
+        // Draw main text with better contrast
+        drawHUDText(msg.message, msg.pos, .05, color, 0, undefined, undefined, 'center', 700);
+        
+        // Optional: Add a subtle glow effect for better visibility
+        if (msg.alpha > 0.5) {
+            let glowColor = hsl(.15, .6, .9, msg.alpha * 0.3);
+            drawHUDText(msg.message, msg.pos, .052, glowColor, 0, undefined, undefined, 'center', 700);
+        }
     }
 }
+
+
 //function to reset HUD values
 function resetHUDValues() {
     playerScore = 0;
@@ -838,22 +947,50 @@ function resetHUDValues() {
 //  function to get difficulty settings based on level
 function getDifficultySettings() {
     return {
-        trafficDensity: 0.2 + (currentLevel * 0.05),  // Increases with level
-        obstacleFrequency: 0.1 + (currentLevel * 0.03),  // Increases with level
-        maxSpeed: 150 + (currentLevel * 10)  // Increases with level
+        trafficDensity: 0.15 + (currentLevel * 0.08),        // More aggressive increase
+        obstacleFrequency: 0.08 + (currentLevel * 0.05),     // More obstacles
+        maxSpeed: 140 + (currentLevel * 8),                  // Slower max speed increase
+        aiAggressiveness: 0.5 + (currentLevel * 0.1),        // More aggressive AI
+        scoreRequirement: currentLevel * 5000,               // Score needed for next level
+        windResistance: 1 + (currentLevel * 0.1),            // Harder to maintain speed
+        fuelConsumption: 1 + (currentLevel * 0.15)           // If fuel system exists
     };
 }
 //  function to check for distance milestones
 function checkDistanceMilestones() {
-    // Check for distance milestones every 100m
-    if (playerDistance % 100 === 0 && playerDistance > 0) {
-        const bonus = 500 * currentLevel;
+    // Check for distance milestones every 200m (increased from 100m)
+    if (playerDistance % 200 === 0 && playerDistance > 0) {
+        // Only award milestone bonus if player is maintaining good speed
+        const currentSpeed = playerVehicle.velocity.z;
         
-        // Changed message format to not include the bonus points
-        addBonus(bonus, `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        if (currentSpeed > 50) { // Must be going at least 50 speed units
+            const baseBonus = 300 * currentLevel; // Reduced base bonus
+            
+            // Speed bonus for milestones
+            const speedBonus = currentSpeed > 120 ? baseBonus * 1.5 : 
+                              currentSpeed > 80 ? baseBonus * 1.2 : baseBonus;
+            
+            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
+        } else {
+            // Show message but no bonus for slow milestone
+            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+        }
     }
-
 }
+
+// level progression to be more challenging
+// Modify the checkLevelProgression function to remove score requirements
+function checkLevelProgression() {
+    // Level up every 500 meters (distance-based only)
+    const newLevel = Math.floor(playerDistance / 500) + 1;
+    
+    if (newLevel > currentLevel) {
+        // Level up immediately when distance is reached
+        levelUp(newLevel);
+    }
+}
+
+
 
 //  function to award bonus points
 function addBonus(points, message, position) {
@@ -875,16 +1012,45 @@ function addBonus(points, message, position) {
 
 //  function to award overtake bonus
 function awardOvertakeBonus(vehicle) {
-    // Calculate bonus based on relative speed
     const relativeSpeed = playerVehicle.velocity.z - vehicle.velocity.z;
-    const bonus = Math.floor(relativeSpeed * 10);
+    const bonus = Math.floor(relativeSpeed * 5); // Reduced from 10 to 5
     
-    // bonus
     addBonus(bonus, "OVERTAKE", vec3(.5, .4));
 }
 
+
 //  function to award speed bonus
 function awardSpeedBonus() {
-    const bonus = Math.floor(playerVehicle.velocity.z * 5);
+    const bonus = Math.floor(playerVehicle.velocity.z * 2); // Reduced from 5 to 2
     addBonus(bonus, "SPEED DEMON", vec3(.5, .4));
+}
+// Add a performance tracking system
+function updatePerformanceMetrics() {
+    if (!playerVehicle.performanceMetrics) {
+        playerVehicle.performanceMetrics = {
+            averageSpeed: 0,
+            topSpeed: 0,
+            timeAtHighSpeed: 0,
+            totalTime: 0,
+            crashes: 0
+        };
+    }
+    
+    const metrics = playerVehicle.performanceMetrics;
+    const currentSpeed = playerVehicle.velocity.z;
+    
+    // Update metrics
+    metrics.totalTime += 1/60; // Assuming 60fps
+    metrics.averageSpeed = (metrics.averageSpeed * 0.99) + (currentSpeed * 0.01);
+    metrics.topSpeed = Math.max(metrics.topSpeed, currentSpeed);
+    
+    if (currentSpeed > 120) {
+        metrics.timeAtHighSpeed += 1/60;
+    }
+    
+    // Performance bonuses
+    if (metrics.timeAtHighSpeed > 10 && metrics.timeAtHighSpeed % 10 < 1/60) {
+        const bonus = Math.floor(metrics.averageSpeed * 50);
+        addBonus(bonus, "HIGH SPEED MASTER", vec3(.5, .4));
+    }
 }
