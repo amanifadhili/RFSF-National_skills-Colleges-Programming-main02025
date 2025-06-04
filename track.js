@@ -10,23 +10,39 @@ function trackPreRender()
     cameraOffset = playerVehicle.pos.z - cameraPlayerOffset.z;
     
     // Get track segment information at camera position for terrain following
-    cameraTrackInfo = new TrackSegmentInfo(cameraOffset);
+     cameraTrackInfo = new TrackSegmentInfo(cameraOffset);
     
+     // Enhanced world heading for curves - smoother rotation
+    const curveStrength = cameraTrackInfo.offset.x / 1000; // Normalize curve intensity
+    worldHeading += 0.0001 * curveStrength * playerVehicle.velocity.z; // Smoother curve rotation
+
     // Gradually rotate world heading based on track curves and player speed
     // Creates subtle banking effect when going around turns
-    worldHeading += .00005 * cameraTrackInfo.offset.x * playerVehicle.velocity.z;
+    // worldHeading += .00005 * cameraTrackInfo.offset.x * playerVehicle.velocity.z;
+    
 
     // Set camera height - much higher in attract mode for overview effect
-    if (attractMode)
+   if (attractMode)
         cameraPos.y = cameraTrackInfo.offset.y + 1e3; // 1000 units high for attract mode
-    else
-        cameraPos.y = cameraTrackInfo.offset.y + cameraPlayerOffset.y; // Follow track height
+    else {
+        // Smoother hill following with look-ahead
+        const lookAheadInfo = new TrackSegmentInfo(cameraOffset + trackSegmentLength * 5);
+        const avgHeight = (cameraTrackInfo.offset.y + lookAheadInfo.offset.y) / 2;
+        cameraPos.y = avgHeight + cameraPlayerOffset.y; // Follow average height
+    }
 
     // Tilt camera based on track pitch (up/down slopes) for immersion
-    cameraRot.x = cameraTrackInfo.pitch / 2;
+   cameraRot.x = cameraTrackInfo.pitch / 1.5;
+   cameraRot.z = curveStrength * 0.1; // Add banking/roll effect for curves
     
+   // Enhanced camera lateral movement - follows curves better
+    const lookAheadDistance = playerVehicle.velocity.z * 2;
+    const lookAheadInfo = new TrackSegmentInfo(cameraOffset + lookAheadDistance);
+    const avgCurve = (cameraTrackInfo.offset.x + lookAheadInfo.offset.x) / 2;
+    cameraPos.x = playerVehicle.pos.x * 0.7 + avgCurve * 0.3;
+
     // Smooth camera horizontal movement - follows 70% of player's lateral position
-    cameraPos.x = playerVehicle.pos.x * .7;
+    // cameraPos.x = playerVehicle.pos.x * .7;
 
     // === LIGHTING AND ATMOSPHERE SETUP ===
     // Dynamic lighting that rotates with world heading for consistent shadows
@@ -39,9 +55,9 @@ function trackPreRender()
 
     // === TRACK GEOMETRY PROJECTION ===
     // Calculate world positions for track segments (iterate in reverse for proper Z-order)
-    const cameraTrackSegment = cameraTrackInfo.segment;           // Current camera segment index
-    const cameraTrackSegmentPercent = cameraTrackInfo.percent;   // Position within segment (0-1)
-    const turnScale = 2;  // Multiplier for how sharp turns appear
+    const cameraTrackSegment = cameraTrackInfo.segment;           
+    const cameraTrackSegmentPercent = cameraTrackInfo.percent;   
+    const turnScale = 3; // Increased from 2 for more dramatic curves
     
     let x = 0;  // Accumulated horizontal offset
     let v = 0;  // Velocity/rate of horizontal change
@@ -61,13 +77,12 @@ function trackPreRender()
         const s = i < 1 ? 1 - cameraTrackSegmentPercent : 1;
         
         // Create world position for this track segment
-        track[j].pos = track[j].offset.copy();  // Start with track's base offset
+         track[j].pos = track[j].offset.copy();    // Start with track's base offset
         
         // Apply accumulated horizontal curvature
         // This creates the "projection" effect where turns appear curved
-        track[j].pos.x = x += v += turnScale * s * track[j].pos.x;
+         track[j].pos.x = x += v += turnScale * s * track[j].offset.x;
         
-        // Adjust Z position relative to camera for proper depth
         track[j].pos.z -= cameraOffset;
     }
 }
@@ -436,20 +451,17 @@ function buildTrack()
         }
         
         // Generate track geometry for this segment
-        let x = 0;  // Horizontal offset (curves disabled)
-        let ys = 0;  // No hills currently
-        let y = ys;  // Vertical offset
-
-        // Calculate horizontal and vertical offsets based on sine waves
-        /*
-        let x = Math.sin(i*roadGenWaveFrequencyX) * roadGenWaveScaleX;  // Commented: sine wave curves
-        let ys = min(2e3,10/roadGenWaveFrequencyY);  // Commented: hill calculation
-        let y = ys * Math.sin(i*roadGenWaveFrequencyY);  // Commented: sine wave hills
-        */
-        let z = i * trackSegmentLength;  // Z position along track
-        let o = vec3(x, y, z);           // 3D offset for this segment
-        let w = i > trackEnd ? roadGenWidth : roadGenWidth;  // Width (0 after track end)
+        let x = Math.sin(i * roadGenWaveFrequencyX) * roadGenWaveScaleX;  // Sine wave curves
         
+        // ENABLE HILLS - Replace the commented hill code
+        let ys = Math.min(2e3, 10/roadGenWaveFrequencyY);  
+        let y = ys * Math.sin(i * roadGenWaveFrequencyY);   
+        
+        let z = i * trackSegmentLength;  
+        let o = vec3(x, y, z);           
+        let w = i > trackEnd ? 0 : roadGenWidth;  
+
+
         let t = track[i];  // Check if segment already exists (for tapering)
         if (t)
         {
