@@ -48,10 +48,10 @@ const sceneryDrawDistance = 500;    // Distance to render background scenery
 
 //  level distance requirements
 const levelDistances = {
-    1: 100,  // Level 1: 300m
-    2: 200,  // Level 2: 500m
-    3: 300,  // Level 3: 700m
-    4: 400  // Magic Garden: 1000m
+    1: 300,  // Level 1: 300m
+    2: 500,  // Level 2: 500m
+    3: 700,  // Level 3: 700m
+    4: 1000  // Magic Garden: 1000m
 };
 
 // Camera positioning
