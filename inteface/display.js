@@ -31,6 +31,15 @@ let highScoreSaved = false; // Add with other global variables
 let finalScore = 0;
 let finalTime = 0;
 // Initialize HUD elements with modern design
+
+const MINIMAP = {
+    x: 30,           // Distance from left edge
+    y: null,         // Will be calculated for bottom position
+    radius: 80,      // Circle radius instead of width/height
+    scale: 0.1       // Scale factor
+};
+
+
 function initHUD()
 {
   console.log("Initializing HUD...");

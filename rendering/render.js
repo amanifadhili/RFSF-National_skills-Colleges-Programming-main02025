@@ -2,6 +2,8 @@
  * Handles all rendering related to debugging (HUD, Map, Meshes, etc.).
  * Renders all debug visualizations to the main canvas.
  */
+
+let showMiniMap = true;
 function drawDebug() {
     const canvas = mainCanvas;
     const context = mainContext;
@@ -14,6 +16,10 @@ function drawDebug() {
     // Show 2D minimap of the track
     if (showMap) {
         renderDebugTrackMap(context, canvas);
+    }
+
+    if (showMiniMap) {
+        drawMiniMap(context, playerVehicle, vehicles, track);
     }
 
     // Show generative canvas for texture or tile inspection

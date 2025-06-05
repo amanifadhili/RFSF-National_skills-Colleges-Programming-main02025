@@ -350,6 +350,7 @@ function gameUpdate(frameTimeMS=0)  // frameTimeMS provided by requestAnimationF
     renderEnvironment(); // Render environment effects (rain, etc.)
     drawHUD();          // Render user interface elements
     drawDebug();        // Render debug information (if enabled)
+    drawMiniMap(); // Render minimap if enabled
     inputUpdatePost();  // Clean up input state after frame
     
     // Schedule next frame
