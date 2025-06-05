@@ -15,9 +15,13 @@ let levelMessages = [
     "ROOKIE DRIVER",
     "INTERMEDIATE DRIVER",
     "EXPERT DRIVER",
-    "MAGIC GARDEN"
+    "MAGICAL GARDEN"
 ];
 let bonusMessages = [];
+// Add win state and timer
+let gameWon = false;
+let winTimer = 0;
+const WIN_DELAY = 5; // 5 seconds delay before stopping the game
 // Initialize HUD elements with modern design
 function initHUD()
 {
@@ -186,6 +190,17 @@ function drawHUD() {
     
     drawLevelTransition();
     drawBonusMessages();
+
+    // Add win message overlay if game is won
+    if (gameWon) {
+        const winColor = hsl(.8, .8, .7);  // Magical purple color
+        drawHUDRect(vec3(.5, .5), vec3(.8, .4), hsl(.8, .3, .1, .9), .01, winColor);
+        drawHUDText("CONGRATULATIONS!", vec3(.5, .4), .1, winColor, .005, BLACK, undefined, 'center', 900);
+        drawHUDText("You've reached the Magical Garden!", vec3(.5, .5), .05, winColor, .003, BLACK, undefined, 'center', 700);
+        if (winTimer > 0) {
+            drawHUDText(`Game will end in ${Math.ceil(winTimer)} seconds...`, vec3(.5, .6), .04, winColor, .002, BLACK, undefined, 'center', 500);
+        }
+    }
 }
 function welcomeScreen()
 {
@@ -446,37 +461,46 @@ function updateHUDValues() {
     
     // Check for distance milestones
     checkDistanceMilestones();
+
+    // Update win timer if game is won
+    if (gameWon && winTimer > 0) {
+        winTimer -= timeDelta;
+        if (winTimer <= 0) {
+            // Stop the game after delay
+            attractMode = 1;
+        }
+    }
 }
 
-// Add level distance requirements
-const levelDistances = {
-    1: 300,  // Level 1: 300m
-    2: 500,  // Level 2: 500m
-    3: 700,  // Level 3: 700m
-    4: 1000  // Magic Garden: 1000m
-};
+
 
 // Replace the checkLevelProgression function
 function checkLevelProgression() {
-    let newLevel = 1;
-    let totalDistance = 0;
+    const totalDistance = Object.values(levelDistances).reduce((sum, dist) => sum + dist, 0);
     
-    // Calculate current level based on distance requirements
-    for (let i = 1; i <= 4; i++) {
-        totalDistance += levelDistances[i];
-        if (playerDistance < totalDistance) {
-            newLevel = i;
-            break;
+    // Check for win condition (reaching magical garden)
+    if (currentLevel === 3 && playerDistance >= levelDistances[1] + levelDistances[2] + levelDistances[3]) {
+        if (!gameWon) {
+            gameWon = true;
+            currentLevel = 4;  // Set to magical garden level
+            startLevelTransition();
+            // Show congratulatory message
+            addBonus(10000, "CONGRATULATIONS! You've reached the Magical Garden!", vec3(0.5, 0.5));
+            // Start win timer
+            winTimer = WIN_DELAY;
         }
+        return;
     }
     
-    if (newLevel > currentLevel) {
-        // Level up!
-        levelUp(newLevel);
+    // Normal level progression
+    if (currentLevel < 3) {  // Only progress through levels 1-3
+        const levelStart = Object.values(levelDistances)
+            .slice(0, currentLevel - 1)
+            .reduce((sum, dist) => sum + dist, 0);
+        const levelEnd = levelStart + levelDistances[currentLevel];
         
-        // Special message for reaching magic garden
-        if (newLevel === 4) {
-            addBonus(5000, "WELCOME TO MAGIC GARDEN!", vec3(.5, .4));
+        if (playerDistance >= levelEnd) {
+            levelUp(currentLevel + 1);
         }
     }
 }

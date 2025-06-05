@@ -41,10 +41,18 @@ const timeDelta = 1/60;     // Time step for physics calculations (1/frameRate)
 
 // Track dimensions and layout
 const trackWidth = 1500;            // Width of the racing track in game units
-const trackEnd = 2.5e3;             // Total number of track segments (2,500 for 300m + 500m + 700m + 1000m)
+const trackEnd = 3e3;               // Total number of track segments (3,000 for 300m + 500m + 700m + 1500m)
 const trackSegmentLength = 100;     // Length of each track segment in game units
 const drawDistance = 1e3;           // Number of segments to render ahead (1,000)
 const sceneryDrawDistance = 500;    // Distance to render background scenery
+
+//  level distance requirements
+const levelDistances = {
+    1: 100,  // Level 1: 300m
+    2: 200,  // Level 2: 500m
+    3: 300,  // Level 3: 700m
+    4: 400  // Magic Garden: 1000m
+};
 
 // Camera positioning
 const cameraPlayerOffset = vec3(0,700,1050);  // Camera offset from player (x, y, z)
