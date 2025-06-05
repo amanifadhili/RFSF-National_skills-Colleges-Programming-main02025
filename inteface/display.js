@@ -13,10 +13,9 @@ let levelTransitionTimer = 0;
 let levelTransitionActive = false;
 let levelMessages = [
     "ROOKIE DRIVER",
-    "GETTING BETTER",
-    "PROFESSIONAL DRIVER",
+    "INTERMEDIATE DRIVER",
     "EXPERT DRIVER",
-    "MASTER OF THE ROAD"
+    "MAGIC GARDEN"
 ];
 let bonusMessages = [];
 // Initialize HUD elements with modern design
@@ -29,204 +28,164 @@ function initHUD()
 function drawHUD() {
     // Attract mode title screen
     if (attractMode) {
-      
         welcomeScreen();
-
-       controlMenu();
-
+        controlMenu();
         return;
     }
     
-// Game countdown display
-if (startCountdownTimer.active() || startCountdown > 0) {
-    if (startCountdown < 4) {
-        let a = 1 - time % 1;
-        let t = startCountdown | 0;
-        
-        if (startCountdown == 0 && startCountdownTimer.active())
-            t = 'GO!';
-        
-        // Enhanced countdown styling with unique colors
-        let colors = [hsl(.3, .9, .7), hsl(.15, .9, .7), hsl(.6, .9, .7), hsl(.0, .9, .7)]; // Green, Orange, Blue, Red
-        let c = colors[startCountdown].copy();
-        c.a = a;
-        
-        // Animated background circle that pulses
-        let circleSize = .3 + (1 - a) * .2 + Math.sin(time * 6) * .02;
-        let circleColor = colors[startCountdown].copy();
-        circleColor.a = .2 * a;
-        drawHUDRect(vec3(.5, .5), vec3(circleSize, circleSize), circleColor, .01, c);
-        
-        // Secondary ring for depth
-        let ring2Size = circleSize * 1.3;
-        let ring2Color = colors[startCountdown].copy();
-        ring2Color.a = .1 * a;
-        drawHUDRect(vec3(.5, .5), vec3(ring2Size, ring2Size), 0, .006, ring2Color);
-        
-        // Main countdown text with dramatic scaling
-        let textSize = .35 + (1 - a) * .15 + Math.sin(time * 8) * .01;
-        drawHUDText(t, vec3(.5, .5), textSize, c, .012, BLACK, undefined, 'center', 900, undefined, undefined, 0);
-        
-        // Animated corner energy bursts
-        for(let i = 4; i--;) {
-            let cornerX = .15 + (i % 2) * .7;
-            let cornerY = .25 + Math.floor(i/2) * .5;
-            let burstPulse = Math.sin(time * 10 + i * 1.5) * .5 + .5;
-            let burstSize = .04 + burstPulse * .03;
-            let burstColor = colors[startCountdown].copy();
-            burstColor.a = burstPulse * .8 * a;
-            drawHUDRect(vec3(cornerX, cornerY), vec3(burstSize, burstSize), burstColor, 0);
+    // Game countdown display
+    if (startCountdownTimer.active() || startCountdown > 0) {
+        if (startCountdown < 4) {
+            let a = 1 - time % 1;
+            let t = startCountdown | 0;
             
-            // Secondary burst effect
-            let burst2Size = burstSize * .6;
-            let burst2Color = WHITE.copy();
-            burst2Color.a = burstPulse * .4 * a;
-            drawHUDRect(vec3(cornerX, cornerY), vec3(burst2Size, burst2Size), burst2Color, 0);
-        }
-        
-        // Rotating orbital elements
-        let orbitRadius = .25;
-        for(let j = 6; j--;) {
-            let angle = (j / 6) * Math.PI * 2 + time * 4;
-            let orbitX = .5 + Math.cos(angle) * orbitRadius;
-            let orbitY = .5 + Math.sin(angle) * orbitRadius;
-            let orbitPulse = Math.sin(time * 6 + j) * .3 + .7;
-            let orbitColor = colors[startCountdown].copy();
-            orbitColor.a = orbitPulse * .6 * a;
-            let orbitSize = .02 + orbitPulse * .015;
-            drawHUDRect(vec3(orbitX, orbitY), vec3(orbitSize, orbitSize), orbitColor, 0);
-        }
-        
-        // Screen edge flash effect
-        if (a > .7) {
-            let flashIntensity = (a - .7) * 3.33; // 0 to 1 range
-            let flashColor = colors[startCountdown].copy();
-            flashColor.a = flashIntensity * .15;
+            if (startCountdown == 0 && startCountdownTimer.active())
+                t = 'GO!';
             
-            // Top and bottom bars
-            drawHUDRect(vec3(.5, .05), vec3(1, .1), flashColor, 0);
-            drawHUDRect(vec3(.5, .95), vec3(1, .1), flashColor, 0);
+            // Enhanced countdown styling with unique colors
+            let colors = [hsl(.3, .9, .7), hsl(.15, .9, .7), hsl(.6, .9, .7), hsl(.0, .9, .7)]; // Green, Orange, Blue, Red
+            let c = colors[startCountdown].copy();
+            c.a = a;
             
-            // Left and right bars
-            drawHUDRect(vec3(.05, .5), vec3(.1, 1), flashColor, 0);
-            drawHUDRect(vec3(.95, .5), vec3(.1, 1), flashColor, 0);
+            // Animated background circle that pulses
+            let circleSize = .3 + (1 - a) * .2 + Math.sin(time * 6) * .02;
+            let circleColor = colors[startCountdown].copy();
+            circleColor.a = .2 * a;
+            drawHUDRect(vec3(.5, .5), vec3(circleSize, circleSize), circleColor, .01, c);
+            
+            // Main countdown text with dramatic scaling
+            let textSize = .35 + (1 - a) * .15 + Math.sin(time * 8) * .01;
+            drawHUDText(t, vec3(.5, .5), textSize, c, .012, BLACK, undefined, 'center', 900, undefined, undefined, 0);
         }
     }
-}
 
-
-// }
- updateHUDValues();
+    updateHUDValues();
     
     // Update level transition
     updateLevelTransition();
     
     // Update bonus messages
     updateBonusMessages();
+    
     // speed display in top-right
     const mph = playerVehicle.velocity.z | 0;
-const aspect = mainCanvasSize.x / mainCanvasSize.y;
+    const aspect = mainCanvasSize.x / mainCanvasSize.y;
 
-if (aspect > .75) {
-    // Speed background panel - UPDATED SIZE
-    drawHUDRect(vec3(.85, .08), vec3(.20, .10), hsl(.0, .8, .2, .8), .003, hsl(.0, .8, .6));
-    
-    // Speed text with glow effect
-    drawHUDText('SPEED', vec3(.85, .055), .025, hsl(.0, .8, .8), .002, BLACK, undefined, 'center', 300);
-    drawHUDText(mph + ' KPH', vec3(.85, .095), .045, hsl(.0, .9, .9), .003, hsl(.0, .8, .3), undefined, 'center', 700, 'italic');
-}
-// score, distance, and level:
-if (!attractMode && !gameOverTimer.isSet()) {
-    // Create a unified stats panel in the top-left
-    const panelWidth = .45;
-    const panelHeight = .22;
-    const panelX = .18;
-    const panelY = .15;
-    
-    // Main panel background with gradient-like effect
-    drawHUDRect(vec3(panelX, panelY), vec3(panelWidth, panelHeight), 
-                hsl(.6, .4, .15, .85), .004, hsl(.6, .6, .4));
-    
-    // Panel header
-    drawHUDRect(vec3(panelX, panelY - panelHeight * 0.38), 
-                vec3(panelWidth, .04), hsl(.6, .5, .25, .9), 0);
-    drawHUDText('DRIVER STATS', vec3(panelX, panelY - panelHeight * 0.38), 
-                .03, hsl(.6, .2, .9), .002, BLACK, undefined, 'center', 700);
-    
-    // Decorative corner accents
-    for(let i = 4; i--;) {
-        let cornerX = panelX - panelWidth * 0.45 + (i % 2) * panelWidth * 0.9;
-        let cornerY = panelY - panelHeight * 0.45 + Math.floor(i/2) * panelHeight * 0.9;
-        let cornerColor = hsl(.6, .6, .5, .6);
+    if (aspect > .75) {
+        // Speed background panel - UPDATED SIZE
+        drawHUDRect(vec3(.85, .08), vec3(.20, .10), hsl(.0, .8, .2, .8), .003, hsl(.0, .8, .6));
         
-        // L-shaped corner accents
-        drawHUDRect(vec3(cornerX, cornerY), vec3(.02, .002), cornerColor, 0);
-        drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .02), cornerColor, 0);
+        // Speed text with glow effect
+        drawHUDText('SPEED', vec3(.85, .055), .025, hsl(.0, .8, .8), .002, BLACK, undefined, 'center', 300);
+        drawHUDText(mph + ' KPH', vec3(.85, .095), .045, hsl(.0, .9, .9), .003, hsl(.0, .8, .3), undefined, 'center', 700, 'italic');
+    }
+
+    // score, distance, and level:
+    if (!attractMode) {
+        // Create a unified stats panel in the top-left
+        const panelWidth = .45;
+        const panelHeight = .22;
+        const panelX = .18;
+        const panelY = .15;
+        
+        // Main panel background with gradient-like effect
+        drawHUDRect(vec3(panelX, panelY), vec3(panelWidth, panelHeight), 
+                    hsl(.6, .4, .15, .85), .004, hsl(.6, .6, .4));
+        
+        // Panel header
+        drawHUDRect(vec3(panelX, panelY - panelHeight * 0.38), 
+                    vec3(panelWidth, .04), hsl(.6, .5, .25, .9), 0);
+        drawHUDText('DRIVER STATS', vec3(panelX, panelY - panelHeight * 0.38), 
+                    .03, hsl(.6, .2, .9), .002, BLACK, undefined, 'center', 700);
+        
+        // Decorative corner accents
+        for(let i = 4; i--;) {
+            let cornerX = panelX - panelWidth * 0.45 + (i % 2) * panelWidth * 0.9;
+            let cornerY = panelY - panelHeight * 0.45 + Math.floor(i/2) * panelHeight * 0.9;
+            let cornerColor = hsl(.6, .6, .5, .6);
+            
+            // L-shaped corner accents
+            drawHUDRect(vec3(cornerX, cornerY), vec3(.02, .002), cornerColor, 0);
+            drawHUDRect(vec3(cornerX, cornerY), vec3(.002, .02), cornerColor, 0);
+        }
+        
+        // Score section with icon and value
+        const scoreY = panelY - panelHeight * 0.2;
+        drawHUDText('⭐', vec3(panelX - panelWidth * 0.35, scoreY), 
+                    .035, hsl(.15, .9, .7), 0, undefined, undefined, 'center', 400);
+        drawHUDText('SCORE', vec3(panelX - panelWidth * 0.15, scoreY), 
+                    .025, hsl(.15, .7, .8), .001, BLACK, undefined, 'left', 500);
+        drawHUDText(Math.floor(playerScore).toLocaleString(), vec3(panelX + panelWidth * 0.50, scoreY), 
+                    .035, hsl(.15, .9, .9), .002, hsl(.15, .8, .2, .5), undefined, 'right', 700);
+        
+        // Horizontal separator
+        drawHUDRect(vec3(panelX, panelY), 
+                    vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
+        
+        // Distance section with icon and value
+        const distanceY = panelY + panelHeight * 0.1;
+        drawHUDText('🏁', vec3(panelX - panelWidth * 0.35, distanceY), 
+                    .035, hsl(.6, .9, .7), 0, undefined, undefined, 'center', 400);
+        drawHUDText('DISTANCE', vec3(panelX - panelWidth * 0.15, distanceY), 
+                    .025, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 500);
+        
+        // Animate distance counter for a more dynamic feel
+        const displayDistance = Math.floor(playerDistance);
+        const distanceText = displayDistance.toLocaleString() + 'm';
+        drawHUDText(distanceText, vec3(panelX + panelWidth * 0.5, distanceY), 
+                    .035, hsl(.6, .9, .9), .002, hsl(.6, .8, .2, .5), undefined, 'right', 700);
+        
+        // Horizontal separator
+        drawHUDRect(vec3(panelX, panelY + panelHeight * 0.2), 
+                    vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
+        
+        // Level section with icon and value
+        const levelY = panelY + panelHeight * 0.3;
+        drawHUDText('🏆', vec3(panelX - panelWidth * 0.35, levelY), 
+                    .035, hsl(.3, .9, .7), 0, undefined, undefined, 'center', 400);
+        drawHUDText('LEVEL', vec3(panelX - panelWidth * 0.15, levelY), 
+                    .025, hsl(.3, .7, .8), .001, BLACK, undefined, 'left', 500);
+        
+        // Add a subtle pulse effect to the level number
+        const levelPulse = Math.sin(time * 3) * .005;
+        const levelSize = .04 + levelPulse;
+        drawHUDText(currentLevel.toString(), vec3(panelX + panelWidth * 0.50, levelY), 
+                    levelSize, hsl(.3, .9, .9), .002, hsl(.3, .8, .2, .5), undefined, 'right', 800);
+        
+        // Level progress bar
+        const currentLevelStart = Object.values(levelDistances)
+            .slice(0, currentLevel - 1)
+            .reduce((sum, dist) => sum + dist, 0);
+        const currentLevelEnd = currentLevelStart + levelDistances[currentLevel];
+        const levelProgress = (playerDistance - currentLevelStart) / levelDistances[currentLevel];
+        
+        // Progress bar background
+        drawHUDRect(vec3(panelX, panelY + panelHeight * 0.4), 
+                    vec3(panelWidth - .04, .015), hsl(.3, .2, .2, .6), .001, hsl(.3, .3, .4, .4));
+        
+        // Progress bar fill with level-specific color
+        const levelColors = [
+            hsl(.15, .8, .5),  // Level 1: Orange
+            hsl(.3, .8, .5),   // Level 2: Green
+            hsl(.6, .8, .5),   // Level 3: Blue
+            hsl(.8, .8, .5)    // Magic Garden: Purple
+        ];
+        
+        // Calculate alpha with pulse effect
+        const alpha = .8 + Math.sin(time * 4) * .2;
+        
+        drawHUDRect(vec3(panelX - (panelWidth - .04) * (0.5 - levelProgress/2), panelY + panelHeight * 0.4), 
+                    vec3((panelWidth - .04) * levelProgress, .015), 
+                    hsl(levelColors[currentLevel - 1].h, levelColors[currentLevel - 1].s, levelColors[currentLevel - 1].l, alpha), 0);
+        
+        // Add distance text below progress bar
+        const progressText = `${Math.floor(playerDistance - currentLevelStart)}/${levelDistances[currentLevel]}m`;
+        drawHUDText(progressText, vec3(panelX, panelY + panelHeight * 0.45), 
+                    .02, hsl(.3, .7, .8), .001, BLACK, undefined, 'center', 500);
     }
     
-    // Score section with icon and value
-    const scoreY = panelY - panelHeight * 0.2;
-    drawHUDText('⭐', vec3(panelX - panelWidth * 0.35, scoreY), 
-                .035, hsl(.15, .9, .7), 0, undefined, undefined, 'center', 400);
-    drawHUDText('SCORE', vec3(panelX - panelWidth * 0.15, scoreY), 
-                .025, hsl(.15, .7, .8), .001, BLACK, undefined, 'left', 500);
-    drawHUDText(Math.floor(playerScore).toLocaleString(), vec3(panelX + panelWidth * 0.50, scoreY), 
-                .035, hsl(.15, .9, .9), .002, hsl(.15, .8, .2, .5), undefined, 'right', 700);
-    
-    // Horizontal separator
-    drawHUDRect(vec3(panelX, panelY), 
-                vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
-    
-    // Distance section with icon and value
-    const distanceY = panelY + panelHeight * 0.1;
-    drawHUDText('🏁', vec3(panelX - panelWidth * 0.35, distanceY), 
-                .035, hsl(.6, .9, .7), 0, undefined, undefined, 'center', 400);
-    drawHUDText('DISTANCE', vec3(panelX - panelWidth * 0.15, distanceY), 
-                .025, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 500);
-    
-    // Animate distance counter for a more dynamic feel
-    const displayDistance = Math.floor(playerDistance);
-    const distanceText = displayDistance.toLocaleString() + 'm';
-    drawHUDText(distanceText, vec3(panelX + panelWidth * 0.5, distanceY), 
-                .035, hsl(.6, .9, .9), .002, hsl(.6, .8, .2, .5), undefined, 'right', 700);
-    
-    // Horizontal separator
-    drawHUDRect(vec3(panelX, panelY + panelHeight * 0.2), 
-                vec3(panelWidth - .04, .001), hsl(.6, .3, .6, .4), 0);
-    
-    // Level section with icon and value
-    const levelY = panelY + panelHeight * 0.3;
-    drawHUDText('🏆', vec3(panelX - panelWidth * 0.35, levelY), 
-                .035, hsl(.3, .9, .7), 0, undefined, undefined, 'center', 400);
-    drawHUDText('LEVEL', vec3(panelX - panelWidth * 0.15, levelY), 
-                .025, hsl(.3, .7, .8), .001, BLACK, undefined, 'left', 500);
-    
-    // Add a subtle pulse effect to the level number
-    const levelPulse = Math.sin(time * 3) * .005;
-    const levelSize = .04 + levelPulse;
-    drawHUDText(currentLevel.toString(), vec3(panelX + panelWidth * 0.50, levelY), 
-                levelSize, hsl(.3, .9, .9), .002, hsl(.3, .8, .2, .5), undefined, 'right', 800);
-    
-    // Level progress bar
-    const nextLevelDistance = currentLevel * 500;
-    const prevLevelDistance = (currentLevel - 1) * 500;
-    const levelProgress = (playerDistance - prevLevelDistance) / (nextLevelDistance - prevLevelDistance);
-    
-    // Progress bar background
-    drawHUDRect(vec3(panelX, panelY + panelHeight * 0.4), 
-                vec3(panelWidth - .04, .015), hsl(.3, .2, .2, .6), .001, hsl(.3, .3, .4, .4));
-    
-    // Progress bar fill
-    drawHUDRect(vec3(panelX - (panelWidth - .04) * (0.5 - levelProgress/2), panelY + panelHeight * 0.4), 
-                vec3((panelWidth - .04) * levelProgress, .015), hsl(.3, .8, .5 + Math.sin(time * 4) * .1), 0);
-}
-
- 
     drawLevelTransition();
-    
-    // Draw bonus messages 
     drawBonusMessages();
-   
 }
 function welcomeScreen()
 {
@@ -438,7 +397,7 @@ function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shad
 }
 // function to hud.js
 function updateHUDValues() {
-    if (attractMode || gameOverTimer.isSet()) return;
+    if (attractMode ) return;
     
     // Update distance based on player position (convert to meters) - SLOWED DOWN
     if (playerVehicle) {
@@ -489,35 +448,36 @@ function updateHUDValues() {
     checkDistanceMilestones();
 }
 
-// Modify checkDistanceMilestones for slower progression
-function checkDistanceMilestones() {
-    // Check for distance milestones every 100m (back to 100m but distance counts slower)
-    if (playerDistance % 100 === 0 && playerDistance > 0) {
-        const currentSpeed = playerVehicle.velocity.z;
-        
-        if (currentSpeed > 50) {
-            const baseBonus = 150 * currentLevel; // Reduced from 300 to 150
-            
-            // Reduced speed bonus for milestones
-            const speedBonus = currentSpeed > 120 ? baseBonus * 1.2 : 
-                              currentSpeed > 80 ? baseBonus * 1.1 : baseBonus;
-            
-            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
-        } else {
-            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+// Add level distance requirements
+const levelDistances = {
+    1: 300,  // Level 1: 300m
+    2: 500,  // Level 2: 500m
+    3: 700,  // Level 3: 700m
+    4: 1000  // Magic Garden: 1000m
+};
+
+// Replace the checkLevelProgression function
+function checkLevelProgression() {
+    let newLevel = 1;
+    let totalDistance = 0;
+    
+    // Calculate current level based on distance requirements
+    for (let i = 1; i <= 4; i++) {
+        totalDistance += levelDistances[i];
+        if (playerDistance < totalDistance) {
+            newLevel = i;
+            break;
         }
     }
-}
-
-
-// function to check for level progression
-function checkLevelProgression() {
-    // Level up every 500 meters
-    const newLevel = Math.floor(playerDistance / 500) + 1;
     
     if (newLevel > currentLevel) {
         // Level up!
         levelUp(newLevel);
+        
+        // Special message for reaching magic garden
+        if (newLevel === 4) {
+            addBonus(5000, "WELCOME TO MAGIC GARDEN!", vec3(.5, .4));
+        }
     }
 }
 
@@ -651,82 +611,14 @@ function resetHUDValues() {
 //  function to get difficulty settings based on level
 function getDifficultySettings() {
     return {
-        trafficDensity: 0.15 + (currentLevel * 0.08),        // More aggressive increase
-        obstacleFrequency: 0.08 + (currentLevel * 0.05),     // More obstacles
-        maxSpeed: 140 + (currentLevel * 8),                  // Slower max speed increase
-        aiAggressiveness: 0.5 + (currentLevel * 0.1),        // More aggressive AI
-        scoreRequirement: currentLevel * 5000,               // Score needed for next level
-        windResistance: 1 + (currentLevel * 0.1),            // Harder to maintain speed
-        fuelConsumption: 1 + (currentLevel * 0.15)           // If fuel system exists
+        trafficDensity: 0.15 + (currentLevel * 0.1),        // More aggressive increase
+        obstacleFrequency: 0.08 + (currentLevel * 0.06),    // More obstacles
+        maxSpeed: 140 + (currentLevel * 10),                // Slower max speed increase
+        aiAggressiveness: 0.5 + (currentLevel * 0.15),      // More aggressive AI
+        scoreRequirement: currentLevel * 5000,              // Score needed for next level
+        windResistance: 1 + (currentLevel * 0.15),          // Harder to maintain speed
+        fuelConsumption: 1 + (currentLevel * 0.2)           // If fuel system exists
     };
-}
-//  function to check for distance milestones
-function checkDistanceMilestones() {
-    // Check for distance milestones every 200m (increased from 100m)
-    if (playerDistance % 200 === 0 && playerDistance > 0) {
-        // Only award milestone bonus if player is maintaining good speed
-        const currentSpeed = playerVehicle.velocity.z;
-        
-        if (currentSpeed > 50) { // Must be going at least 50 speed units
-            const baseBonus = 300 * currentLevel; // Reduced base bonus
-            
-            // Speed bonus for milestones
-            const speedBonus = currentSpeed > 120 ? baseBonus * 1.5 : 
-                              currentSpeed > 80 ? baseBonus * 1.2 : baseBonus;
-            
-            addBonus(Math.floor(speedBonus), `${playerDistance}m MILESTONE`, vec3(.5, .4));
-        } else {
-            // Show message but no bonus for slow milestone
-            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
-        }
-    }
-}
-
-// level progression to be more challenging
-// Modify the checkLevelProgression function to remove score requirements
-function checkLevelProgression() {
-    // Level up every 500 meters (distance-based only)
-    const newLevel = Math.floor(playerDistance / 500) + 1;
-    
-    if (newLevel > currentLevel) {
-        // Level up immediately when distance is reached
-        levelUp(newLevel);
-    }
-}
-
-
-
-//  function to award bonus points
-function addBonus(points, message, position) {
-    // points to score
-    playerScore += points;
-    
-    // Create bonus message
-    bonusMessages.push({
-        message: message,
-        points: points,
-        pos: position || vec3(.5, .5),
-        timeLeft: 2, // 2 seconds display time
-        alpha: 1
-    });
-    
-    // Play bonus sound
-    sound_click.play(1, 1.5); // Higher pitch for bonus
-}
-
-//  function to award overtake bonus
-function awardOvertakeBonus(vehicle) {
-    const relativeSpeed = playerVehicle.velocity.z - vehicle.velocity.z;
-    const bonus = Math.floor(relativeSpeed * 5); // Reduced from 10 to 5
-    
-    addBonus(bonus, "OVERTAKE", vec3(.5, .4));
-}
-
-
-//  function to award speed bonus
-function awardSpeedBonus() {
-    const bonus = Math.floor(playerVehicle.velocity.z * 2); // Reduced from 5 to 2
-    addBonus(bonus, "SPEED DEMON", vec3(.5, .4));
 }
 // Add a performance tracking system
 function updatePerformanceMetrics() {
@@ -756,5 +648,31 @@ function updatePerformanceMetrics() {
     if (metrics.timeAtHighSpeed > 10 && metrics.timeAtHighSpeed % 10 < 1/60) {
         const bonus = Math.floor(metrics.averageSpeed * 50);
         addBonus(bonus, "HIGH SPEED MASTER", vec3(.5, .4));
+    }
+}
+
+// Modify checkDistanceMilestones for new level distances
+function checkDistanceMilestones() {
+    // Check for distance milestones every 100m
+    if (playerDistance % 100 === 0 && playerDistance > 0) {
+        const currentSpeed = playerVehicle.velocity.z;
+        
+        if (currentSpeed > 50) {
+            // Base bonus increases with level
+            const baseBonus = 200 * currentLevel;
+            
+            // Speed bonus for milestones
+            const speedBonus = currentSpeed > 120 ? baseBonus * 1.5 : 
+                              currentSpeed > 80 ? baseBonus * 1.2 : baseBonus;
+            
+            // Special milestone message for magic garden
+            const message = currentLevel === 4 ? 
+                `${playerDistance}m MAGIC GARDEN` : 
+                `${playerDistance}m MILESTONE`;
+            
+            addBonus(Math.floor(speedBonus), message, vec3(.5, .4));
+        } else {
+            addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
+        }
     }
 }

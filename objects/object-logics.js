@@ -364,10 +364,10 @@ class TrackSegment
         }
 
         // === DETERMINE SEGMENT VISUAL STYLE ===
-        // Check if this segment should have checkpoint/starting line markings
-        let checkpointLine = segmentIndex > 25 && segmentIndex < 30;  // Starting area
-        if (segmentIndex % checkpointTrackSegments < 5)
-            checkpointLine = 1;  // Regular checkpoint intervals
+        // Check if this segment should have level markers
+        let levelMarker = segmentIndex > 25 && segmentIndex < 30;  // Starting area
+        if (segmentIndex === 300 || segmentIndex === 800 || segmentIndex === 1500)
+            levelMarker = 1;  // Level transition points
 
         {
             const largeSegmentIndex = segmentIndex / 6 | 0;
@@ -376,7 +376,7 @@ class TrackSegment
             this.colorGround = hsl(.083, .2, .7 + Math.cos(segmentIndex * 2 / PI) * .05);
             this.colorRoad = BLACK;
             
-            if (checkpointLine)
+            if (levelMarker)
                 this.colorRoad = WHITE;
             
             // Enhanced lane markings for 3-lane system
@@ -385,87 +385,81 @@ class TrackSegment
 
         // === PLACE SCENERY OBJECTS ===
         // Helper function to add sprites to this segment
-       // === EASY CITY SCENERY SYSTEM ===
-      // === IMPROVED CITY SCENERY SYSTEM ===
-const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
+        const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
 
-const BARE_AREA_CHANCE = 0.6;     // 60% empty space (lots of open land)
-const BUILDING_CHANCE = 0.05;     // 5% chance of building (very few buildings)
-const HOUSE_CHANCE = 0.15;        // 15% chance of house (scattered houses)
-const TREE_CHANCE = 0.4;          // 40% chance of tree (lots of trees)
-const SIGN_CHANCE = 0.02;         // 2% chance of sign (rare signs)
+        const BARE_AREA_CHANCE = 0.6;     // 60% empty space (lots of open land)
+        const BUILDING_CHANCE = 0.05;     // 5% chance of building (very few buildings)
+        const HOUSE_CHANCE = 0.15;        // 15% chance of house (scattered houses)
+        const TREE_CHANCE = 0.4;          // 40% chance of tree (lots of trees)
+        const SIGN_CHANCE = 0.02;         // 2% chance of sign (rare signs)
 
-
-
-if (segmentIndex % checkpointTrackSegments == 0) // Checkpoint markers
-{
-    // Keep existing checkpoint code
-    addSprite(vec3(-width + 100, 0), vec3(800), WHITE, vec3(6, 0), 0);
-    addSprite(vec3(width - 100, 0), vec3(800), WHITE, vec3(7, 0), 0);
-}
-else if (segmentIndex == 30) // Starting line banner
-{
-    addSprite(vec3(0, -700, 0), vec3(1300), WHITE, vec3(5, 0), 0);
-}
-else
-{
-     // OBSTACLE PLACEMENT LOGIC
-         this.placeObstacles(segmentIndex, addSprite, width);
+        if (levelMarker) // Level transition markers
+        {
+            // Level transition markers
+            addSprite(vec3(-width + 100, 0), vec3(800), WHITE, vec3(6, 0), 0);
+            addSprite(vec3(width - 100, 0), vec3(800), WHITE, vec3(7, 0), 0);
+        }
+        else if (segmentIndex == 30) // Starting line banner
+        {
+            addSprite(vec3(0, -700, 0), vec3(1300), WHITE, vec3(5, 0), 0);
+        }
+        else
+        {
+            // OBSTACLE PLACEMENT LOGIC
+            this.placeObstacles(segmentIndex, addSprite, width);
             
-    // REALISTIC CITY SCENERY GENERATION
-    random.setSeed(segmentIndex); // Consistent random for each segment
-    
-    // Left side of road - only add something if NOT bare area
-if (random.bool(BUILDING_CHANCE)) {
-    // Office/Commercial Building - use different building types
-    const buildingType = random.int(4); // 0,1,2,3 for different buildings
-    const buildingHeight = random.float(1200, 2000);
-    const buildingWidth = random.float(600, 1000);
-    addSprite(vec3(-(width + 1800), 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
-}
-else if (random.bool(HOUSE_CHANCE)) {
-    // Residential House - use house tile
-    const houseSize = random.float(400, 700);
-    addSprite(vec3(-(width + 1200), 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
-}
-else if (random.bool(TREE_CHANCE)) {
-    // Tree/Park area
-    const treeSize = random.float(600, 1000);
-    addSprite(vec3(-(width + 1000), 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
-}
-    
-    // Right side of road - only add something if NOT bare area
-if (!random.bool(BARE_AREA_CHANCE)) {
-    if (random.bool(BUILDING_CHANCE)) {
-        // Office/Commercial Building - use different building types
-        const buildingType = random.int(4); // 0,1,2,3 for different buildings
-        const buildingHeight = random.float(1200, 2000);
-        const buildingWidth = random.float(600, 1000);
-        addSprite(vec3(width + 1800, 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
-    }
-    else if (random.bool(HOUSE_CHANCE)) {
-        // Residential House - use house tile
-        const houseSize = random.float(400, 700);
-        addSprite(vec3(width + 1200, 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
-    }
-    else if (random.bool(TREE_CHANCE)) {
-        // Tree/Park area
-        const treeSize = random.float(600, 1000);
-        addSprite(vec3(width + 1000, 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
-    }
-}
+            // REALISTIC CITY SCENERY GENERATION
+            random.setSeed(segmentIndex); // Consistent random for each segment
+            
+            // Left side of road - only add something if NOT bare area
+            if (random.bool(BUILDING_CHANCE)) {
+                // Office/Commercial Building - use different building types
+                const buildingType = random.int(4); // 0,1,2,3 for different buildings
+                const buildingHeight = random.float(1200, 2000);
+                const buildingWidth = random.float(600, 1000);
+                addSprite(vec3(-(width + 1800), 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+            }
+            else if (random.bool(HOUSE_CHANCE)) {
+                // Residential House - use house tile
+                const houseSize = random.float(400, 700);
+                addSprite(vec3(-(width + 1200), 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+            }
+            else if (random.bool(TREE_CHANCE)) {
+                // Tree/Park area
+                const treeSize = random.float(600, 1000);
+                addSprite(vec3(-(width + 1000), 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+            }
+            
+            // Right side of road - only add something if NOT bare area
+            if (!random.bool(BARE_AREA_CHANCE)) {
+                if (random.bool(BUILDING_CHANCE)) {
+                    // Office/Commercial Building - use different building types
+                    const buildingType = random.int(4); // 0,1,2,3 for different buildings
+                    const buildingHeight = random.float(1200, 2000);
+                    const buildingWidth = random.float(600, 1000);
+                    addSprite(vec3(width + 1800, 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+                }
+                else if (random.bool(HOUSE_CHANCE)) {
+                    // Residential House - use house tile
+                    const houseSize = random.float(400, 700);
+                    addSprite(vec3(width + 1200, 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+                }
+                else if (random.bool(TREE_CHANCE)) {
+                    // Tree/Park area
+                    const treeSize = random.float(600, 1000);
+                    addSprite(vec3(width + 1000, 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+                }
+            }
 
-    // Occasional road signs (less frequent)
-    if (random.bool(SIGN_CHANCE)) {
-        const signSide = random.bool() ? 1 : -1;
-        addSprite(vec3((width + 600) * signSide, 0, 0), vec3(400), WHITE, vec3(random.int(8), 2));
-    }
-}
-
-
+            // Occasional road signs (less frequent)
+            if (random.bool(SIGN_CHANCE)) {
+                const signSide = random.bool() ? 1 : -1;
+                addSprite(vec3((width + 600) * signSide, 0, 0), vec3(400), WHITE, vec3(random.int(8), 2));
+            }
+        }
     }
 
-     /**
+    /**
      * Places road obstacles randomly
      */
     placeObstacles(segmentIndex, addSprite, width)

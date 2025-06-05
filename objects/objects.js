@@ -194,12 +194,12 @@ class PlayerVehicle extends Vehicle {
         const playerBrake = 2;
 
         // Checkpoint logic
-        if (playerVehicle.pos.z > nextCheckpointDistance) {
-            nextCheckpointDistance += checkpointDistance;
-            checkpointTimeLeft += 40;
-            speak('YOU ARRIVED AT CHECKPOINT');
-            sound_checkpoint.play();
-        }
+        // if (playerVehicle.pos.z > nextCheckpointDistance) {
+        //     nextCheckpointDistance += checkpointDistance;
+        //     checkpointTimeLeft += 40;
+        //     speak('YOU ARRIVED AT CHECKPOINT');
+        //     sound_checkpoint.play();
+        // }
 
         // Collision detection with AI vehicles
         for (const v of vehicles) {
@@ -236,7 +236,6 @@ class PlayerVehicle extends Vehicle {
             playerInput.x = clamp(4 * (mousePos.x - 0.5 - center), -1, 1);
         }
 
-        if (gameOverTimer.isSet()) playerInput = vec3();
 
         if (testDrive) this.velocity.z = 30;
         this.velocity.y += gravity;
@@ -271,14 +270,7 @@ class PlayerVehicle extends Vehicle {
         {
             this.pos.y = playerTrackInfo.offset.y;
             const trackPitch = playerTrackInfo.pitch;
-            if (!gameOverTimer.isSet())
-            {
-                let reflectVelocity = vec3(0, Math.cos(trackPitch), Math.sin(trackPitch))
-                .scale(-elasticity *
-                (Math.cos(trackPitch) * this.velocity.y + Math.sin(trackPitch) * this.velocity.z))
-
-                this.velocity = this.velocity.add(reflectVelocity);
-            }
+    
 
             if (Math.abs(this.pos.x) > playerTrackInfo.width - this.collisionSize.x)
             {
@@ -319,8 +311,7 @@ class PlayerVehicle extends Vehicle {
 
         if (startCountdown > 0)
             this.velocity.z=0
-        if (gameOverTimer.isSet())
-            this.velocity = this.velocity.scale(.95);
+     
    
         {
             // check for collisions
@@ -361,7 +352,7 @@ class PlayerVehicle extends Vehicle {
             }
         }
         // Skip if in attract mode or game over
-if (attractMode || gameOverTimer.isSet()) return;
+if (attractMode ) return;
 
 // Keep track of vehicles that have been overtaken
 if (!this.overtakenVehicles) {
