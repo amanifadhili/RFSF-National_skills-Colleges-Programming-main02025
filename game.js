@@ -10,6 +10,11 @@ speakEnable = 1;    // Enable text-to-speech announcements (0 = disabled, 1 = en
 debugInfo = 0;      // Show debug information overlay (0 = hidden, 1 = visible)
 soundVolume = .3;   // Master volume level (0.0 to 1.0)
 
+// Weather system settings
+let currentWeather = 'sun';  // Current weather state ('sun' or 'rain')
+let weatherIntensity = 0;    // Weather effect intensity (0-1)
+let rainParticles = [];      // Array to store rain particle objects
+const MAX_RAIN_PARTICLES = 200; // Maximum number of rain particles
 
 // Engine metadata
 const engineVersion = '0.1.0';              // Current version of the game engine
@@ -140,6 +145,9 @@ function gameInit()
 
 function gameStart()
 {
+    // Switch weather on game start/restart
+    switchWeather();
+    
     // Reset all game state variables to initial values
     attractVehicleSpawnTimer = time = frame = frameTimeLastMS = averageFPS = frameTimeBufferMS = 
         worldHeading = cameraOffset = 0;
@@ -353,6 +361,9 @@ function gameUpdate(frameTimeMS=0)  // frameTimeMS provided by requestAnimationF
     drawMiniMap(); // Render minimap if enabled
     inputUpdatePost();  // Clean up input state after frame
     
+    // Update weather effects
+    updateWeather();
+    
     // Schedule next frame
     requestAnimationFrame(gameUpdate);  // Request next animation frame from browser
 }
@@ -361,3 +372,53 @@ function gameUpdate(frameTimeMS=0)  // frameTimeMS provided by requestAnimationF
 // ====================================================================
 
 gameInit();  // Initialize and start the game when script loads
+
+// Weather system functions
+function updateWeather() {
+    if (currentWeather === 'rain') {
+        // Update rain particles
+        for(let i = rainParticles.length; i--;) {
+            let p = rainParticles[i];
+            p.y -= 50; // Rain falls downward
+            p.x += random.floatSign(5); // Slight horizontal movement
+            
+            // Reset particle if it goes below ground
+            if (p.y < 0) {
+                p.y = 1000;
+                p.x = random.floatSign(1000);
+                p.z = random.float(0, 1000);
+            }
+        }
+        
+        // Add new rain particles if needed
+        while (rainParticles.length < MAX_RAIN_PARTICLES) {
+            rainParticles.push({
+                x: random.floatSign(1000),
+                y: random.float(0, 1000),
+                z: random.float(0, 1000)
+            });
+        }
+    }
+}
+
+function switchWeather() {
+    // Toggle between sun and rain
+    currentWeather = currentWeather === 'sun' ? 'rain' : 'sun';
+    
+    // Clear rain particles when switching to sun
+    if (currentWeather === 'sun') {
+        rainParticles = [];
+    }
+    
+    // Initialize rain particles when switching to rain
+    if (currentWeather === 'rain') {
+        rainParticles = [];
+        for(let i = MAX_RAIN_PARTICLES; i--;) {
+            rainParticles.push({
+                x: random.floatSign(1000),
+                y: random.float(0, 1000),
+                z: random.float(0, 1000)
+            });
+        }
+    }
+}
