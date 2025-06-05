@@ -3,7 +3,23 @@
 // Declare global variables used throughout the rendering pipeline
 let glCanvas, glContext, glDrawCount, glDrawCalls, glEnableFog = 1;
 let glActiveTexture, glShader, glArrayBuffer, glPositionData, glColorData;
+let glEnvironmentColors = {
+    skyColor: rgb(0.5, 0.8, 1.0),
+    fogColor: rgb(0.7, 0.9, 1.0),
+    groundColor: rgb(0.2, 0.6, 0.2),
+    brightness: 1.0,
+    fogDensity: 0.3
+};
 
+// Add this function to update environment colors
+function updateEnvironmentColors() {
+    const env = environmentManager.getCurrentEnvironment();
+    glEnvironmentColors.skyColor = env.skyColor;
+    glEnvironmentColors.fogColor = env.fogColor;
+    glEnvironmentColors.groundColor = env.groundColor;
+    glEnvironmentColors.brightness = env.brightness;
+    glEnvironmentColors.fogDensity = env.fogDensity;
+}
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize WebGL context and setup shaders, buffers, and render settings
 function glInit() {
@@ -120,11 +136,22 @@ function glCreateTexture(image) {
 
 // Prepare frame for rendering
 function glPreRender() {
+    // Update environment colors FIRST
+    updateEnvironmentColors();
+    
     // Resize WebGL canvas to match main canvas
     glContext.viewport(0, 0, glCanvas.width = mainCanvas.width, glCanvas.height = mainCanvas.height);
 
-    // Optionally clear background color
-    debug && glContext.clearColor(.4, .6, .9, 1);
+    // Use dynamic environment colors for background with enhanced contrast
+    const env = glEnvironmentColors;
+    
+    // Apply more dramatic background color
+    glContext.clearColor(
+        Math.pow(env.skyColor.r, 0.8), // Gamma correction for more punch
+        Math.pow(env.skyColor.g, 0.8), 
+        Math.pow(env.skyColor.b, 0.8), 
+        1
+    );
     glContext.clear(gl_DEPTH_BUFFER_BIT | gl_COLOR_BUFFER_BIT);
     glDrawCalls = glDrawCount = 0;
 
@@ -133,14 +160,32 @@ function glPreRender() {
     const combinedMatrix = glCreateProjectionMatrix().multiplySelf(viewMatrix);
     glContext.uniformMatrix4fv(glUniform('m'), 0, combinedMatrix.toFloat32Array());
 
-    // Upload light and fog uniforms
+    // Upload light and fog uniforms with MUCH more dramatic changes
     const initUniform4f = (name, x, y, z, w = 0) => glContext.uniform4f(glUniform(name), x, y, z, w);
     initUniform4f('l', lightDirection.x, lightDirection.y, lightDirection.z);
-    initUniform4f('g', lightColor.r, lightColor.g, lightColor.b);
-    initUniform4f('a', ambientColor.r, ambientColor.g, ambientColor.b);
-    initUniform4f('f', fogColor.r, fogColor.g, fogColor.b, fogColor.a);
+    
+    // Apply dramatic brightness changes to light color
+    const brightnessFactor = Math.pow(env.brightness, 1.5); // More dramatic brightness curve
+    const adjustedLightColor = {
+        r: Math.min(lightColor.r * brightnessFactor, 2.0), // Allow over-bright
+        g: Math.min(lightColor.g * brightnessFactor, 2.0),
+        b: Math.min(lightColor.b * brightnessFactor, 2.0)
+    };
+    initUniform4f('g', adjustedLightColor.r, adjustedLightColor.g, adjustedLightColor.b);
+    
+    // Apply dramatic ambient lighting changes
+    const ambientFactor = Math.max(0.05, env.brightness + (env.ambientBoost || 0));
+    const adjustedAmbient = {
+        r: ambientColor.r * ambientFactor,
+        g: ambientColor.g * ambientFactor,
+        b: ambientColor.b * ambientFactor
+    };
+    initUniform4f('a', adjustedAmbient.r, adjustedAmbient.g, adjustedAmbient.b);
+    
+    // Apply dramatic fog with enhanced density
+    const fogDensityFactor = Math.pow(env.fogDensity, 1.2); // More dramatic fog curve
+    initUniform4f('f', env.fogColor.r, env.fogColor.g, env.fogColor.b, fogDensityFactor);
 }
-
 // Create a perspective projection matrix
 function glCreateProjectionMatrix() {
     const aspect = mainCanvas.width / mainCanvas.height;
