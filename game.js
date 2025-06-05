@@ -68,6 +68,7 @@ let mainCanvasSize = pixelate ? vec3(1440, 900) : vec3(1280, 720);  // Canvas re
 let mainCanvas;         // Main rendering canvas element
 let mainContext;        // 2D rendering context for main canvas
 
+// let environmentManager;
 // Time and frame management
 let time;               // Current game time in seconds
 let frame;              // Current frame number
@@ -187,6 +188,12 @@ function gameStart()
 
 function gameUpdateInternal()
 {
+    // Reduce debug output frequency even more
+    if (playerVehicle && frame % 300 === 0) { // Every 5 seconds
+        const envDistance = playerVehicle.pos.z / 1000; // Convert to thousands
+        console.log(`Player: ${envDistance.toFixed(1)}k units, Environment: ${environmentManager.currentEnvData.name}`);
+    }
+
     if (attractMode)
     {
         // ATTRACT MODE LOGIC (Demo/Title Screen)
@@ -225,6 +232,11 @@ function gameUpdateInternal()
             sound_start.play();   // Play transition sound
             gameStart();          // Restart in attract mode
         }
+        
+        // Add manual environment testing
+        if (keyWasPressed('KeyE')) {
+            environmentManager.forceNextEnvironment();
+        }
     }
     
     // Global restart key (works in any mode)
@@ -235,11 +247,15 @@ function gameUpdateInternal()
         gameStart();          // Restart game
     }
     
+    // Update environment system (less frequently)
+    if (playerVehicle && environmentManager) {
+        environmentManager.update(playerVehicle.pos.z);
+    }
+    
     // Update all vehicles in the game
     for(const v of vehicles)
         v.update();  // Update vehicle physics, AI, and rendering
 }
-
 // ====================================================================
 // MAIN GAME UPDATE LOOP
 // ====================================================================
@@ -318,10 +334,15 @@ function gameUpdate(frameTimeMS=0)  // frameTimeMS provided by requestAnimationF
     // Restore smoothing time for next frame
     frameTimeBufferMS += deltaSmooth;
 
+    // Update environment based on player position
+    if (playerVehicle) {
+        environmentManager.update(playerVehicle.pos.z);
+    }
     // RENDERING PIPELINE
     trackPreRender();   // Prepare track geometry for rendering
-    glPreRender();      // Set up WebGL state for 3D rendering
+    glPreRender();      // Set up WebGL state for 3D rendering (this now includes environment)
     drawScene();        // Render the 3D game world
+    renderEnvironment(); // Render environment effects (rain, etc.)
     drawHUD();          // Render user interface elements
     drawDebug();        // Render debug information (if enabled)
     inputUpdatePost();  // Clean up input state after frame
@@ -329,7 +350,6 @@ function gameUpdate(frameTimeMS=0)  // frameTimeMS provided by requestAnimationF
     // Schedule next frame
     requestAnimationFrame(gameUpdate);  // Request next animation frame from browser
 }
-
 // ====================================================================
 // START THE GAME
 // ====================================================================
