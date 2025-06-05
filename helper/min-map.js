@@ -1,3 +1,40 @@
+// Calculate bottom position
+function getMiniMapY(canvas) {
+    return canvas.height - MINIMAP.radius - 85; // 30px from bottom
+}
+
+
+// Draw a car on the mini-map
+function drawCarOnMiniMap(ctx, car, color, isPlayer) {
+    // Convert world coordinates to mini-map coordinates
+    let mapX = MINIMAP.x + (car.x * MINIMAP.scale) + MINIMAP.width / 2;
+    let mapY = MINIMAP.y + (car.y * MINIMAP.scale) + MINIMAP.height / 2;
+    
+    // Keep within mini-map bounds
+    mapX = Math.max(MINIMAP.x, Math.min(mapX, MINIMAP.x + MINIMAP.width));
+    mapY = Math.max(MINIMAP.y, Math.min(mapY, MINIMAP.y + MINIMAP.height));
+    
+    // Draw car dot
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(mapX, mapY, isPlayer ? 4 : 3, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Add direction indicator for player
+    if (isPlayer) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mapX, mapY);
+        ctx.lineTo(
+            mapX + Math.cos(car.angle) * 8,
+            mapY + Math.sin(car.angle) * 8
+        );
+        ctx.stroke();
+    }
+}
+
+
 // Draw circular mini-map
 function drawMiniMap(ctx, playerCar, otherCars, track) {
     // Safety checks
