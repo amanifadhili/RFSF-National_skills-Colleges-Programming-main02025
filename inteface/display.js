@@ -23,6 +23,15 @@ let gameWon = false;
 let winTimer = 0;
 const WIN_DELAY = 5; // 5 seconds delay before stopping the game
 // Initialize HUD elements with modern design
+
+const MINIMAP = {
+    x: 30,           // Distance from left edge
+    y: null,         // Will be calculated for bottom position
+    radius: 80,      // Circle radius instead of width/height
+    scale: 0.1       // Scale factor
+};
+
+
 function initHUD()
 {
   console.log("Initializing HUD...");
@@ -698,5 +707,210 @@ function checkDistanceMilestones() {
         } else {
             addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
         }
+    }
+}
+
+// Calculate bottom position
+function getMiniMapY(canvas) {
+    return canvas.height - MINIMAP.radius - 85; // 30px from bottom
+}
+
+
+// Draw a car on the mini-map
+function drawCarOnMiniMap(ctx, car, color, isPlayer) {
+    // Convert world coordinates to mini-map coordinates
+    let mapX = MINIMAP.x + (car.x * MINIMAP.scale) + MINIMAP.width / 2;
+    let mapY = MINIMAP.y + (car.y * MINIMAP.scale) + MINIMAP.height / 2;
+    
+    // Keep within mini-map bounds
+    mapX = Math.max(MINIMAP.x, Math.min(mapX, MINIMAP.x + MINIMAP.width));
+    mapY = Math.max(MINIMAP.y, Math.min(mapY, MINIMAP.y + MINIMAP.height));
+    
+    // Draw car dot
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(mapX, mapY, isPlayer ? 4 : 3, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Add direction indicator for player
+    if (isPlayer) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mapX, mapY);
+        ctx.lineTo(
+            mapX + Math.cos(car.angle) * 8,
+            mapY + Math.sin(car.angle) * 8
+        );
+        ctx.stroke();
+    }
+}
+
+
+
+
+// Draw circular mini-map
+function drawMiniMap(ctx, playerCar, otherCars, track) {
+    // Safety checks
+    if (!ctx || !playerCar) {
+        return;
+    }
+
+    // Get canvas for bottom positioning
+    const canvas = ctx.canvas;
+    const centerX = MINIMAP.x + MINIMAP.radius;
+    const centerY = getMiniMapY(canvas) + MINIMAP.radius;
+
+    // Draw circular background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, MINIMAP.radius, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Draw circular border
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, MINIMAP.radius, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // Draw the track line using projected coordinates
+    ctx.strokeStyle = 'gray';
+    ctx.lineWidth = 2; // Thicker line for visibility
+    ctx.beginPath();
+
+    if (track && track.length > 0) {
+        let p = vec3(); // Projected position
+        let direction = vec3(0, -0.5); // Initial direction for projection
+        let velocity = 0; // Accumulated curvature effect
+
+        // Iterate through segments, starting from a bit before the player
+        const startSegmentIndex = Math.max(0, (playerCar.pos.z / trackSegmentLength | 0) - 50);
+        const endSegmentIndex = Math.min(track.length, startSegmentIndex + 200); // Draw a fixed number of segments
+
+        // Move to the starting point
+        let firstSegment = track[startSegmentIndex];
+        velocity += firstSegment.offset.x;
+        p = p.add(direction.rotateZ(velocity * 0.005).scale(MINIMAP.scale * 20)); // Scale the projection
+        ctx.moveTo(centerX + p.x, centerY + p.y);
+
+        // Draw lines for subsequent segments
+        for (let i = startSegmentIndex + 1; i < endSegmentIndex; i++) {
+            const segment = track[i];
+            velocity += segment.offset.x;
+            p = p.add(direction.rotateZ(velocity * 0.005).scale(MINIMAP.scale * 20)); // Scale the projection
+            ctx.lineTo(centerX + p.x, centerY + p.y);
+        }
+    }
+
+    ctx.stroke();
+
+    // Draw player car (red dot)
+    // Need to calculate player car's projected position similarly to the track
+    let playerProjectedPos = vec3();
+    let playerDirection = vec3(0, -0.5);
+    let playerVelocity = 0;
+    const playerSegmentIndex = (playerCar.pos.z / trackSegmentLength | 0);
+
+    // Accumulate velocity up to player's segment (simplified)
+    for(let i = 0; i <= playerSegmentIndex; i++) {
+        if (track[i]) {
+           playerVelocity += track[i].offset.x;
+        }
+    }
+     // Use a fixed number of segments before the player to calculate the starting point for player projection
+    const playerProjStartSegment = Math.max(0, playerSegmentIndex - 50);
+    let pCar = vec3();
+    let vCar = 0;
+
+    for(let i = playerProjStartSegment; i <= playerSegmentIndex; i++){
+        if (track[i]){
+            vCar += track[i].offset.x;
+            pCar = pCar.add(playerDirection.rotateZ(vCar * 0.005).scale(MINIMAP.scale * 20));
+        }
+    }
+
+    // Adjust player position on the projected track line
+    // This is a simplified approach; a more accurate method might involve finding the closest point on the drawn track line
+    const playerMapX = centerX + pCar.x + (playerCar.pos.x * MINIMAP.scale * 0.5); // Add lateral position scaled
+    const playerMapY = centerY + pCar.y;
+
+
+    drawCarOnCircularMiniMap(ctx, playerMapX, playerMapY, {
+        x: 0, // Car's lateral position is handled by playerMapX
+        y: 0, // Car's forward position is handled by playerMapY
+        angle: playerCar.turn // Still use car's angle for direction indicator
+    }, 'red', true);
+
+    // Draw other cars (blue dots) - This will also need adjustment based on the new track projection
+    if (otherCars) {
+        otherCars.forEach(car => {
+             // Similar projection for AI cars
+            let aiProjectedPos = vec3();
+            let aiDirection = vec3(0, -0.5);
+            let aiVelocity = 0;
+            const aiSegmentIndex = (car.pos.z / trackSegmentLength | 0);
+
+             // Use a fixed number of segments before the AI car to calculate the starting point
+            const aiProjStartSegment = Math.max(0, aiSegmentIndex - 50);
+            let pAI = vec3();
+            let vAI = 0;
+
+            for(let i = aiProjStartSegment; i <= aiSegmentIndex; i++){
+                 if (track[i]){
+                    vAI += track[i].offset.x;
+                    pAI = pAI.add(aiDirection.rotateZ(vAI * 0.005).scale(MINIMAP.scale * 20));
+                 }
+            }
+
+            const aiMapX = centerX + pAI.x + (car.pos.x * MINIMAP.scale * 0.5); // Add lateral position scaled
+            const aiMapY = centerY + pAI.y;
+
+            if (!car.isPlayer) {
+                drawCarOnCircularMiniMap(ctx, aiMapX, aiMapY, {
+                    x: 0, // Lateral position handled by aiMapX
+                    y: 0, // Forward position handled by aiMapY
+                    angle: car.turn // Still use car's angle for direction indicator
+                }, 'blue', false);
+            }
+        });
+    }
+}
+
+// Draw car on circular mini-map
+function drawCarOnCircularMiniMap(ctx, centerX, centerY, car, color, isPlayer) {
+    // Convert world coordinates to mini-map coordinates
+    // The input 'car' object now contains already projected map coordinates (x, y)
+    let mapX = centerX + car.x;
+    let mapY = centerY + car.y;
+
+    // Keep within mini-map bounds - This logic might need refinement with the new projection
+    // For now, let's disable this bounds check to see the full projected path if it goes outside
+    // mapX = Math.max(MINIMAP.x, Math.min(mapX, MINIMAP.x + MINIMAP.width));
+    // mapY = Math.max(MINIMAP.y, Math.min(mapY, MINIMAP.y + MINIMAP.height));
+
+    // Draw car dot
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(mapX, mapY, isPlayer ? 5 : 3, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Add direction indicator for player
+    if (isPlayer) {
+        // The angle should rotate the direction vector relative to the projected track
+        // This part might need more complex calculation based on the track's tangent at the player's position
+        // For a simplified approach, we'll just use the car's heading to rotate a fixed-length line
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mapX, mapY);
+        // Use Math.cos and Math.sin with the car's angle to draw the direction line
+        // The length of the direction indicator line
+        const indicatorLength = isPlayer ? 15 : 10;
+        ctx.lineTo(
+            mapX + Math.cos(car.angle - Math.PI/2) * indicatorLength, // Adjust angle for canvas coordinates
+            mapY + Math.sin(car.angle - Math.PI/2) * indicatorLength  // Adjust angle for canvas coordinates
+        );
+        ctx.stroke();
     }
 }

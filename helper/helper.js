@@ -194,3 +194,17 @@ class Timer
     getPercent() { return this.isSet()? percent(this.time - time, this.setTime, 0) : 0; }
     valueOf() { return this.get(); }
 }
+
+// Convert world coordinates to mini-map coordinates
+function worldToMiniMap(worldX, worldY) {
+    return {
+        x: MINIMAP.x + (worldX * MINIMAP.scale) + MINIMAP.width / 2,
+        y: MINIMAP.y + (worldY * MINIMAP.scale) + MINIMAP.height / 2
+    };
+}
+
+// Check if point is within mini-map bounds
+function isInMiniMapBounds(x, y) {
+    return x >= MINIMAP.x && x <= MINIMAP.x + MINIMAP.width &&
+           y >= MINIMAP.y && y <= MINIMAP.y + MINIMAP.height;
+}
