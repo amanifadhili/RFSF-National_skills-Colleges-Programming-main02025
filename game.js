@@ -179,6 +179,11 @@ function gameStart()
     if (typeof resetHUDValues === 'function') {
         resetHUDValues();
     }
+
+    // Initialize high scores
+    if (typeof initHighScores === 'function') {
+        initHighScores();
+    }
 }
 
 // ====================================================================

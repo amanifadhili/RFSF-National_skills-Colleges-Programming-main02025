@@ -22,10 +22,19 @@ let bonusMessages = [];
 let gameWon = false;
 let winTimer = 0;
 const WIN_DELAY = 5; // 5 seconds delay before stopping the game
+// Add these variables at the top with other global variables
+let highScore = 0;
+let bestTime = 0;
+let newHighScore = false;
+let newBestTime = false;
+let highScoreSaved = false; // Add with other global variables
+let finalScore = 0;
+let finalTime = 0;
 // Initialize HUD elements with modern design
 function initHUD()
 {
   console.log("Initializing HUD...");
+  initHighScores();
 }
 
 // Main HUD rendering function
@@ -119,7 +128,7 @@ function drawHUD() {
                     .035, hsl(.15, .9, .7), 0, undefined, undefined, 'center', 400);
         drawHUDText('SCORE', vec3(panelX - panelWidth * 0.15, scoreY), 
                     .025, hsl(.15, .7, .8), .001, BLACK, undefined, 'left', 500);
-        drawHUDText(Math.floor(playerScore).toLocaleString(), vec3(panelX + panelWidth * 0.50, scoreY), 
+        drawHUDText((gameWon ? finalScore : Math.floor(playerScore)).toLocaleString(), vec3(panelX + panelWidth * 0.50, scoreY), 
                     .035, hsl(.15, .9, .9), .002, hsl(.15, .8, .2, .5), undefined, 'right', 700);
         
         // Horizontal separator
@@ -186,6 +195,26 @@ function drawHUD() {
         const progressText = `${Math.floor(playerDistance - currentLevelStart)}/${levelDistances[currentLevel]}m`;
         drawHUDText(progressText, vec3(panelX, panelY + panelHeight * 0.45), 
                     .02, hsl(.3, .7, .8), .001, BLACK, undefined, 'center', 500);
+        
+        // Add high score and best time display
+        const statsY = panelY + panelHeight * 0.5;
+        
+        // High Score section
+        drawHUDText('🏆', vec3(panelX - panelWidth * 0.35, statsY), 
+                    .035, hsl(.15, .9, .7), 0, undefined, undefined, 'center', 400);
+        drawHUDText('HIGH SCORE', vec3(panelX - panelWidth * 0.15, statsY), 
+                    .025, hsl(.15, .7, .8), .001, BLACK, undefined, 'left', 500);
+        drawHUDText(highScore.toLocaleString(), vec3(panelX + panelWidth * 0.50, statsY), 
+                    .035, hsl(.15, .9, .9), .002, hsl(.15, .8, .2, .5), undefined, 'right', 700);
+        
+        // Best Time section
+        const timeY = statsY + .05;
+        drawHUDText('⏱️', vec3(panelX - panelWidth * 0.35, timeY), 
+                    .035, hsl(.6, .9, .7), 0, undefined, undefined, 'center', 400);
+        drawHUDText('BEST TIME', vec3(panelX - panelWidth * 0.15, timeY), 
+                    .025, hsl(.6, .7, .8), .001, BLACK, undefined, 'left', 500);
+        drawHUDText(formatTime(bestTime), vec3(panelX + panelWidth * 0.50, timeY), 
+                    .035, hsl(.6, .9, .9), .002, hsl(.6, .8, .2, .5), undefined, 'right', 700);
     }
     
     drawLevelTransition();
@@ -412,7 +441,7 @@ function drawHUDText(text, pos, size = .1, color = WHITE, shadowOffset = 0, shad
 }
 // function to hud.js
 function updateHUDValues() {
-    if (attractMode ) return;
+    if (attractMode || gameWon) return; // Prevent updates after win
     
     // Update distance based on player position (convert to meters) - SLOWED DOWN
     if (playerVehicle) {
@@ -470,6 +499,9 @@ function updateHUDValues() {
             attractMode = 1;
         }
     }
+
+    // Add this at the end of the function
+    updateHighScores();
 }
 
 
@@ -486,8 +518,9 @@ function checkLevelProgression() {
             startLevelTransition();
             // Show congratulatory message
             addBonus(10000, "CONGRATULATIONS! You've reached the Magical Garden!", vec3(0.5, 0.5));
-            // Start win timer
             winTimer = WIN_DELAY;
+            finalScore = Math.floor(playerScore); // Freeze score
+            finalTime = time;                     // Freeze time
         }
         return;
     }
@@ -631,6 +664,13 @@ function resetHUDValues() {
     scoreMultiplier = 1;
     bonusMessages = [];
     levelTransitionActive = false;
+    gameWon = false;         // Reset win state
+    winTimer = 0;            // Reset win timer
+    newHighScore = false;
+    newBestTime = false;
+    highScoreSaved = false; // Reset save flag
+    finalScore = 0;
+    finalTime = 0;
 }
 //  function to get difficulty settings based on level
 function getDifficultySettings() {
@@ -698,5 +738,32 @@ function checkDistanceMilestones() {
         } else {
             addBonus(0, `${playerDistance}m (TOO SLOW)`, vec3(.5, .4));
         }
+    }
+}
+
+// Add this function to initialize high score and best time
+function initHighScores() {
+    highScore = getHighScore();
+    bestTime = getBestTime();
+}
+
+// Add this function to update high scores
+function updateHighScores() {
+    if (gameWon && !highScoreSaved) {
+        if (finalScore > highScore) {
+            if (saveHighScore(finalScore)) {
+                highScore = finalScore;
+                newHighScore = true;
+                addBonus(1000, "NEW HIGH SCORE!", vec3(.5, .4));
+            }
+        }
+        if (bestTime === 0 || finalTime < bestTime) {
+            if (saveBestTime(finalTime)) {
+                bestTime = finalTime;
+                newBestTime = true;
+                addBonus(1000, "NEW BEST TIME!", vec3(.5, .4));
+            }
+        }
+        highScoreSaved = true;
     }
 }
