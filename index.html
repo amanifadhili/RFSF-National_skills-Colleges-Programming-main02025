@@ -1,87 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- HTML document type declaration for HTML5 compatibility -->
 
 <head>
-    <!-- Document head section - contains metadata and resources -->
-    <!-- Currently empty but typically would contain:
-         - Page title (<title>)
-         - CSS stylesheets (<link>)
-         - Meta tags for SEO and viewport
-         - Favicon links
-    -->
 </head>
 
-<!-- Character encoding declaration - ensures proper text rendering -->
-<!-- UTF-8 supports all Unicode characters including international text -->
 <meta charset="utf-8">
 
 <body>
-    <!-- Main document body - contains visible content and scripts -->
-    
-    <!-- CORE DEVELOPMENT AND UTILITY SCRIPTS -->
-    <!-- Debug utilities - contains console logging, error handling, and development tools -->
-    
-    <script src="debug-utils.js"></script>
-
-    <script src="render.js"></script>
-    
-    <!-- Common utility functions - mathematical operations, data manipulation, helper functions -->
-    <script src="utilities.js"></script>
-    
-    <!-- GRAPHICS AND RENDERING LAYER -->
-    <!-- WebGL initialization and management - handles 3D graphics rendering -->
+    <script src="helper/debug.js"></script>
+    <script src="rendering/render.js"></script>
+    <script src="helper/helper.js"></script>
     <script src="webgl.js"></script>
-    
-    <!-- Drawing and rendering functions - manages visual output and graphics operations -->
-    <script src="draw.js"></script>
-    
-    <!-- Scene management - handles 3D scene setup, camera, lighting, and object positioning -->
-    <script src="scene.js"></script>
-    
-    <!-- GAME WORLD AND ENVIRONMENT -->
-    <!-- Track/level generation and management - creates racing tracks and game paths -->
-    <script src="track.js"></script>
-    
-    <!-- Procedural content generation - creates dynamic game elements algorithmically -->
-    <script src="generative.js"></script>
-    
-    <!-- USER INTERACTION LAYER -->
-    <!-- Input handling - keyboard, mouse, touch, and gamepad controls -->
-    <script src="input.js"></script>
-    
-    <!-- AUDIO SYSTEM -->
-    <!-- Audio engine - manages sound initialization, playback, and audio effects -->
-    <script src="audio.js"></script>
-    
-    <!-- Sound assets and audio content - contains game sound effects and music -->
-    <script src="sounds.js"></script>
-    
-    <!-- GAME ENTITIES -->
-    <!-- Vehicle physics and behavior - handles car/player movement, collision, physics -->
-    <script src="vehicle.js"></script>
-    
-    <!-- Heads-Up Display - manages UI elements like speedometer, minimap, score display -->
-    <script src="hud.js"></script>
-    
-    <!-- MAIN GAME CONTROLLER -->
-    <!-- Primary game logic - coordinates all systems, manages game state and main loop -->
-    <!-- This should be loaded LAST as it depends on all other modules -->
+    <script src="rendering/draw.js"></script>
+    <script src="inteface/scene.js"></script>
+    <script src="objects/object-logics.js"></script>
+    <script src="rendering/generative.js"></script>
+    <script src="inteface/handle-input.js"></script>
+    <script src="sound-system/audio-system.js"></script>
+    <script src="sound-system/sound-track.js"></script>
+    <script src="objects/objects.js"></script>
+    <script src="inteface/display.js"></script>
     <script src="game.js"></script>
-    
-    <!-- 
-    SCRIPT LOADING ORDER EXPLANATION:
-    =================================
-    1. Core utilities first (debug, utilities, webgl) - foundation layer
-    2. Rendering system (draw, scene) - graphics layer
-    3. Game world (track, generative) - content layer  
-    4. User interaction (input) - control layer
-    5. Audio system (audio, sounds) - sound layer
-    6. Game entities (vehicle, hud) - object layer
-    7. Main controller (game.js) last - orchestration layer
-    
-    This order ensures dependencies are loaded before the code that uses them.
-    -->
-    
 </body>
 </html>

@@ -41,19 +41,25 @@ const timeDelta = 1/60;     // Time step for physics calculations (1/frameRate)
 
 // Track dimensions and layout
 const trackWidth = 1500;            // Width of the racing track in game units
+<<<<<<< HEAD
 const trackEnd = 1e4;               // Total number of track segments (10,000)
+=======
+const trackEnd = 3e3;               // Total number of track segments (3,000 for 300m + 500m + 700m + 1500m)
+>>>>>>> 2536a8a29d5b8bc8f4afbf7f22300ff8e8530a3f
 const trackSegmentLength = 100;     // Length of each track segment in game units
 const drawDistance = 1e3;           // Number of segments to render ahead (1,000)
 const sceneryDrawDistance = 500;    // Distance to render background scenery
 
+//  level distance requirements
+const levelDistances = {
+    1: 100,  // Level 1: 300m
+    2: 200,  // Level 2: 500m
+    3: 300,  // Level 3: 700m
+    4: 400  // Magic Garden: 1000m
+};
+
 // Camera positioning
 const cameraPlayerOffset = vec3(0,700,1050);  // Camera offset from player (x, y, z)
-
-// Checkpoint system configuration
-const checkpointTrackSegments = 3e3;  // Segments between checkpoints (3,000)
-const checkpointDistance = checkpointTrackSegments * trackSegmentLength;  // Distance between checkpoints
-const checkpointMaxDifficulty = 9;    // Maximum difficulty level (after 9 checkpoints)
-const startCheckpointTime = 60;       // Initial time given to reach first checkpoint (seconds)
 
 // RUNTIME GAME STATE VARIABLES
 
@@ -76,11 +82,8 @@ let frameTimeBufferMS;  // Time buffer for frame rate smoothing
 // Game state timers and counters
 let attractVehicleSpawnTimer;  // Timer for spawning vehicles in attract mode
 let paused;                    // Game pause state
-let checkpointTimeLeft;        // Time remaining to reach next checkpoint
 let startCountdown;            // Countdown timer at race start (3, 2, 1, GO!)
 let startCountdownTimer;       // Timer object for countdown
-let gameOverTimer;             // Timer for game over screen
-let nextCheckpointDistance;    // Distance to next checkpoint
 
 // WORLD AND CAMERA VARIABLES
 
@@ -142,16 +145,13 @@ function gameStart()
 {
     // Reset all game state variables to initial values
     attractVehicleSpawnTimer = time = frame = frameTimeLastMS = averageFPS = frameTimeBufferMS = 
-        worldHeading = cameraOffset = checkpointTimeLeft = 0;
+        worldHeading = cameraOffset = 0;
     
     // Set up race start sequence
     startCountdown = quickStart ? 0 : 4;       
-    checkpointTimeLeft = startCheckpointTime;   
-    nextCheckpointDistance = checkpointDistance; 
     
     // Initialize timer objects
     startCountdownTimer = new Timer;
-    gameOverTimer = new Timer;
     
     // Reset camera position and rotation
     cameraPos = vec3();  // Initialize to zero vector
@@ -164,22 +164,26 @@ function gameStart()
 
     // Spawn AI vehicles at intervals along the track
     const aiColors = [
-    hsl(0, .8, .5),    // Red
-    hsl(.15, .9, .6),  // Orange
-    hsl(.3, .7, .5),   // Green
-    hsl(.6, .8, .4),   // Blue
-    hsl(.8, .6, .4),   // Purple
-    hsl(.1, .9, .7),   // Yellow
-    hsl(.45, .5, .3),  // Brown
-    hsl(0, 0, .3)      // Dark Gray
-];
-   for(let i = 50; i--;){ // Create 50 AI vehicles
-    vehicles.push(new Vehicle(randInt(10e3, 20e3)*i+3e3, aiColors[randInt(aiColors.length)])); // Random 6,000-12,000 units
- // ADD THIS CODE HERE - Reset HUD values when game starts
+        hsl(0, .8, .5),    // Red
+        hsl(.15, .9, .6),  // Orange
+        hsl(.3, .7, .5),   // Green
+        hsl(.6, .8, .4),   // Blue
+        hsl(.8, .6, .4),   // Purple
+        hsl(.1, .9, .7),   // Yellow
+        hsl(.45, .5, .3),  // Brown
+        hsl(0, 0, .3)      // Dark Gray
+    ];
+
+    // Spawn fewer AI vehicles for better gameplay
+    for(let i = 30; i--;){ // Create 30 AI vehicles instead of 50
+        vehicles.push(new Vehicle(randInt(10e3, 20e3)*i+3e3, aiColors[randInt(aiColors.length)]));
+    }
+
+    // Reset HUD values when game starts
     if (typeof resetHUDValues === 'function') {
         resetHUDValues();
     }
-}}
+}
 
 // ====================================================================
 // INTERNAL GAME LOGIC UPDATE FUNCTION
@@ -215,7 +219,6 @@ function gameUpdateInternal()
         if (startCountdown > 0 && !startCountdownTimer.active())
         {
             --startCountdown;                           // Decrement countdown
-            speak(startCountdown || 'PLEASE GO!' );     // Announce countdown or "GO!"
             startCountdownTimer.set(1);                 // Set timer for 1 second
         }
         
@@ -226,44 +229,8 @@ function gameUpdateInternal()
             sound_start.play();   // Play transition sound
             gameStart();          // Restart in attract mode
         }
-
-        // Handle game over screen interactions
-        if (gameOverTimer > 1 && mouseWasPressed(0) || gameOverTimer > 9)
-        {
-            attractMode = 1;      // Return to attract mode
-            gameStart();          // Restart game
-        }
-
-        // Update checkpoint timer (only during active gameplay)
-        if (checkpointTimeLeft > 0 && startCountdown == 0)
-        {
-            checkpointTimeLeft -= timeDelta;  // Decrease time remaining
-            if (checkpointTimeLeft <= 0)      // Time expired
-            {
-                speak('Challenge failed. press R to restart!');   // Announce game over
-                gameOverTimer.set();          // Start game over timer
-                checkpointTimeLeft = 0;       // Clamp to zero
-            }
-        }
-        // ADD THIS CODE HERE - Update HUD values and apply difficulty settings
-        if (typeof updateHUDValues === 'function') {
-            updateHUDValues();
-        }
-        
-        // Get difficulty settings based on level
-        if (typeof getDifficultySettings === 'function') {
-            const difficulty = getDifficultySettings();
-
-             // Apply difficulty to game systems
-            // For example, adjust traffic density for AI vehicle spawning
-            if (vehicles.length < 10 + (difficulty.trafficDensity * 10) && 
-                Math.random() < difficulty.trafficDensity * 0.01) {
-                // Spawn a new AI vehicle ahead of player
-                vehicles.push(new Vehicle(playerVehicle.pos.z + randInt(500, 2000), 
-                                         hsl(rand(),.8,.5)));
-            }
     }
-    }
+    
     // Global restart key (works in any mode)
     if (keyWasPressed('KeyR'))
     {

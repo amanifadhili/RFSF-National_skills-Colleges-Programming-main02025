@@ -65,22 +65,38 @@ class Music extends Sound
     { return super.play( volume, 1, 1, loop); }
 }
 
+// In the speak function, modify the voice settings for a more feminine voice:
+
 function speak(text)
 {
     if (!soundEnable || !speechSynthesis || !speakEnable) return;
 
     speechSynthesis.cancel();
 
-
-    // build utterance and speak
+    // Build utterance and speak
     const utterance = new SpeechSynthesisUtterance(text);
-    //utterance.lang = 'it';
     utterance.volume = soundVolume*2.5;
-    //utterance.rate = rate;
-    //utterance.pitch = 2;
+    utterance.rate = 0.9;        // Slightly slower speech rate
+    utterance.pitch = 1.3;       // Higher pitch for more feminine voice
+    
+    // Try to select a female voice if available
+    const voices = speechSynthesis.getVoices();
+    const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('zira') ||
+        voice.name.toLowerCase().includes('hazel') ||
+        voice.name.toLowerCase().includes('samantha')
+    );
+    
+    if (femaleVoice) {
+        utterance.voice = femaleVoice;
+    }
+    
     speechSynthesis.speak(utterance);
     return utterance;
 }
+
 
 function getNoteFrequency(semitoneOffset, rootFrequency=220)
 { return rootFrequency * 2**(semitoneOffset/12); }

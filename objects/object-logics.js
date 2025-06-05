@@ -108,11 +108,18 @@ function drawRoad(zwrite = 0)
             segment2 = segment1;
             continue;
         }
+<<<<<<< HEAD:track.js
         
 
         const p1 = segment1.pos;
         const p2 = segment2.pos;
         
+=======
+
+        const p1 = segment1.pos;
+        const p2 = segment2.pos;
+        
+>>>>>>> 2536a8a29d5b8bc8f4afbf7f22300ff8e8530a3f:objects/object-logics.js
         if (i % (lerp(i / drawDistance, 1, 6) | 0) == 0)
         {
             const normals = [segment1.normal, segment1.normal, segment2.normal, segment2.normal];
@@ -365,10 +372,10 @@ class TrackSegment
         }
 
         // === DETERMINE SEGMENT VISUAL STYLE ===
-        // Check if this segment should have checkpoint/starting line markings
-        let checkpointLine = segmentIndex > 25 && segmentIndex < 30;  // Starting area
-        if (segmentIndex % checkpointTrackSegments < 5)
-            checkpointLine = 1;  // Regular checkpoint intervals
+        // Check if this segment should have level markers
+        let levelMarker = segmentIndex > 25 && segmentIndex < 30;  // Starting area
+        if (segmentIndex === 300 || segmentIndex === 800 || segmentIndex === 1500)
+            levelMarker = 1;  // Level transition points
 
         {
             const largeSegmentIndex = segmentIndex / 6 | 0;
@@ -377,7 +384,11 @@ class TrackSegment
             this.colorGround = hsl(.083, .2, .7 + Math.cos(segmentIndex * 2 / PI) * .05);
             this.colorRoad = BLACK;
             
+<<<<<<< HEAD:track.js
             if (checkpointLine)
+=======
+            if (levelMarker)
+>>>>>>> 2536a8a29d5b8bc8f4afbf7f22300ff8e8530a3f:objects/object-logics.js
                 this.colorRoad = WHITE;
             
             // Enhanced lane markings for 3-lane system
@@ -386,17 +397,73 @@ class TrackSegment
 
         // === PLACE SCENERY OBJECTS ===
         // Helper function to add sprites to this segment
-       // === EASY CITY SCENERY SYSTEM ===
-      // === IMPROVED CITY SCENERY SYSTEM ===
-const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
+        const addSprite = (...a) => this.sprites.push(new TrackSprite(...a));
 
-const BARE_AREA_CHANCE = 0.6;     // 60% empty space (lots of open land)
-const BUILDING_CHANCE = 0.05;     // 5% chance of building (very few buildings)
-const HOUSE_CHANCE = 0.15;        // 15% chance of house (scattered houses)
-const TREE_CHANCE = 0.4;          // 40% chance of tree (lots of trees)
-const SIGN_CHANCE = 0.02;         // 2% chance of sign (rare signs)
+        const BARE_AREA_CHANCE = 0.6;     // 60% empty space (lots of open land)
+        const BUILDING_CHANCE = 0.05;     // 5% chance of building (very few buildings)
+        const HOUSE_CHANCE = 0.15;        // 15% chance of house (scattered houses)
+        const TREE_CHANCE = 0.4;          // 40% chance of tree (lots of trees)
+        const SIGN_CHANCE = 0.02;         // 2% chance of sign (rare signs)
 
+        if (levelMarker) // Level transition markers
+        {
+            // Level transition markers
+            addSprite(vec3(-width + 100, 0), vec3(800), WHITE, vec3(6, 0), 0);
+            addSprite(vec3(width - 100, 0), vec3(800), WHITE, vec3(7, 0), 0);
+        }
+        else if (segmentIndex == 30) // Starting line banner
+        {
+            addSprite(vec3(0, -700, 0), vec3(1300), WHITE, vec3(5, 0), 0);
+        }
+        else
+        {
+            // OBSTACLE PLACEMENT LOGIC
+            this.placeObstacles(segmentIndex, addSprite, width);
+            
+            // REALISTIC CITY SCENERY GENERATION
+            random.setSeed(segmentIndex); // Consistent random for each segment
+            
+            // Left side of road - only add something if NOT bare area
+            if (random.bool(BUILDING_CHANCE)) {
+                // Office/Commercial Building - use different building types
+                const buildingType = random.int(4); // 0,1,2,3 for different buildings
+                const buildingHeight = random.float(1200, 2000);
+                const buildingWidth = random.float(600, 1000);
+                addSprite(vec3(-(width + 1800), 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+            }
+            else if (random.bool(HOUSE_CHANCE)) {
+                // Residential House - use house tile
+                const houseSize = random.float(400, 700);
+                addSprite(vec3(-(width + 1200), 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+            }
+            else if (random.bool(TREE_CHANCE)) {
+                // Tree/Park area
+                const treeSize = random.float(600, 1000);
+                addSprite(vec3(-(width + 1000), 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+            }
+            
+            // Right side of road - only add something if NOT bare area
+            if (!random.bool(BARE_AREA_CHANCE)) {
+                if (random.bool(BUILDING_CHANCE)) {
+                    // Office/Commercial Building - use different building types
+                    const buildingType = random.int(4); // 0,1,2,3 for different buildings
+                    const buildingHeight = random.float(1200, 2000);
+                    const buildingWidth = random.float(600, 1000);
+                    addSprite(vec3(width + 1800, 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+                }
+                else if (random.bool(HOUSE_CHANCE)) {
+                    // Residential House - use house tile
+                    const houseSize = random.float(400, 700);
+                    addSprite(vec3(width + 1200, 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
+                }
+                else if (random.bool(TREE_CHANCE)) {
+                    // Tree/Park area
+                    const treeSize = random.float(600, 1000);
+                    addSprite(vec3(width + 1000, 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
+                }
+            }
 
+<<<<<<< HEAD:track.js
 
 if (segmentIndex % checkpointTrackSegments == 0) // Checkpoint markers
 {
@@ -443,27 +510,99 @@ if (!random.bool(BARE_AREA_CHANCE)) {
         const buildingHeight = random.float(1200, 2000);
         const buildingWidth = random.float(600, 1000);
         addSprite(vec3(width + 1800, 0, 0), vec3(buildingWidth, buildingHeight), WHITE, vec3(buildingType + 1, 4));
+=======
+            // Occasional road signs (less frequent)
+            if (random.bool(SIGN_CHANCE)) {
+                const signSide = random.bool() ? 1 : -1;
+                addSprite(vec3((width + 600) * signSide, 0, 0), vec3(400), WHITE, vec3(random.int(8), 2));
+            }
+        }
+>>>>>>> 2536a8a29d5b8bc8f4afbf7f22300ff8e8530a3f:objects/object-logics.js
     }
-    else if (random.bool(HOUSE_CHANCE)) {
-        // Residential House - use house tile
-        const houseSize = random.float(400, 700);
-        addSprite(vec3(width + 1200, 0, random.floatSign(200)), vec3(houseSize), WHITE, vec3(0, 4));
-    }
-    else if (random.bool(TREE_CHANCE)) {
-        // Tree/Park area
-        const treeSize = random.float(600, 1000);
-        addSprite(vec3(width + 1000, 0, random.floatSign(300)), vec3(treeSize), hsl(0.3, 0.7, random.float(0.3, 0.5)), vec3(0, 1));
-    }
-}
 
-    // Occasional road signs (less frequent)
-    if (random.bool(SIGN_CHANCE)) {
-        const signSide = random.bool() ? 1 : -1;
-        addSprite(vec3((width + 600) * signSide, 0, 0), vec3(400), WHITE, vec3(random.int(8), 2));
-    }
-}
-
-
+    /**
+     * Places road obstacles randomly
+     */
+    placeObstacles(segmentIndex, addSprite, width)
+    {
+        // Don't place obstacles too early in the race
+        if (segmentIndex < 100) return;
+        
+        // Obstacle placement probability (adjust for difficulty)
+        const obstacleChance = 0.01; // 1% chance per segment
+        
+        if (random.bool(obstacleChance))
+        {
+            // Choose obstacle type
+            const obstacleType = random.int(4); // 0-3 for different obstacles
+            let obstacleSprite;
+            
+            // Choose lane (0=left, 1=center, 2=right)
+            const lane = random.int(3);
+            const laneWidth = width / 3;
+            const laneOffset = (lane - 1) * laneWidth; // Convert to world position
+            
+            // Add some random offset within the lane
+            const randomOffset = random.floatSign(laneWidth * 0.3);
+            const xPosition = laneOffset + randomOffset;
+            
+            switch(obstacleType)
+            {
+                case 0: // Traffic Cone
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, 0, 0),     // Position
+                        vec3(200),                 // Size
+                        WHITE,                     // Color tint
+                        vec3(1, 3),               // Texture tile (cone texture)
+                        120                        // Collision size
+                    );
+                    obstacleSprite.obstacleType = 'cone';
+                    obstacleSprite.speedPenalty = 0.7; // Slow down to 70% speed
+                    break;
+                    
+                case 1: // Pothole
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, -20, 0),   // Slightly below ground
+                        vec3(300, 50, 300),        // Wider, flatter
+                        hsl(0, 0, 0.3),           // Dark gray tint
+                        vec3(2, 3),               // Texture tile (pothole texture)
+                        180                        // Larger collision area
+                    );
+                    obstacleSprite.obstacleType = 'pothole';
+                    obstacleSprite.speedPenalty = 0.5; // Major slowdown
+                    obstacleSprite.damageAmount = 10;   // Causes damage
+                    break;
+                    
+                case 2: // Road Barrier
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, 0, 0),
+                        vec3(400, 300, 200),       // Wide barrier
+                        WHITE,
+                        vec3(3, 3),               // Texture tile (barrier texture)
+                        250                        // Large collision
+                    );
+                    obstacleSprite.obstacleType = 'barrier';
+                    obstacleSprite.speedPenalty = 0.3; // Major impact
+                    obstacleSprite.damageAmount = 20;
+                    break;
+                    
+                case 3: // Oil Spill
+                    obstacleSprite = new TrackSprite(
+                        vec3(xPosition, -5, 0),    // Slightly below surface
+                        vec3(400, 20, 400),        // Wide, flat spill
+                        hsl(0.7, 0.5, 0.2),      // Dark oily color
+                        vec3(4, 3),               // Texture tile (oil texture)
+                        200                        // Medium collision
+                    );
+                    obstacleSprite.obstacleType = 'oil';
+                    obstacleSprite.speedPenalty = 0.8;  // Slight slowdown
+                    obstacleSprite.slippery = true;     // Makes car slide
+                    break;
+            }
+            
+            // Add the obstacle to the track
+            this.sprites.push(obstacleSprite);
+        }
     }
 
      /**
